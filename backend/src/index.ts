@@ -19,8 +19,8 @@ const trpcRouter = trpc.router({
     console.log("From client"+req.input);
   })
 });
-
-app.use("/trpc", createExpressMiddleware({router: trpcRouter}));
-
 app.use(cors({ origin: "http://localhost:3125" }));
+app.use("/trpc", createExpressMiddleware({router: trpcRouter}));
 app.listen(3000 , () => console.log("Server running on http://localhost:3000"));
+
+export type AppRouter = typeof trpcRouter;

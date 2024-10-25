@@ -10,5 +10,8 @@ const client = createTRPCProxyClient<AppRouter>({
 async function main() {
     const hello = await client.hello.query();
     console.log(hello);
+
+    const hello2 = await client.users.getUser.query();
+    console.log(hello2);
 }
 main()

@@ -59,6 +59,15 @@ oauthRouter.get("/googlecallback", async (req, res) => {
 
   const access_token_data = await response.json();
 
-  console.log(access_token_data);
+  const { id_token } = access_token_data;
+
+  console.log(id_token);
+
+  // verify and extract the information in the id token
+
+  const token_info_response = await fetch(
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${id_token}`
+  );
+  res.status(token_info_response.status).json(await token_info_response.json());
   res.redirect('http://localhost:5173/')
 });

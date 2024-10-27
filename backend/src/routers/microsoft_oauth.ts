@@ -43,20 +43,19 @@ oauthMicrosoftRouter.get("/microsoftcallback", async (req, res) => {
 
     const tokenData = await tokenResponse.json();
     const { id_token } = tokenData;
-    res.redirect(`http://localhost:5173/?token=${encodeURIComponent(id_token)}`);
-    
-  
-    // Step 3: Verify the ID token and retrieve user information
+    const { access_token } = tokenData;
+    res.redirect(`http://localhost:5173/?microsoft_token=${encodeURIComponent(access_token)}`);
+  });
+
+  oauthMicrosoftRouter.get("/user", async (req, res) => {
+    const { microsoft_token } = req.query;
     const userInfoResponse = await fetch(
       `https://graph.microsoft.com/v1.0/me`,
       {
-        headers: {
-          Authorization: `Bearer ${tokenData.access_token}`,
-        },
+        headers: {Authorization: `Bearer ${microsoft_token}`},
       }
     );
   
     const userInfo = await userInfoResponse.json();
-
-    console.log(userInfo);  
+    res.json(userInfo);
   });

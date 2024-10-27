@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import { Router } from "express";
 
 import dotenv from "dotenv";
+import { assert } from "console";
 dotenv.config();
 
 const client_id = process.env.GOOGLE_CLIENT_ID;
@@ -52,11 +53,14 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
 
   const access_token_data = await response.json();
   const { id_token } = access_token_data;
-  res.redirect(`http://localhost:5173/?token=${encodeURIComponent(id_token)}`);
+  res.redirect(`http://localhost:5173/?google_token=${encodeURIComponent(id_token)}`);
+});
 
+oauthGoogleRouter.get('/user', async (req, res) => {
+  const { google_token } = req.query;
   const token_info_response = await fetch(
-    `https://oauth2.googleapis.com/tokeninfo?id_token=${id_token}`
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(google_token as string)}`
   );
   const token_info = await token_info_response.json();
-  console.log(token_info);
+  res.json(token_info);
 });

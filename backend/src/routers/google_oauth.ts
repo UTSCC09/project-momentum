@@ -7,7 +7,7 @@ dotenv.config();
 const client_id = process.env.GOOGLE_CLIENT_ID;
 const client_secret = process.env.GOOGLE_CLIENT_SECRET;
 const redirect_url =
-  process.env.REDIRECT_URL || "http://localhost:3000/api/oauth/google/googlecallback";
+  process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/oauth/google/googlecallback";
 
 export const oauthGoogleRouter = Router();
 
@@ -29,9 +29,7 @@ const url = oauth2Client.generateAuthUrl({
   });
 
 oauthGoogleRouter.post("/signin", (req, res) => {
-    // Signin logic here
     res.json({ url });
-    // send a fetch to googlecallback
 });
 
 oauthGoogleRouter.get("/googlecallback", async (req, res) => {
@@ -43,7 +41,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
     code,
     client_id: client_id,
     client_secret: client_secret,
-    redirect_uri: "http://localhost:3000/api/oauth/google/googlecallback",
+    redirect_uri: redirect_url,
     grant_type: "authorization_code",
   };
 
@@ -54,13 +52,11 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
 
   const access_token_data = await response.json();
   const { id_token } = access_token_data;
-  // verify and extract the information in the id token
+  res.redirect(`http://localhost:5173/?token=${encodeURIComponent(id_token)}`);
 
   const token_info_response = await fetch(
     `https://oauth2.googleapis.com/tokeninfo?id_token=${id_token}`
   );
-  // res.status(token_info_response.status).json(await token_info_response.json());
   const token_info = await token_info_response.json();
-  console.log(id_token);
-  res.redirect(`http://localhost:5173/?token=${encodeURIComponent(id_token)}`);
+  console.log(token_info);
 });

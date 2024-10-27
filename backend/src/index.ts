@@ -6,6 +6,8 @@ import session from "express-session";
 import { oauthGoogleRouter } from "./routers/google_oauth";
 import { oauthMicrosoftRouter } from "./routers/microsoft_oauth";
 
+import { redisRouter } from "./routers/redis";
+
 const app: Express = express();
 app.use(cors({ origin: "http://localhost:5173" }));
 
@@ -26,6 +28,9 @@ app.use(
 
 app.use("/api/oauth/google", oauthGoogleRouter);
 app.use("/api/oauth/microsoft", oauthMicrosoftRouter);
+
+app.use("/api/redis", redisRouter);
+
 app.use("/trpc", createExpressMiddleware({router: trpcRouter}));
 app.listen(3000 , () => console.log("Server running on http://localhost:3000"));
 

@@ -56,6 +56,16 @@ function getuser2() {
   })
 }
 
+function getRedis() {
+    fetch(`http://localhost:3000/api/redis/cache`, {
+      method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+    })
+  }
+
 </script>
 
 <template>
@@ -64,6 +74,8 @@ function getuser2() {
 
   <button @click=getuser>{{ username }}</button>
   <button @click=getuser2>{{ username2 }}</button>
+
+  <button @click=getRedis>get redis</button>
 </template>
 
 <style scoped>

@@ -1,30 +1,65 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
+<script setup>
+import { ScheduleXCalendar } from '@schedule-x/vue'
+import {
+  createCalendar,
+  createViewDay,
+  createViewMonthAgenda,
+  createViewMonthGrid,
+  createViewWeek,
+} from '@schedule-x/calendar'
+import '@schedule-x/theme-default/dist/index.css'
 
+// plugins
+import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
+import { createResizePlugin } from '@schedule-x/resize'
+import { createEventModalPlugin } from '@schedule-x/event-modal'
+import { createCurrentTimePlugin } from '@schedule-x/current-time'
+
+const config = {
+  selectedDate: '2023-12-19',
+  views: [
+    createViewDay(),
+    createViewWeek(),
+    createViewMonthGrid(),
+    createViewMonthAgenda(),
+  ],
+  events: [
+    {
+      id: 1,
+      title: 'Event 1',
+      start: '2023-12-19',
+      end: '2023-12-19',
+    },
+    {
+      id: 2,
+      title: 'Event 2',
+      start: '2023-12-20 12:00',
+      end: '2023-12-20 13:00',
+    },
+  ],
+};
+
+const plugins = [
+  createDragAndDropPlugin(), createResizePlugin(), createEventModalPlugin(),
+  createCurrentTimePlugin(),
+];
+ 
+// Do not use a ref here, as the calendar instance is not reactive, and doing so might cause issues
+// For updating events, use the events service plugin
+const calendarApp = createCalendar(config, plugins)
+</script>
+ 
 <template>
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <ScheduleXCalendar :calendar-app="calendarApp" />
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+<style>
+.sx-vue-calendar-wrapper {
+  width: 1200px;
+  max-width: 100vw;
+  height: 800px;
+  max-height: 90vh;
 }
 </style>

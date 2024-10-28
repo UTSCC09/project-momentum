@@ -2,9 +2,12 @@ import { Router } from "express";
 
 export const loginRouter = Router();
 
-loginRouter.get('/', (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+loginRouter.post('/', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password || typeof username !== "string" || typeof password !== "string") {
+        res.status(400).send("Username or password not provided");
+        return;
+    }
 
     //login
 
@@ -13,10 +16,18 @@ loginRouter.get('/', (req, res) => {
             req.session.user.username = username;
             req.session.user.password = password;
         }
+        else{
+            req.session.user = {
+                userId: "1",
+                username,
+                password
+            }
+        }
     }
     catch (err) {
         console.log(err);
     }
-
+    console.log(req.session);
+    console.log("Logged in");
     res.send("Logged in");
 });

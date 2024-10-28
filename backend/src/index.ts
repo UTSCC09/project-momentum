@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
+import bodyParser from 'body-parser';
 import session from "express-session";
 import { createContext } from "./trpc"; 
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -8,12 +9,13 @@ import { loginRouter } from "./routers/oauth/_login";
 import { oauthGoogleRouter } from "./routers/oauth/google_oauth";
 import { oauthMicrosoftRouter } from "./routers/oauth/microsoft_oauth";
 
+import { trpcRouter } from "./routers/trpc";
 import { redisRouter } from "./routers/redis";
 
 const app: Express = express();
 app.use(cors({ origin: "http://localhost:5173" }));
 
-import { trpcRouter } from "./routers/trpc";
+app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
     res.json("Hello, World!");

@@ -14,7 +14,6 @@ export const userRouter = trpc.router({
 
     // Need a userID and a username here
     createUser: userProcedure.input(z.object({name: z.string()})).mutation(req => {
-        console.log(req.ctx.req.session);
         return {name: req.input.name, userId: req.input.userId};
     }),
 

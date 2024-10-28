@@ -2,7 +2,6 @@ import { google } from "googleapis";
 import { Router } from "express";
 
 import dotenv from "dotenv";
-import { assert } from "console";
 dotenv.config();
 
 const client_id = process.env.GOOGLE_CLIENT_ID;
@@ -51,7 +50,8 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
     body: JSON.stringify(data),
   });
 
-  const access_token_data = await response.json();
+  const access_token_data = await response.json(); 
+  // TODO: use refresh token to get new access token
   const { id_token } = access_token_data;
   res.redirect(`http://localhost:5173/?google_token=${encodeURIComponent(id_token)}`);
 });

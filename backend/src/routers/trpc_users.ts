@@ -1,5 +1,6 @@
 import { trpc } from '../trpc';
 import { z } from 'zod';
+import session from 'express-session';
 
 // Here the procedure should be something all the routers should have
 // z.someType is a varifer of the input from the client
@@ -13,6 +14,7 @@ export const userRouter = trpc.router({
 
     // Need a userID and a username here
     createUser: userProcedure.input(z.object({name: z.string()})).mutation(req => {
+        console.log(req.ctx.req.session);
         return {name: req.input.name, userId: req.input.userId};
     }),
 

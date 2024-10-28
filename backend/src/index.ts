@@ -1,10 +1,12 @@
-import express, { Express } from "express";
+import express, { Express, Request, Response } from "express";
 import cors from "cors";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import session from "express-session";
+import { createContext } from "./trpc"; 
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
-import { oauthGoogleRouter } from "./routers/google_oauth";
-import { oauthMicrosoftRouter } from "./routers/microsoft_oauth";
+import { loginRouter } from "./routers/oauth/_login";
+import { oauthGoogleRouter } from "./routers/oauth/google_oauth";
+import { oauthMicrosoftRouter } from "./routers/oauth/microsoft_oauth";
 
 import { redisRouter } from "./routers/redis";
 
@@ -26,12 +28,16 @@ app.use(
     })
   );
 
+app.use("/api/login", loginRouter);
 app.use("/api/oauth/google", oauthGoogleRouter);
 app.use("/api/oauth/microsoft", oauthMicrosoftRouter);
 
 app.use("/api/redis", redisRouter);
 
-app.use("/trpc", createExpressMiddleware({router: trpcRouter}));
+app.use("/trpc", createExpressMiddleware({
+  router: trpcRouter,
+  createContext: createContext
+}));
 app.listen(3000 , () => console.log("Server running on http://localhost:3000"));
 
 export type AppRouter = typeof trpcRouter;

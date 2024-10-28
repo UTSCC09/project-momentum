@@ -9,12 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@primevue/themes": "^4.1.1",
     "@schedule-x/current-time": "^2.4.1",
     "@schedule-x/drag-and-drop": "^2.4.1",
     "@schedule-x/event-modal": "^2.4.1",
+    "@schedule-x/events-service": "^2.4.1",
     "@schedule-x/resize": "^2.4.1",
+    "@schedule-x/shared": "^2.4.1",
     "@schedule-x/theme-default": "^2.4.1",
     "@schedule-x/vue": "^2.3.1",
+    "pinia": "^2.2.4",
+    "primevue": "^4.1.1",
     "vue": "^3.5.12"
   },
   "devDependencies": {

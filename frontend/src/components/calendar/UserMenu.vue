@@ -1,4 +1,6 @@
 <template>
+  <SelectButton v-model="view" @change="switchView" :options="views" aria-labelledby="basic" />
+
   <Avatar icon="pi pi-user" size="large" shape="circle" @click="toggle" aria-haspopup="true"
     aria-controls="overlay_menu" />
   <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
@@ -41,14 +43,23 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
 import Password from "primevue/password";
-import InputMask from 'primevue/inputmask';
+import SelectButton from 'primevue/selectbutton';
 
 import { ref } from "vue";
+import { useRouter } from 'vue-router'
 
 const visibleLogin = ref(false);
 const visibleSignup = ref(false);
 const pwLogin = ref(null);
 const pwSignup = ref(null);
+
+const router = useRouter();
+const view = ref('Schedule');
+const views = ref(['Schedule', 'Tasks']);
+function switchView() {
+  router.push("/tasks");
+}
+
 const menu = ref();
 const items = ref([
   {

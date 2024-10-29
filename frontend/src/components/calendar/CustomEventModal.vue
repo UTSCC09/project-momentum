@@ -26,7 +26,7 @@
 
 <script lang="ts" setup>
 import { PropType, ref, watch } from 'vue'
-import { useEventsStore } from "../store/events-store.ts";
+import { useEventsStore } from "../../store/events-store.ts";
 
 // components
 import Panel from 'primevue/panel';

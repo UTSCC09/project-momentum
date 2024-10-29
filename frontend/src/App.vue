@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Calendar from './components/Calendar.vue';
-import CalendarDrawer from './components/CalendarDrawer.vue';
+import CalendarDrawer from './components/calendar/CalendarDrawer.vue';
+import { RouterView } from 'vue-router';
 </script>
 
 <template>
@@ -8,7 +8,9 @@ import CalendarDrawer from './components/CalendarDrawer.vue';
     <div class="calendar-drawer">
       <CalendarDrawer />
     </div>
-    <div class="calendar-main"><Calendar /></div>
+    <div class="calendar-main">
+      <RouterView />
+    </div>
   </div>
 </template>
 

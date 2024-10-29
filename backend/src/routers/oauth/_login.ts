@@ -5,7 +5,7 @@ import { TRPCError } from '@trpc/server';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-256-bit-secret'); //TODO: change to actual secrete
 
-const userProcedure = trpc.procedure.use(trpc.middleware(async ({ ctx, next }) => {
+export const userProcedure = trpc.procedure.use(trpc.middleware(async ({ ctx, next }) => {
     const authHeader = ctx.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -66,8 +66,8 @@ export const userRouter = trpc.router({
         return { success: true, token: token };
     }),
 
-      varifyUser: userProcedure
-      .query(() => {
-          return "Hello, User!"
-      }),
+    varifyUser: userProcedure
+    .query(() => {
+        return "Hello, User!"
+    }),
 })

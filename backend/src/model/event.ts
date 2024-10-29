@@ -1,11 +1,11 @@
 import { sequelize } from "../datasource";
-import { User } from "./user";
 import { DataTypes } from "sequelize";
+import { User } from "./user";
 import { Oauth_User } from "./oauth_user";
 
-/* Task Table */
+/* Event Table */
 
-export const Task = sequelize.define("Task", {
+export const Event = sequelize.define("Event", {
     id:{
         type: DataTypes.STRING,
         allowNull: false,
@@ -24,7 +24,7 @@ export const Task = sequelize.define("Task", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    deadline:{
+    time:{
         type: DataTypes.TIME,
         allowNull: true,
     },
@@ -34,5 +34,5 @@ export const Task = sequelize.define("Task", {
     },
 })
 
-User.hasMany(Task, {foreignKey: 'uid'});
-Oauth_User.hasMany(Task, {foreignKey: 'uid'});
+User.hasMany(Event, {foreignKey: 'uid'});
+Oauth_User.hasMany(Event, {foreignKey: 'uid'});

@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import bodyParser from 'body-parser';
-import session from "express-session";
+
 import { createContext } from "./trpc"; 
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
@@ -14,15 +14,6 @@ const app: Express = express();
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use(bodyParser.json());
-
-app.use(
-    session({
-      secret: process.env.SESSION_SECRET || "your_secret_key",
-      resave: true,
-      saveUninitialized: false,
-      cookie: { secure: false }, // Use true if using HTTPS in production
-    })
-  );
 
 app.use("/api/oauth/google", oauthGoogleRouter);
 app.use("/api/oauth/microsoft", oauthMicrosoftRouter);

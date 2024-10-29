@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize";
+import { User } from "./model/user"
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,9 +12,11 @@ export const sequelize = new Sequelize('CSCC09', dbUsername, dbPassword, {
     dialect: 'mysql'
 })
 
-export async function connectDB_test(){
+export async function connectDB(){
     try {
         await sequelize.authenticate();
+        await sequelize.sync();
+
         console.log("success connect to database");
     } catch {
         console.error("failed connect to database")

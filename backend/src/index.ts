@@ -10,8 +10,8 @@ import { oauthMicrosoftRouter } from "./routers/oauth/microsoft_oauth";
 
 import { trpcRouter } from "./routers/trpc";
 
-// import {connectDB_test} from "./datasource"
-// connectDB_test()
+import {connectDB} from "./datasource"
+connectDB()
 
 const app: Express = express();
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));

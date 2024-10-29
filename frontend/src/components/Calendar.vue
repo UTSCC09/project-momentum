@@ -7,7 +7,6 @@ import {
   createViewMonthGrid,
   createViewWeek,
 } from '@schedule-x/calendar'
-import '@schedule-x/theme-default/dist/index.css'
 
 // plugins
 import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
@@ -60,12 +59,3 @@ const calendarApp = createCalendar(config, plugins)
     <ScheduleXCalendar :calendar-app="calendarApp" :custom-components="customComponents" />
   </div>
 </template>
-
-<style>
-.sx-vue-calendar-wrapper {
-  width: 1200px;
-  max-width: 100vw;
-  height: 800px;
-  max-height: 90vh;
-}
-</style>

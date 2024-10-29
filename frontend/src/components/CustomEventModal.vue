@@ -4,12 +4,22 @@
     <!-- <div>{{ calendarEvent.id }}</div> -->
     <div>{{ calendarEvent.title }}</div>
     <Panel header="Edit" toggleable>
-      <form>
-        <FloatLabel variant="on">
-          <InputText id="on_label" />
-          <label for="on_label">Title</label>
-        </FloatLabel>
-      </form>
+      <div class="card flex justify-center">
+        <IftaLabel>
+          <InputText id="title" v-model="value" variant="filled" />
+          <label for="title">Title</label>
+        </IftaLabel>
+        <div id="datetime">
+          <IftaLabel>
+            <DatePicker id="startDateTime" v-model="startDateTime" showTime hourFormat="24" fluid />
+            <label for="startDateTime">From</label>
+          </IftaLabel>
+          <IftaLabel>
+            <DatePicker id="endDateTime" v-model="endDateTime" showTime hourFormat="24" fluid />
+            <label for="endDateTime">To</label>
+          </IftaLabel>
+        </div>
+      </div>
     </Panel>
   </div>
 </template>
@@ -20,8 +30,13 @@ import { useEventsStore } from "../store/events-store.ts";
 
 // components
 import Panel from 'primevue/panel';
-import FloatLabel from 'primevue/floatlabel';
+import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
+import DatePicker from 'primevue/datepicker';
+
+const value = ref(null);
+const startDateTime = ref();
+const endDateTime = ref();
 
 const props = defineProps({
   calendarEvent: {
@@ -48,5 +63,14 @@ const eventsStore = useEventsStore()
   border-radius: var(--sx-rounding-small);
   max-height: 250px;
   overflow-y: scroll;
+}
+
+#title {
+  width: 100%;
+}
+
+#datetime {
+  display: flex;
+  flex-direction: row;
 }
 </style>

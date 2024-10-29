@@ -1,30 +1,72 @@
-import { trpc, authProcedure } from '../../trpc';
+import { trpc } from '../../trpc';
 import { z } from 'zod';
-import session from 'express-session';
+import { SignJWT, jwtVerify } from 'jose';
 import { TRPCError } from '@trpc/server';
 
-// Here the procedure should be something all the routers should have
-// z.someType is a varifer of the input from the client
-// const userProcedure = authProcedure.input(z.object({userId: z.string()} ));
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-256-bit-secret'); //TODO: change to actual secrete
+
+const userProcedure = trpc.procedure.use(trpc.middleware(async ({ ctx, next }) => {
+    const authHeader = ctx.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token missing or malformed' });
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+        const { payload } = await jwtVerify(token, JWT_SECRET);
+        return next();
+    } catch (error) {
+        console.error(error);
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid or expired token' });
+    }
+}));
 
 export const userRouter = trpc.router({
 
-    // We set output here so even we pass in a password, it will not be returned
-    // but you cannot miss anything in the output
-    loginUser: trpc.procedure
-    .input(z.object({username: z.string(), password: z.string()}))
+    createUser: trpc.procedure
+    .input(z.object({username: z.string(), password: z.string(), email: z.string()}))
     .mutation(async ({ input, ctx }) => {
-        const { username, password } = input;
-  
-        // Step 1: Authenticate the user (pseudo code for example)
-        const user = {id: username, name: password}; // Implement this function to check credentials  
-        // Step 2: Set session data
-  
-        // Step 3: Return output, excluding sensitive information like password
-        return { name: user.name, token: "sometoken"};
+        let createStatus = false
+        const { username, password, email } = input;
+        const user = {id: username, name: password, email: email};
+        
+        // TODO: varify and store in DB
+
+        createStatus = true;
+        const userId = "User ID"; // TODO: change to actual user ID
+
+        const token = await new SignJWT({ userId })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime("30d")
+        .sign(JWT_SECRET);
+
+        return { success: createStatus, token: token};
       }),
 
-      varifyUser: authProcedure
+    loginUser: trpc.procedure
+    .input(z.object({ username: z.string(), password: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+        const { username, password } = input;
+        
+        // TODO: replace with actual user authentication (e.g., check DB)
+        const isValidUser = true;
+        if (!isValidUser) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid username or password' });
+        }
+
+        const userId = "User ID"; // TODO: replace with actual user ID from DB
+
+        const token = await new SignJWT({ userId })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime("30d")
+        .sign(JWT_SECRET);
+
+        return { success: true, token: token };
+    }),
+
+      varifyUser: userProcedure
       .query(() => {
           return "Hello, User!"
       }),

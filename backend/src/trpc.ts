@@ -8,15 +8,6 @@ export function createContext({ req, res }: CreateExpressContextOptions) {
   if(req.headers.authorization){
     return { authorization: req.headers.authorization};
   }
-  return { authorization: 0};
+  return { authorization: ""};
 }
-
-const isloggedin = trpc.middleware(({ ctx, next }) => {
-    if(!ctx.authorization){
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    return next();
-});
-
-export const authProcedure = trpc.procedure.use(isloggedin);
 export type Context = inferAsyncReturnType<typeof createContext>;

@@ -16,16 +16,12 @@ const client = createTRPCProxyClient<AppRouter>({
 });
 
 async function main() {
-
-    // const hello0 = await client.users.varifyUser.query();
-    // console.log(hello0);
-    // Perform login and update the token
-    const hello2 = await client.users.loginUser.mutate({ username: "id", password: "name" });
+    const hello2 = await client.users.loginUser.mutate({ username: "name", password: "pwd"});
     console.log(hello2);
 
     // Destructure the token from the response
-    const { name, token: newToken } = hello2;
-    token = newToken;  // Update the token variable
+    const { success, token : Token } = hello2;
+    token = Token;  // Update the token variable
 
     // Now, subsequent requests will use the updated token
     const hello = await client.users.varifyUser.query();

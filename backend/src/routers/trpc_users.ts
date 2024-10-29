@@ -1,10 +1,11 @@
 import { trpc } from '../trpc';
 import { z } from 'zod';
 import session from 'express-session';
+import { authProcedure } from '../trpc';
 
 // Here the procedure should be something all the routers should have
 // z.someType is a varifer of the input from the client
-const userProcedure = trpc.procedure.input(z.object({userId: z.string()} ));
+const userProcedure = authProcedure.input(z.object({userId: z.string()} ));
 
 export const userRouter = trpc.router({
     // Need a userID here

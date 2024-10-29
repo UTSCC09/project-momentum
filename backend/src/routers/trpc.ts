@@ -1,5 +1,5 @@
 import { trpc } from '../trpc';
-import { userRouter } from './trpc_users';
+import { userRouter } from './oauth/_login';
 
 export const trpcRouter = trpc.router({
 

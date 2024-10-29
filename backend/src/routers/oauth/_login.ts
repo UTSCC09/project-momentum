@@ -1,33 +1,31 @@
-import { Router } from "express";
+import { trpc, authProcedure } from '../../trpc';
+import { z } from 'zod';
+import session from 'express-session';
+import { TRPCError } from '@trpc/server';
 
-export const loginRouter = Router();
+// Here the procedure should be something all the routers should have
+// z.someType is a varifer of the input from the client
+// const userProcedure = authProcedure.input(z.object({userId: z.string()} ));
 
-loginRouter.post('/', (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password || typeof username !== "string" || typeof password !== "string") {
-        res.status(400).send("Username or password not provided");
-        return;
-    }
+export const userRouter = trpc.router({
 
-    //login
+    // We set output here so even we pass in a password, it will not be returned
+    // but you cannot miss anything in the output
+    loginUser: trpc.procedure
+    .input(z.object({username: z.string(), password: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { username, password } = input;
+  
+        // Step 1: Authenticate the user (pseudo code for example)
+        const user = {id: username, name: password}; // Implement this function to check credentials  
+        // Step 2: Set session data
+  
+        // Step 3: Return output, excluding sensitive information like password
+        return { name: user.name, token: "sometoken"};
+      }),
 
-    try {
-        if (req.session.user) {
-            req.session.user.username = username;
-            req.session.user.password = password;
-        }
-        else{
-            req.session.user = {
-                userId: "1",
-                username,
-                password
-            }
-        }
-    }
-    catch (err) {
-        console.log(err);
-    }
-    console.log(req.session);
-    console.log("Logged in");
-    res.send("Logged in");
-});
+      varifyUser: authProcedure
+      .query(() => {
+          return "Hello, User!"
+      }),
+})

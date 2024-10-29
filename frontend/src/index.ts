@@ -1,25 +1,35 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client"
 import { AppRouter } from "../../backend/src/index"
 
+// Declare a token variable that can be updated
+let token: string | null = null;
 
 const client = createTRPCProxyClient<AppRouter>({
-    links: [httpBatchLink({url: "http://localhost:3000/trpc"})],
-})
+    links: [httpBatchLink({
+        url: "http://localhost:3000/trpc",
+        async headers() {
+            return {
+                authorization: token ? `Bearer ${token}` : "",
+            };
+        }
+    })],
+});
 
-// Hello here is our router name, we can change it to like user or something else
 async function main() {
-    const hello = await client.hello.query();
-    console.log(hello);
 
-    const hello2 = await client.users.getUser.query({userId: "id"});
+    // const hello0 = await client.users.varifyUser.query();
+    // console.log(hello0);
+    // Perform login and update the token
+    const hello2 = await client.users.loginUser.mutate({ username: "id", password: "name" });
     console.log(hello2);
 
-    // type safe, if you hover on result, you will see the type
-    const hello3 = await client.users.createUser.mutate({userId: "id", name: "name"});
-    console.log(hello3);
+    // Destructure the token from the response
+    const { name, token: newToken } = hello2;
+    token = newToken;  // Update the token variable
 
-    // Password will not be returned
-    const hello4 = await client.users.createUser2.mutate({userId: "id", name: "name"});
-    console.log(hello4);
+    // Now, subsequent requests will use the updated token
+    const hello = await client.users.varifyUser.query();
+    console.log(hello);
 }
-main()
+
+main();

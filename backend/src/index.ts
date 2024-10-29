@@ -5,36 +5,27 @@ import session from "express-session";
 import { createContext } from "./trpc"; 
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
-import { loginRouter } from "./routers/oauth/_login";
 import { oauthGoogleRouter } from "./routers/oauth/google_oauth";
 import { oauthMicrosoftRouter } from "./routers/oauth/microsoft_oauth";
 
 import { trpcRouter } from "./routers/trpc";
-import { redisRouter } from "./routers/redis";
 
 const app: Express = express();
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use(bodyParser.json());
-
-app.get("/", (req, res) => {
-    res.json("Hello, World!");
-});
 
 app.use(
     session({
       secret: process.env.SESSION_SECRET || "your_secret_key",
-      resave: false,
+      resave: true,
       saveUninitialized: false,
       cookie: { secure: false }, // Use true if using HTTPS in production
     })
   );
 
-app.use("/api/login", loginRouter);
 app.use("/api/oauth/google", oauthGoogleRouter);
 app.use("/api/oauth/microsoft", oauthMicrosoftRouter);
-
-app.use("/api/redis", redisRouter);
 
 app.use("/trpc", createExpressMiddleware({
   router: trpcRouter,

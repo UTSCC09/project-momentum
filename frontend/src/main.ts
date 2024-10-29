@@ -7,8 +7,10 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 
 // stylesheet, order is important!
-import '@schedule-x/theme-default/dist/index.css'
-import './style.css'
+import '@schedule-x/theme-default/dist/index.css';
+import './colors.css';
+import './style.css';
+import 'primeicons/primeicons.css'
 
 const app = createApp(App);
 

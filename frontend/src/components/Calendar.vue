@@ -15,8 +15,11 @@ import { createEventModalPlugin } from '@schedule-x/event-modal'
 import { createCurrentTimePlugin } from '@schedule-x/current-time'
 import { createEventsServicePlugin } from '@schedule-x/events-service'
 import CustomEventModal from './CustomEventModal.vue'
+import UserMenu from './UserMenu.vue'
+import CalendarDrawerButton from './CalendarDrawerButton.vue'
 
 const config = {
+  // isDark: true,
   selectedDate: '2023-12-19',
   views: [
     createViewDay(),
@@ -47,6 +50,8 @@ const plugins = [
 
 const customComponents = {
   eventModal: CustomEventModal,
+  headerContentRightAppend: UserMenu,
+  headerContentLeftPrepend: CalendarDrawerButton
 }
 
 // Do not use a ref here, as the calendar instance is not reactive, and doing so might cause issues

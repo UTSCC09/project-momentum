@@ -28,7 +28,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 3;
-  height: 15vh;
+  height: 70px;
   background-color: var(--sx-color-background);
 }
 
@@ -37,10 +37,16 @@ body {
 }
 
 .sx__week-header {
-  top: 15vh;
+  top: 70px;
+  background-color: var(--sx-color-background);
 }
 
-@media (prefers-color-scheme: light) {
+.sx__week-wrapper,
+.sx__month-grid-wrapper {
+  background-color: var(--sx-color-background);
+}
+
+/* @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
@@ -51,4 +57,4 @@ body {
   button {
     background-color: #f9f9f9;
   }
-}
+} */

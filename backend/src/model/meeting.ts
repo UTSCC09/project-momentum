@@ -1,14 +1,12 @@
-import { sequelize } from "../../datasource";
-import { User } from "../user/user";
+import { sequelize } from "../datasource";
 import { DataTypes } from "sequelize";
-import { Oauth_User } from "../user/oauth_user";
+import { User } from "./user";
+import { Oauth_User } from "./oauth_user";
 import { Project } from "./project";
-import { Status } from "./status";
 
+/* Meeting Table */
 
-/* Task Table */
-
-export const Task = sequelize.define("Task", {
+export const Meeting = sequelize.define("Meeting", {
     id:{
         type: DataTypes.STRING,
         allowNull: false,
@@ -27,21 +25,17 @@ export const Task = sequelize.define("Task", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    deadline:{
+    start_time:{
+        type: DataTypes.TIME,
+        allowNull: true,
+    },
+    end_time:{
         type: DataTypes.TIME,
         allowNull: true,
     },
     info: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    status:{
-        type: DataTypes.STRING,
-        allowNull: false,
-        references:{
-            model: Status,
-            key: 'id',
-        },
     },
     project_id:{
         type: DataTypes.STRING,
@@ -51,9 +45,14 @@ export const Task = sequelize.define("Task", {
             key: 'id',
         },
     },
+    // TODO: get from recursion table
+    recurring:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 })
 
-User.hasMany(Task, {foreignKey: 'uid'});
-Oauth_User.hasMany(Task, {foreignKey: 'uid'});
-Project.hasMany(Task, {foreignKey: 'project_id'});
 
+User.hasMany(Meeting, {foreignKey: 'uid'});
+Oauth_User.hasMany(Meeting, {foreignKey: 'uid'});
+Project.hasMany(Meeting, {foreignKey: 'project_id'});

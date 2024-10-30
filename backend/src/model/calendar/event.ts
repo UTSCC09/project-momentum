@@ -1,7 +1,7 @@
-import { sequelize } from "../datasource";
+import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { User } from "./user";
-import { Oauth_User } from "./oauth_user";
+import { User } from "../user/user";
+import { Oauth_User } from "../user/oauth_user";
 
 /* Event Table */
 

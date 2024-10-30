@@ -1,5 +1,4 @@
 import { Sequelize } from "sequelize";
-import { User } from "./model/user"
 import dotenv from "dotenv";
 
 dotenv.config();

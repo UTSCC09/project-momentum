@@ -1,7 +1,6 @@
 import { sequelize } from "../datasource";
-import { User } from "./user";
+import { Users } from "./user";
 import { DataTypes } from "sequelize";
-import { Oauth_User } from "./oauth_user";
 import { Project } from "./project";
 import { Status } from "./status";
 
@@ -22,6 +21,10 @@ export const Task = sequelize.define("Task", {
     uid: {
         type: DataTypes.STRING,
         allowNull: false,
+        references: {
+            model: Users,
+            key:'id', 
+        },
     },
     location:{
         type: DataTypes.STRING,
@@ -53,7 +56,6 @@ export const Task = sequelize.define("Task", {
     },
 })
 
-User.hasMany(Task, {foreignKey: 'uid'});
-Oauth_User.hasMany(Task, {foreignKey: 'uid'});
+Users.hasMany(Task, {foreignKey: 'uid'});
 Project.hasMany(Task, {foreignKey: 'project_id'});
 

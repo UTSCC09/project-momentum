@@ -11,6 +11,7 @@ export const Status = sequelize.define("Status", {
         unique: true,
         primaryKey: true,
     },
+    // name and number matched, can directly pass these values to frontend 
     name:{
         type: DataTypes.STRING,
         allowNull: false,

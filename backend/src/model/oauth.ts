@@ -11,6 +11,7 @@ export const Oauth = sequelize.define("Oauth", {
         primaryKey: true,
         
     },
+    // restrict on name, update the array if other oauth added
     name:{
         type: DataTypes.STRING,
         allowNull: false,

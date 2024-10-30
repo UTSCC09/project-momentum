@@ -1,6 +1,7 @@
 import { sequelize } from "../datasource";
 import { DataTypes } from "sequelize";
 import { Status } from "./status";
+import { Users } from "./user";
 
 
 /* Project Table */
@@ -20,6 +21,7 @@ export const Project = sequelize.define("Project", {
     participants: {
         type: DataTypes.ARRAY,
         allowNull: false,
+        // TODO: check each element is in Users
     },
     info: {
         type: DataTypes.STRING,
@@ -28,6 +30,10 @@ export const Project = sequelize.define("Project", {
     lead: {
         type: DataTypes.STRING,
         allowNull: false,
+        references:{
+            model: Users,
+            key: 'id',
+        },
     },
     status:{
         type: DataTypes.STRING,
@@ -39,3 +45,6 @@ export const Project = sequelize.define("Project", {
     },
     
 })
+
+// Leader can lead multiple projects
+Users.hasMany(Project, {foreignKey: 'lead'});

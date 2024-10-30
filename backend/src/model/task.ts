@@ -2,6 +2,9 @@ import { sequelize } from "../datasource";
 import { User } from "./user";
 import { DataTypes } from "sequelize";
 import { Oauth_User } from "./oauth_user";
+import { Project } from "./project";
+import { Status } from "./status";
+
 
 /* Task Table */
 
@@ -32,12 +35,25 @@ export const Task = sequelize.define("Task", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    // added later on
+    status:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        references:{
+            model: Status,
+            key: 'id',
+        },
+    },
     project_id:{
         type: DataTypes.STRING,
         allowNull: true,
+        references:{
+            model: Project,
+            key: 'id',
+        },
     },
 })
 
 User.hasMany(Task, {foreignKey: 'uid'});
 Oauth_User.hasMany(Task, {foreignKey: 'uid'});
+Project.hasMany(Task, {foreignKey: 'project_id'});
+

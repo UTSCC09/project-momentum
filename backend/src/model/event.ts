@@ -32,6 +32,11 @@ export const Event = sequelize.define("Event", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    // TODO: get from recursion table
+    recurring:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 })
 
 User.hasMany(Event, {foreignKey: 'uid'});

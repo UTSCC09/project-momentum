@@ -2,6 +2,7 @@ import { sequelize } from "../datasource";
 import { DataTypes } from "sequelize";
 import { User } from "./user";
 import { Oauth_User } from "./oauth_user";
+import { Project } from "./project";
 
 /* Meeting Table */
 
@@ -36,13 +37,22 @@ export const Meeting = sequelize.define("Meeting", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    // added later on
     project_id:{
         type: DataTypes.STRING,
         allowNull: true,
+        references:{
+            model: Project,
+            key: 'id',
+        },
     },
+    // TODO: get from recursion table
+    recurring:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 })
 
 
 User.hasMany(Meeting, {foreignKey: 'uid'});
 Oauth_User.hasMany(Meeting, {foreignKey: 'uid'});
+Project.hasMany(Meeting, {foreignKey: 'project_id'});

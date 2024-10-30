@@ -13,8 +13,8 @@ This web application features an AI-powered scheduler that automatically organiz
 ## Tech stack
 
 - Frontend: TypeScript, Vue3.js (optional: Vite), shadcn-vue
-- Backend: gRPC
-- Database: redis
+- Backend: express + gRPC
+- Database: redis + MySQL
 - Deployment: Google Cloud (optional: k8s nginx)
 
 ## Roadmap

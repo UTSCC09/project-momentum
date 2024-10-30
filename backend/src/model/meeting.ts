@@ -36,6 +36,11 @@ export const Meeting = sequelize.define("Meeting", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    // added later on
+    project_id:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 })
 
 

@@ -32,6 +32,11 @@ export const Task = sequelize.define("Task", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    // added later on
+    project_id:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 })
 
 User.hasMany(Task, {foreignKey: 'uid'});

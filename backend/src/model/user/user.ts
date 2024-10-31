@@ -1,6 +1,5 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { Oauth } from "./oauth";
 
 /*  User Table 
     Doc: https://sequelize.org/docs/v6/core-concepts/model-basics/

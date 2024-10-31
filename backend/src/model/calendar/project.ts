@@ -1,6 +1,5 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { Status } from "./utils/status";
 import { User } from "../user/user";
 
 
@@ -29,30 +28,19 @@ export const Project = sequelize.define("Project", {
 
     // further restriction on the element in the array
     participants: {
-        type: DataTypes.ARRAY,
+        type: DataTypes.STRING,
         allowNull: false,
         // TODO: check each element is in Users
     },
     
     lead: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false,
         references:{
             model: User,
             key: 'id',
         },
     },
-
-    status:{
-        type: DataTypes.STRING,
-        allowNull: false,
-        references:{
-            model: Status,
-            key: 'id',
-        },
-    },
-    
 })
 
-// Leader can lead multiple projects
-User.hasMany(Project, {foreignKey: 'lead'});
+// Project.belongsTo(User, {foreignKey: 'lead', targetKey: 'id'});

@@ -13,7 +13,6 @@ export const Status = sequelize.define("Status", {
         allowNull: false,
         unique: true,
         primaryKey: true,
-        onDelete: 'CASCADE',
     },
 
     // name and number matched, can directly pass these values to frontend 

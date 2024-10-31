@@ -2,7 +2,6 @@ import { sequelize } from "../../../datasource";
 import { User } from "../../user/user";
 import { DataTypes } from "sequelize";
 import { Project } from "../project";
-import { Status } from "../utils/status";
 
 
 /* Task Table */
@@ -33,10 +32,6 @@ export const Task = sequelize.define("Task", {
     pid:{
         type: DataTypes.UUID,
         allowNull: true,
-        references:{
-            model: Project,
-            key: 'id',
-        },
         onDelete: 'CASCADE',
     },
 
@@ -60,18 +55,27 @@ export const Task = sequelize.define("Task", {
         allowNull: true,
     },
     
-    status:{
+    progress:{
         type: DataTypes.STRING,
         allowNull: false,
-        references:{
-            model: Status,
-            key: 'id',
+        defaultValue: "Not Started",
+        validate:{
+            isIn: [["Not Started", "Initiated", "Midway", "Nearly Complete", "Complete"]],
+        },
+    },
+
+    progress_number:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate:{
+            isIn: [[0, 25, 50, 75, 100]],
         },
     }
 })
 
 User.hasMany(Task, {foreignKey: 'uid'});
 Task.belongsTo(User, {foreignKey: 'uid'});
+
 Project.hasMany(Task, {foreignKey: 'pid'});
-Task.hasOne(Status, {foreignKey: 'status'});
 

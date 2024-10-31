@@ -7,16 +7,16 @@ import { Recursion } from "./recursion";
 /* Meeting Table */
 
 export const Meeting = sequelize.define("Meeting", {
+
+    /* Meeting ID */
     id:{
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         primaryKey: true,
     },
-    name:{
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
+
+    /* User(Owner) ID */
     uid: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -25,23 +25,32 @@ export const Meeting = sequelize.define("Meeting", {
             key: 'id',
         },
     },
+
+    name:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+
+    description: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
     location:{
         type: DataTypes.STRING,
         allowNull: true,
     },
+
     start_time:{
         type: DataTypes.TIME,
         allowNull: true,
     },
+
     end_time:{
         type: DataTypes.TIME,
         allowNull: true,
     },
-    info: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    // id in project table 
+    
     project_id:{
         type: DataTypes.STRING,
         allowNull: true,
@@ -50,6 +59,7 @@ export const Meeting = sequelize.define("Meeting", {
             key: 'id',
         },
     },
+    
     recurring_id:{
         type: DataTypes.STRING,
         allowNull: true,

@@ -8,16 +8,16 @@ import { Status } from "./status";
 /* Task Table */
 
 export const Task = sequelize.define("Task", {
+
+    /* Task ID */
     id:{
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         primaryKey: true,
     },
-    name:{
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
+
+    /* User(Owner) ID */
     uid: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -26,18 +26,27 @@ export const Task = sequelize.define("Task", {
             key:'id', 
         },
     },
+
+    name:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+
+    description: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
     location:{
         type: DataTypes.STRING,
         allowNull: true,
     },
+
     deadline:{
         type: DataTypes.TIME,
         allowNull: true,
     },
-    info: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
+    
     status:{
         type: DataTypes.STRING,
         allowNull: false,
@@ -46,6 +55,7 @@ export const Task = sequelize.define("Task", {
             key: 'id',
         },
     },
+    
     project_id:{
         type: DataTypes.STRING,
         allowNull: true,

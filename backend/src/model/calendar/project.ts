@@ -1,7 +1,7 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
 import { Status } from "./status";
-import { User } from "../user";
+import { User } from "../user/user";
 
 
 /* Project Table */

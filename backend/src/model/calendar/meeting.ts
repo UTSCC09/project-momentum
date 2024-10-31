@@ -1,6 +1,6 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { User } from "../user";
+import { User } from "../user/user";
 import { Project } from "./project";
 import { Recursion } from "./recursion";
 

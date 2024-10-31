@@ -1,5 +1,5 @@
 import { sequelize } from "../../datasource";
-import { User } from "../user";
+import { User } from "../user/user";
 import { DataTypes } from "sequelize";
 import { Project } from "./project";
 import { Status } from "./status";

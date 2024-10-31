@@ -13,6 +13,15 @@ export const Oauth = sequelize.define("Oauth", {
         primaryKey: true,
     },
 
+    userId: {
+        type: DataTypes.UUID,
+        references: {
+            model: User,
+            key: 'id'
+        },
+        onDelete: 'CASCADE'
+    },
+
     // restrict on name, update the array if other oauth added
     type:{
         type: DataTypes.STRING,
@@ -25,15 +34,6 @@ export const Oauth = sequelize.define("Oauth", {
     token:{
         type: DataTypes.STRING,
         allowNull: false,
-    },
-
-    userId: {
-        type: DataTypes.STRING,
-        references: {
-            model: User,
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
     }
 })
 

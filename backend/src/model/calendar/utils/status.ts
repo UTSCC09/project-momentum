@@ -1,5 +1,5 @@
 
-import { sequelize } from "../../datasource";
+import { sequelize } from "../../../datasource";
 import { DataTypes } from "sequelize";
 
 /* Status Table */
@@ -13,6 +13,7 @@ export const Status = sequelize.define("Status", {
         allowNull: false,
         unique: true,
         primaryKey: true,
+        onDelete: 'CASCADE',
     },
 
     // name and number matched, can directly pass these values to frontend 

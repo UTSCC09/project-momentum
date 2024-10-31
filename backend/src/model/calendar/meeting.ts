@@ -1,14 +1,14 @@
-import { sequelize } from "../datasource";
+import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { Users } from "./user";
+import { Users } from "../user";
+import { Project } from "./project";
 import { Recursion } from "./recursion";
 
+/* Meeting Table */
 
-/* Event Table */
+export const Meeting = sequelize.define("Meeting", {
 
-export const Event = sequelize.define("Event", {
-
-    /* Event ID */
+    /* Meeting ID */
     id:{
         type: DataTypes.STRING,
         allowNull: false,
@@ -20,7 +20,7 @@ export const Event = sequelize.define("Event", {
     uid: {
         type: DataTypes.STRING,
         allowNull: false,
-        references: {
+        references:{
             model: Users,
             key: 'id',
         },
@@ -35,15 +35,29 @@ export const Event = sequelize.define("Event", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    
+
     location:{
         type: DataTypes.STRING,
         allowNull: true,
     },
-    
-    time:{
+
+    start_time:{
         type: DataTypes.TIME,
         allowNull: true,
+    },
+
+    end_time:{
+        type: DataTypes.TIME,
+        allowNull: true,
+    },
+    
+    project_id:{
+        type: DataTypes.STRING,
+        allowNull: true,
+        references:{
+            model: Project,
+            key: 'id',
+        },
     },
     
     recurring_id:{
@@ -56,5 +70,7 @@ export const Event = sequelize.define("Event", {
     },
 })
 
-Users.hasMany(Event, {foreignKey: 'uid'});
-Event.hasOne(Recursion, {foreignKey: 'recurring_id'});
+
+Users.hasMany(Meeting, {foreignKey: 'uid'});
+Project.hasMany(Meeting, {foreignKey: 'project_id'});
+Meeting.hasOne(Recursion, {foreignKey: 'recurring_id'});

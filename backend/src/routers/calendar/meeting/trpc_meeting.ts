@@ -1,7 +1,7 @@
-import { trpc } from '../trpc';
+import { trpc } from '../../../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { userProcedure } from './oauth/_login';
+import { userProcedure } from '../../oauth/_login';
 
 export const meetingRouter = trpc.router({
 

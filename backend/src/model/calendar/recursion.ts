@@ -5,7 +5,8 @@ import { DataTypes } from "sequelize";
 
 export const Recursion = sequelize.define("Recursion", {
     id:{
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         unique: true,
         primaryKey: true,

@@ -6,11 +6,11 @@ import { User } from "./user";
 
 export const Oauth = sequelize.define("Oauth", {
     id:{
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         unique: true,
         primaryKey: true,
-        
     },
 
     // restrict on name, update the array if other oauth added

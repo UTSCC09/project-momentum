@@ -11,7 +11,8 @@ export const Task = sequelize.define("Task", {
 
     /* Task ID */
     id:{
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         unique: true,
         primaryKey: true,

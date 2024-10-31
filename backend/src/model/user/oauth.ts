@@ -1,5 +1,6 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
+import { User } from "./user";
 
 /* Oauth Table */
 
@@ -24,5 +25,17 @@ export const Oauth = sequelize.define("Oauth", {
     token:{
         type: DataTypes.STRING,
         allowNull: false,
+    },
+
+    userId: {
+        type: DataTypes.STRING,
+        references: {
+            model: User,
+            key: 'id'
+        },
+        onDelete: 'CASCADE'
     }
 })
+
+User.hasMany(Oauth, { foreignKey: 'userId' });
+Oauth.belongsTo(User, { foreignKey: 'userId' });

@@ -12,6 +12,7 @@ export const User = sequelize.define("User", {
     /* User ID */
     id:{
         type: DataTypes.STRING,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         unique: true,
         primaryKey: true,
@@ -19,26 +20,17 @@ export const User = sequelize.define("User", {
 
     username: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
 
     email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true,
     },
 
     password: {
         type: DataTypes.STRING,
-        allowNull: false,
-    },
-
-    oauth: {
-        type: DataTypes.STRING,
         allowNull: true,
-        references: {
-            model: Oauth,
-            key: 'id',
-        },
-    }
+    },
 })

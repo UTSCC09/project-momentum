@@ -3,6 +3,7 @@ import { AppRouter } from "../../backend/src/index"
 
 // Declare a token variable that can be updated
 let token: string | null = null;
+let uid: string | null = null;
 
 const client = createTRPCProxyClient<AppRouter>({
     links: [httpBatchLink({
@@ -10,30 +11,25 @@ const client = createTRPCProxyClient<AppRouter>({
         async headers() {
             return {
                 authorization: token ? `Bearer ${token}` : "",
+                uid: uid ? uid : "",
             };
         }
     })],
 });
 
 async function main() {
-    const hello2 = await client.users.loginUser.mutate({ username: "name", password: "pwd"});
+    // const hello2 = await client.users.createUser.mutate({username: "test", password: "test", email: "test@email.com"});
+    const hello2 = await client.users.loginUser.mutate({username: "test", password: "test"});
+    console.log(hello2);
 
-    // Destructure the token from the response
-    const { success, token : Token } = hello2;
-    token = Token;  // Update the token variable
+    if(hello2){
+        const user = hello2.user as { id: string, username: string, email: string };
+        uid = user.id;
+        token = hello2.token;
+    }
 
-    // Now, subsequent requests will use the updated token
     const hello = await client.users.varifyUser.query();
     console.log(hello);
-
-    const task = await client.tasks.getTask.query({userId: "1"});
-    console.log(task);
-
-    const event = await client.events.getEvent.query({userId: "1"});
-    console.log(event);
-
-    const meeting = await client.meetings.getMeeting.query({userId: "1"});
-    console.log(meeting);
 }
 
 main();

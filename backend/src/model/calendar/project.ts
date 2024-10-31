@@ -1,7 +1,7 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
 import { Status } from "./status";
-import { Users } from "../user";
+import { User } from "../user";
 
 
 /* Project Table */
@@ -37,7 +37,7 @@ export const Project = sequelize.define("Project", {
         type: DataTypes.STRING,
         allowNull: false,
         references:{
-            model: Users,
+            model: User,
             key: 'id',
         },
     },
@@ -54,4 +54,4 @@ export const Project = sequelize.define("Project", {
 })
 
 // Leader can lead multiple projects
-Users.hasMany(Project, {foreignKey: 'lead'});
+User.hasMany(Project, {foreignKey: 'lead'});

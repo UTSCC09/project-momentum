@@ -1,6 +1,6 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { Users } from "../user";
+import { User } from "../user";
 import { Project } from "./project";
 import { Recursion } from "./recursion";
 
@@ -21,7 +21,7 @@ export const Meeting = sequelize.define("Meeting", {
         type: DataTypes.STRING,
         allowNull: false,
         references:{
-            model: Users,
+            model: User,
             key: 'id',
         },
     },
@@ -71,6 +71,6 @@ export const Meeting = sequelize.define("Meeting", {
 })
 
 
-Users.hasMany(Meeting, {foreignKey: 'uid'});
+User.hasMany(Meeting, {foreignKey: 'uid'});
 Project.hasMany(Meeting, {foreignKey: 'project_id'});
 Meeting.hasOne(Recursion, {foreignKey: 'recurring_id'});

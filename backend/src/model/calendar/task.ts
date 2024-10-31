@@ -1,5 +1,5 @@
 import { sequelize } from "../../datasource";
-import { Users } from "../user";
+import { User } from "../user";
 import { DataTypes } from "sequelize";
 import { Project } from "./project";
 import { Status } from "./status";
@@ -22,7 +22,7 @@ export const Task = sequelize.define("Task", {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
-            model: Users,
+            model: User,
             key:'id', 
         },
     },
@@ -66,6 +66,6 @@ export const Task = sequelize.define("Task", {
     },
 })
 
-Users.hasMany(Task, {foreignKey: 'uid'});
+User.hasMany(Task, {foreignKey: 'uid'});
 Project.hasMany(Task, {foreignKey: 'project_id'});
 

@@ -1,6 +1,6 @@
 import { sequelize } from "../../datasource";
 import { DataTypes } from "sequelize";
-import { Users } from "../user";
+import { User } from "../user";
 import { Recursion } from "./recursion";
 
 
@@ -21,7 +21,7 @@ export const Event = sequelize.define("Event", {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
-            model: Users,
+            model: User,
             key: 'id',
         },
     },
@@ -56,5 +56,5 @@ export const Event = sequelize.define("Event", {
     },
 })
 
-Users.hasMany(Event, {foreignKey: 'uid'});
+User.hasMany(Event, {foreignKey: 'uid'});
 Event.hasOne(Recursion, {foreignKey: 'recurring_id'});

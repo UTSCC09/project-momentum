@@ -11,12 +11,18 @@ export const Oauth = sequelize.define("Oauth", {
         primaryKey: true,
         
     },
+
     // restrict on name, update the array if other oauth added
-    name:{
+    type:{
         type: DataTypes.STRING,
         allowNull: false,
         validate:{
             isIn: [["google", "microsoft"]],
         }
     },
+
+    token:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
 })

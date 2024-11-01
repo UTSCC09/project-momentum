@@ -64,19 +64,50 @@ async function main() {
     // });
 
     // Create a meeting
-    const meeting = await client.meetings.createMeeting.mutate({
-        name: "test",
-        description: "test",
-        location: "test",
-        start_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        end_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        recurring: {
-            start: new Date().toISOString().slice(0, 19).replace('T', ' '),
-            end: new Date().toISOString().slice(0, 19).replace('T', ' '),
-            repeat: {},
-        },
-    });
-    console.log(meeting);
+    // const meeting: any = await client.meetings.createMeeting.mutate({
+    //     name: "test",
+    //     description: "test",
+    //     location: "test",
+    //     start_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //     end_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //     recurring: {
+    //         start: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //         end: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //         repeat: {},
+    //     },
+    // });
+    // console.log(meeting);
+    // const meeting2 = await client.meetings.getMeeting.query({meetingId: meeting.id});
+    // console.log(meeting2);
+    // const meeting3 = await client.meetings.updateMeeting.mutate({
+    //     meetingId: meeting.id,
+    //     name: "test10086",
+    // });
+    // console.log(meeting3);
+    // const meeting4 = await client.meetings.deleteMeeting.mutate({meetingId: meeting.id});
+    // console.log(meeting4);
+
+    // Create an event
+    // const event: any = await client.events.createEvent.mutate({
+    //     name: "test",
+    //     description: "test",
+    //     location: "test",
+    //     time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //     recurring: {
+    //         start: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //         end: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    //         repeat: {},
+    //     },
+    // });
+    // console.log(event);
+    // const event2 = await client.events.getEvent.query({eventId: event.id});
+    // console.log(event2);
+    // const event3 = await client.events.updateEvent.mutate({
+    //     eventId: event.id,
+    //     name: "test10086",
+    // });
+    // console.log(event3);
+
 }
 
 main();

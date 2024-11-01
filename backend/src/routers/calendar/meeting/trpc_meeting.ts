@@ -121,7 +121,7 @@ export const meetingRouter = trpc.router({
                 update_recurring.repeat = recurring.repeat;
                 await update_recurring.save();
             }
-
+            return meeting;
         } catch (error){
             console.log(error);
         }
@@ -138,6 +138,7 @@ export const meetingRouter = trpc.router({
             if (meeting.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
             await meeting.destroy();
+            return meeting;
         } catch (error){
             console.log(error);
         }

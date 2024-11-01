@@ -76,6 +76,5 @@ export const Task = sequelize.define("Task", {
 
 User.hasMany(Task, {foreignKey: 'uid'});
 Task.belongsTo(User, {foreignKey: 'uid'});
-
 Project.hasMany(Task, {foreignKey: 'pid'});
 

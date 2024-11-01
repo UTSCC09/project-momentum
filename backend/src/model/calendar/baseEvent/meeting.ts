@@ -30,12 +30,8 @@ export const Meeting = sequelize.define("Meeting", {
 
     /* Project ID */
     pid:{
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
-        references:{
-            model: Project,
-            key: 'id',
-        },
         onDelete: 'CASCADE',
     },
 
@@ -65,7 +61,7 @@ export const Meeting = sequelize.define("Meeting", {
     },
     
     recurring_id:{
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
             model: Recursion,
@@ -77,5 +73,5 @@ export const Meeting = sequelize.define("Meeting", {
 
 User.hasMany(Meeting, {foreignKey: 'uid'});
 Meeting.belongsTo(User, {foreignKey: 'uid'});
+
 Project.hasMany(Meeting, {foreignKey: 'pid'});
-Meeting.hasOne(Recursion, {foreignKey: 'recurring_id'});

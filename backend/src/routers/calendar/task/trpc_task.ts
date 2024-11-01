@@ -34,8 +34,6 @@ export const taskRouter = trpc.router({
         } catch (error){
             console.log(error);
         }
-
-
     }),
 
 
@@ -70,10 +68,12 @@ export const taskRouter = trpc.router({
         deadline: z.string().optional(),
         project_id: z.string().optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
         const { taskId, name, description, location, deadline, project_id } = input;
         const task = await Task.findByPk(taskId) as any;
         if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         task.name = name || task.name;
         task.description = description || task.description;
@@ -87,10 +87,12 @@ export const taskRouter = trpc.router({
 
     deleteTask: userProcedure
     .input(z.object({taskId: z.string()}))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
         const { taskId } = input;
         const task = await Task.findByPk(taskId) as any;
         if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         await task.destroy();
         return task;

@@ -62,6 +62,21 @@ async function main() {
     // let tasks = await client.tasks.deleteTask.mutate({
     //     taskId: taskid,
     // });
+
+    // Create a meeting
+    const meeting = await client.meetings.createMeeting.mutate({
+        name: "test",
+        description: "test",
+        location: "test",
+        start_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        end_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        recurring: {
+            start: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            end: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            repeat: {},
+        },
+    });
+    console.log(meeting);
 }
 
 main();

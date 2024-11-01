@@ -38,8 +38,11 @@ export const taskRouter = trpc.router({
 
 
     getTask: userProcedure
+    .input(z.object({taskId: z.string()}))
     .query(async ({input, ctx}) => {
-        const task = await Task.findAll({ where: { uid: ctx.userId } });
+        const { taskId } = input;
+        const task = await Task.findOne({ where: { id: taskId } });
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
         return task;
     }),
     

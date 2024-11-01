@@ -63,6 +63,7 @@ export const meetingRouter = trpc.router({
     .query(async ({ input }) => {
         const { meetingId } = input;
         const meeting = await Meeting.findOne({ where: { id: meetingId } });
+        if (!meeting) throw new TRPCError({ code: 'NOT_FOUND', message: 'Meeting not found' });
         return meeting;
     }),
 
@@ -90,7 +91,6 @@ export const meetingRouter = trpc.router({
         end_time: z.string().optional(),
         project_id: z.string().optional(),
         recurring: z.object({
-            recurringId: z.string(),
             start: z.string(),
             end: z.string(),
             repeat: z.object({}),
@@ -114,12 +114,12 @@ export const meetingRouter = trpc.router({
             await meeting.save();
 
             if (recurring){
-                const new_recurring = await Recursion.findOne({ where: { id: recurring.recurringId } }) as any;
-                if (!new_recurring) throw new TRPCError({ code: 'NOT_FOUND', message: 'Recurring event not found' });
-                new_recurring.start = recurring.start;
-                new_recurring.end = recurring.end;
-                new_recurring.repeat = recurring.repeat;
-                await new_recurring.save();
+                const update_recurring = await Recursion.findOne({ where: { id: meeting.recurringId } }) as any;
+                if (!update_recurring) throw new TRPCError({ code: 'NOT_FOUND', message: 'Recurring event not found' });
+                update_recurring.start = recurring.start;
+                update_recurring.end = recurring.end;
+                update_recurring.repeat = recurring.repeat;
+                await update_recurring.save();
             }
 
         } catch (error){

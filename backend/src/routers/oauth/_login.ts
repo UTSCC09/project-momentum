@@ -53,37 +53,44 @@ export const userRouter = trpc.router({
         }
       }),
 
-      loginUser: trpc.procedure
-      .input(z.object({ username: z.string(), password: z.string() }))
-      .mutation(async ({ input, ctx }) => {
-        const { username, password } = input;
-    
-        try {
-          // Find the user by username
-          const user = await User.findOne({ where: { username } });
-          if (!user) {
-            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found' });
-          }
-    
-          // Verify the password
-          const isPasswordValid = await argon2.verify((user as any).password, password);
-          if (!isPasswordValid) {
-            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Incorrect password' });
-          }
-    
-          // Generate JWT token
-          const token = await new SignJWT({ userId: (user as any).id })
-            .setProtectedHeader({ alg: 'HS256' })
-            .setIssuedAt()
-            .setExpirationTime("30d")
-            .sign(JWT_SECRET);
-    
-          return { success: true, user, token };
-        } catch (error) {
-          console.error("Login Error:", error);
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid login credentials' });
+    loginUser: trpc.procedure
+    .input(z.object({ username: z.string(), password: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { username, password } = input;
+  
+      try {
+        // Find the user by username
+        const user = await User.findOne({ where: { username } });
+        if (!user) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found' });
         }
-      }),
+  
+        // Verify the password
+        const isPasswordValid = await argon2.verify((user as any).password, password);
+        if (!isPasswordValid) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Incorrect password' });
+        }
+  
+        // Generate JWT token
+        const token = await new SignJWT({ userId: (user as any).id })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime("30d")
+          .sign(JWT_SECRET);
+  
+        return { success: true, user, token };
+      } catch (error) {
+        console.error("Login Error:", error);
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid login credentials' });
+      }
+    }),
+
+    loginGoogleUser: trpc.procedure
+    .input(z.object({  google_token: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+        
+    }),
+
 
     varifyUser: userProcedure
     .query(() => {

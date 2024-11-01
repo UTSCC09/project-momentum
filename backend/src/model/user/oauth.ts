@@ -5,14 +5,6 @@ import { User } from "./user";
 /* Oauth Table */
 
 export const Oauth = sequelize.define("Oauth", {
-    id:{
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
-        unique: true,
-        primaryKey: true,
-    },
-
     userId: {
         type: DataTypes.UUID,
         references: {
@@ -29,6 +21,11 @@ export const Oauth = sequelize.define("Oauth", {
         validate:{
             isIn: [["google", "microsoft"]],
         }
+    },
+
+    oauthId:{
+        type: DataTypes.STRING,
+        allowNull: false,
     },
 
     token:{

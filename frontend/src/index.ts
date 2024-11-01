@@ -1,6 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client"
 import { AppRouter } from "../../backend/src/index"
-import { randomUUID } from "crypto";
 
 // Declare a token variable that can be updated
 let token: string | null = null;

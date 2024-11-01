@@ -1,39 +1,41 @@
 <template>
-  <SelectButton v-model="view" @change="switchView" :options="views" aria-labelledby="basic" />
+  <div class="header-right">
+    <SelectButton v-model="view" @change="switchView(view)" :options="views" aria-labelledby="basic" />
 
-  <Avatar icon="pi pi-user" size="large" shape="circle" @click="toggle" aria-haspopup="true"
-    aria-controls="overlay_menu" />
-  <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
+    <Avatar icon="pi pi-user" size="large" shape="circle" @click="toggle" aria-haspopup="true"
+      aria-controls="overlay_menu" />
+    <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
 
-  <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
-    <div class="user-form-element">
-      <label for="emailLogin">Email</label>
-      <InputText id="emailLogin" autocomplete="off" />
-    </div>
-    <div class="user-form-element">
-      <label for="passwordLogin">Password</label>
-      <Password inputId="passwordLogin" v-model="pwLogin" />
-    </div>
-    <div class="user-form-button-group">
-      <Button type="button" label="Cancel" severity="secondary" @click="visibleLogin = false"></Button>
-      <Button type="button" label="Save" @click="visibleLogin = false"></Button>
-    </div>
-  </Dialog>
+    <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
+      <div class="user-form-element">
+        <label for="emailLogin">Email</label>
+        <InputText id="emailLogin" autocomplete="off" />
+      </div>
+      <div class="user-form-element">
+        <label for="passwordLogin">Password</label>
+        <Password inputId="passwordLogin" v-model="pwLogin" />
+      </div>
+      <div class="user-form-button-group">
+        <Button type="button" label="Cancel" severity="secondary" @click="visibleLogin = false"></Button>
+        <Button type="button" label="Save" @click="visibleLogin = false"></Button>
+      </div>
+    </Dialog>
 
-  <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
-    <div class="user-form-element">
-      <label for="emailSignup">Email</label>
-      <InputText id="emailSignup" autocomplete="off" />
-    </div>
-    <div class="user-form-element">
-      <label for="passwordSignup">Password</label>
-      <Password inputId="passwordSignup" v-model="pwSignup" />
-    </div>
-    <div class="user-form-button-group">
-      <Button type="button" label="Cancel" severity="secondary" @click="visibleSignup = false"></Button>
-      <Button type="button" label="Save" @click="visibleSignup = false"></Button>
-    </div>
-  </Dialog>
+    <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
+      <div class="user-form-element">
+        <label for="emailSignup">Email</label>
+        <InputText id="emailSignup" autocomplete="off" />
+      </div>
+      <div class="user-form-element">
+        <label for="passwordSignup">Password</label>
+        <Password inputId="passwordSignup" v-model="pwSignup" />
+      </div>
+      <div class="user-form-button-group">
+        <Button type="button" label="Cancel" severity="secondary" @click="visibleSignup = false"></Button>
+        <Button type="button" label="Save" @click="visibleSignup = false"></Button>
+      </div>
+    </Dialog>
+  </div>
 </template>
 
 <script setup>
@@ -48,16 +50,23 @@ import SelectButton from 'primevue/selectbutton';
 import { ref } from "vue";
 import { useRouter } from 'vue-router'
 
+const props = defineProps({
+  view: {
+    type: String,
+    default: "Schedule",
+  },
+});
+
 const visibleLogin = ref(false);
 const visibleSignup = ref(false);
 const pwLogin = ref(null);
 const pwSignup = ref(null);
 
 const router = useRouter();
-const view = ref('Schedule');
+const view = ref(props.view || "Schedule");
 const views = ref(['Schedule', 'Tasks']);
-function switchView() {
-  router.push("/tasks");
+function switchView(newView) {
+  newView == 'Tasks' ? router.push("/tasks") : router.push("/");
 }
 
 const menu = ref();
@@ -119,6 +128,11 @@ const toggle = (event) => {
   justify-content: flex-end;
   gap: 2px;
   margin-top: 15px;
+}
+
+.header-right {
+  display: flex;
+  gap: var(--sx-spacing-padding4);
 }
 
 InputText {

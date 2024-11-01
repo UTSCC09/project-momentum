@@ -71,8 +71,8 @@ export const taskRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const { taskId, name, description, location, deadline, project_id } = input;
         const task = await Task.findByPk(taskId) as any;
-        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
 
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
         if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         task.name = name || task.name;

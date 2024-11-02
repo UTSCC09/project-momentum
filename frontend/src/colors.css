@@ -1,141 +1,81 @@
 :root {
-  --sx-color-primary: #52616B;
-  /* Custom Primary */
-  --sx-color-on-primary: #F0F5F9;
-  /* Light text on primary */
-  --sx-color-primary-container: #C9D6DF;
-  /* Light primary container */
-  --sx-color-on-primary-container: #1E2022;
-  /* Dark text on container */
+  --sx-color-primary: #000000; /* Black */
+  --sx-color-on-primary: #FFFFFF; /* White text on primary */
+  --sx-color-primary-container: #333333; /* Dark gray for primary container */
+  --sx-color-on-primary-container: #FFFFFF; /* White text on container */
 
-  --sx-color-secondary: #1E2022;
-  /* Darker secondary */
-  --sx-color-on-secondary: #F0F5F9;
-  /* Light text on secondary */
-  --sx-color-secondary-container: #C9D6DF;
-  /* Light secondary container */
-  --sx-color-on-secondary-container: #F0F5F9;
-  /* Light text on secondary container */
+  --sx-color-secondary: #1C1C1C; /* Darker secondary */
+  --sx-color-on-secondary: #FFFFFF; /* White text on secondary */
+  --sx-color-secondary-container: #444444; /* Medium gray for secondary container */
+  --sx-color-on-secondary-container: #FFFFFF; /* White text on secondary container */
 
-  --sx-color-tertiary: #F0F5F9;
-  /* Light tertiary */
-  --sx-color-on-tertiary: #1E2022;
-  /* Dark text on tertiary */
-  --sx-color-tertiary-container: #C9D6DF;
-  /* Light tertiary container */
-  --sx-color-on-tertiary-container: #1E2022;
-  /* Dark text on tertiary container */
+  --sx-color-tertiary: #F0F5F9; /* Light tertiary */
+  --sx-color-on-tertiary: #1E2022; /* Dark text on tertiary */
+  --sx-color-tertiary-container: #C9D6DF; /* Light tertiary container */
+  --sx-color-on-tertiary-container: #1E2022; /* Dark text on tertiary container */
 
-  --sx-color-surface: #F0F5F9;
-  /* Light surface */
-  --sx-color-surface-dim: #C9D6DF;
-  /* Dim surface */
-  --sx-color-surface-bright: #F0F5F9;
-  /* Bright surface */
-  --sx-color-on-surface: #1E2022;
-  /* Dark text on surface */
+  --sx-color-surface: #F0F5F9; /* Light surface */
+  --sx-color-surface-dim: #CCCCCC; /* Dim surface */
+  --sx-color-surface-bright: #F0F5F9; /* Bright surface */
+  --sx-color-on-surface: #1E2022; /* Dark text on surface */
 
-  --sx-color-surface-container: #C9D6DF;
-  /* Surface container */
-  --sx-color-surface-container-low: #F0F5F9;
-  /* Low container */
-  --sx-color-surface-container-high: #F0F5F9;
-  /* High container */
+  --sx-color-surface-container: #C9D6DF; /* Surface container */
+  --sx-color-surface-container-low: #F0F5F9; /* Low container */
+  --sx-color-surface-container-high: #FFFFFF; /* High container */
 
-  --sx-color-background: #ffffff;
-  /* Background */
-  --sx-color-on-background: #1E2022;
-  /* Dark text on background */
+  --sx-color-background: #FFFFFF; /* Background */
+  --sx-color-on-background: #1E2022; /* Dark text on background */
 
-  --sx-color-outline: #52616B;
-  /* Outline */
-  --sx-color-outline-variant: #C9D6DF;
-  /* Outline variant */
-  --sx-color-shadow: rgba(0, 0, 0, 0.2);
-  /* Soft shadow */
+  --sx-color-outline: #666666; /* Gray outline */
+  --sx-color-outline-variant: #B0B0B0; /* Outline variant */
+  --sx-color-shadow: rgba(0, 0, 0, 0.2); /* Soft shadow */
 
-  --sx-color-surface-tint: #52616B;
-  /* Surface tint */
-  --sx-color-neutral: var(--sx-color-outline);
-  /* Neutral */
-  --sx-color-neutral-variant: var(--sx-color-outline-variant);
-  /* Neutral variant */
+  --sx-color-surface-tint: #333333; /* Surface tint */
+  --sx-color-neutral: var(--sx-color-outline); /* Neutral */
+  --sx-color-neutral-variant: var(--sx-color-outline-variant); /* Neutral variant */
 
-  --sx-internal-color-gray-ripple-background: #C9D6DF;
-  /* Gray ripple background */
-  --sx-internal-color-light-gray: #F0F5F9;
-  /* Light gray */
-  --sx-internal-color-text: #1E2022;
-  /* Text color */
+  --sx-internal-color-gray-ripple-background: #CCCCCC; /* Gray ripple background */
+  --sx-internal-color-light-gray: #F0F5F9; /* Light gray */
+  --sx-internal-color-text: #1E2022; /* Text color */
 }
 
 .is-dark {
-  --sx-color-primary: #C9D6DF;
-  /* Light primary for dark mode */
-  --sx-color-on-primary: #1E2022;
-  /* Dark text on primary */
-  --sx-color-primary-container: #52616B;
-  /* Darker primary container */
-  --sx-color-on-primary-container: #F0F5F9;
-  /* Light text on container */
+  --sx-color-primary: #FFFFFF; /* White for dark mode */
+  --sx-color-on-primary: #000000; /* Black text on primary */
+  --sx-color-primary-container: #333333; /* Darker primary container */
+  --sx-color-on-primary-container: #FFFFFF; /* White text on container */
 
-  --sx-color-secondary: #F0F5F9;
-  /* Light secondary */
-  --sx-color-on-secondary: #1E2022;
-  /* Dark text on secondary */
-  --sx-color-secondary-container: #C9D6DF;
-  /* Light secondary container */
-  --sx-color-on-secondary-container: #1E2022;
-  /* Dark text on secondary container */
+  --sx-color-secondary: #F0F5F9; /* Light secondary */
+  --sx-color-on-secondary: #1E2022; /* Dark text on secondary */
+  --sx-color-secondary-container: #444444; /* Light secondary container */
+  --sx-color-on-secondary-container: #1E2022; /* Dark text on secondary container */
 
-  --sx-color-tertiary: #F0F5F9;
-  /* Light tertiary */
-  --sx-color-on-tertiary: #1E2022;
-  /* Dark text on tertiary */
-  --sx-color-tertiary-container: #52616B;
-  /* Darker tertiary container */
-  --sx-color-on-tertiary-container: #F0F5F9;
-  /* Light text on tertiary container */
+  --sx-color-tertiary: #F0F5F9; /* Light tertiary */
+  --sx-color-on-tertiary: #1E2022; /* Dark text on tertiary */
+  --sx-color-tertiary-container: #333333; /* Darker tertiary container */
+  --sx-color-on-tertiary-container: #F0F5F9; /* Light text on tertiary container */
 
-  --sx-color-surface: #1E2022;
-  /* Dark surface */
-  --sx-color-surface-dim: #3B3F41;
-  /* Dim surface */
-  --sx-color-surface-bright: #2A2D2F;
-  /* Slightly brighter surface */
-  --sx-color-on-surface: #F0F5F9;
-  /* Light text on surface */
+  --sx-color-surface: #1E2022; /* Dark surface */
+  --sx-color-surface-dim: #3B3F41; /* Dim surface */
+  --sx-color-surface-bright: #2A2D2F; /* Slightly brighter surface */
+  --sx-color-on-surface: #F0F5F9; /* Light text on surface */
 
-  --sx-color-surface-container: #2A2D2F;
-  /* Surface container */
-  --sx-color-surface-container-low: #1E2022;
-  /* Low container */
-  --sx-color-surface-container-high: #3B3F41;
-  /* High container */
+  --sx-color-surface-container: #2A2D2F; /* Surface container */
+  --sx-color-surface-container-low: #1E2022; /* Low container */
+  --sx-color-surface-container-high: #3B3F41; /* High container */
 
-  --sx-color-background: #1E2022;
-  /* Dark background */
-  --sx-color-on-background: #F0F5F9;
-  /* Light text on background */
+  --sx-color-background: #1E2022; /* Dark background */
+  --sx-color-on-background: #F0F5F9; /* Light text on background */
 
-  --sx-color-outline: #C9D6DF;
-  /* Light outline */
-  --sx-color-outline-variant: #4A4E50;
-  /* Outline variant */
-  --sx-color-shadow: rgba(0, 0, 0, 0.5);
-  /* Deeper shadow for dark mode */
+  --sx-color-outline: #CCCCCC; /* Light outline */
+  --sx-color-outline-variant: #4A4E50; /* Outline variant */
+  --sx-color-shadow: rgba(0, 0, 0, 0.5); /* Deeper shadow for dark mode */
 
-  --sx-color-surface-tint: #C9D6DF;
-  /* Surface tint */
-  --sx-color-neutral: var(--sx-color-outline);
-  /* Neutral */
-  --sx-color-neutral-variant: var(--sx-color-outline-variant);
-  /* Neutral variant */
+  --sx-color-surface-tint: #666666; /* Surface tint */
+  --sx-color-neutral: var(--sx-color-outline); /* Neutral */
+  --sx-color-neutral-variant: var(--sx-color-outline-variant); /* Neutral variant */
 
-  --sx-internal-color-gray-ripple-background: #3B3F41;
-  /* Gray ripple background */
-  --sx-internal-color-light-gray: #2A2D2F;
-  /* Darker gray */
-  --sx-internal-color-text: #F0F5F9;
-  /* Text color */
+  --sx-internal-color-gray-ripple-background: #3B3F41; /* Gray ripple background */
+  --sx-internal-color-light-gray: #2A2D2F; /* Darker gray */
+  --sx-internal-color-text: #F0F5F9; /* Text color */
 }

@@ -1,0 +1,64 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  height: 100vh;
+}
+
+#app {
+  height: 100%;
+}
+
+.sx-vue-calendar-wrapper {
+  height: 100%;
+}
+
+.sx__calendar-wrapper {
+  display: block;
+  border-bottom: var(--sx-border);
+}
+
+.sx__calendar {
+  display: unset;
+  border: none;
+}
+
+.sx__calendar-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 70px;
+  background-color: var(--sx-color-background);
+}
+
+.sx__view-container {
+  display: unset;
+}
+
+.sx__week-header {
+  top: 70px;
+  background-color: var(--sx-color-background);
+}
+
+.sx__week-wrapper,
+.sx__month-grid-wrapper {
+  background-color: var(--sx-color-background);
+}
+
+.sx__event-modal {
+  z-index: 3;
+}
+
+/* @media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+} */

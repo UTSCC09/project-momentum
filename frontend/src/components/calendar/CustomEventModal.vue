@@ -1,26 +1,51 @@
 <template>
   <div class="custom-event-modal">
-    <input v-model="isChecked" type="checkbox" />
-    <!-- <div>{{ calendarEvent.id }}</div> -->
-    <div>{{ calendarEvent.title }}</div>
-    <Panel header="Edit" toggleable>
-      <div class="card flex justify-center">
+    <!-- <input v-model="isChecked" type="checkbox" /> -->
+
+    <div class="event-title-container">
+      <p class="event-title">{{ calendarEvent.title }}</p>
+      <Button icon="pi pi-pencil" @click="visible = true" variant="text" />
+    </div>
+    <div class="event-subtitle-container">
+      <p><i class="pi pi-map-marker" style="font-size: 0.75rem"></i> {{ calendarEvent.location }}</p>
+      <p><i class="pi pi-clock" style="font-size: 0.75rem"></i> {{ `${calendarEvent.start} - ${calendarEvent.end}` }}
+      </p>
+    </div>
+    <p class="event-description">{{ calendarEvent.description }}</p>
+
+    <Dialog v-model:visible="visible" modal header="Edit Event" :style="{ width: '50vw' }">
+      <div>
         <IftaLabel>
-          <InputText id="title" v-model="value" variant="filled" />
+          <InputText id="title" v-model="title" variant="filled" />
           <label for="title">Title</label>
         </IftaLabel>
-        <div id="datetime">
-          <IftaLabel>
-            <DatePicker id="startDateTime" v-model="startDateTime" showTime hourFormat="24" fluid />
-            <label for="startDateTime">From</label>
-          </IftaLabel>
-          <IftaLabel>
-            <DatePicker id="endDateTime" v-model="endDateTime" showTime hourFormat="24" fluid />
-            <label for="endDateTime">To</label>
-          </IftaLabel>
-        </div>
       </div>
-    </Panel>
+      <div>
+        <IftaLabel>
+          <InputText id="location" v-model="location" />
+          <label for="location">Location</label>
+        </IftaLabel>
+      </div>
+      <div id="datetime">
+        <IftaLabel>
+          <DatePicker id="startDateTime" v-model="startDateTime" showTime hourFormat="24" fluid />
+          <label for="startDateTime">From</label>
+        </IftaLabel>
+        <IftaLabel>
+          <DatePicker id="endDateTime" v-model="endDateTime" showTime hourFormat="24" fluid />
+          <label for="endDateTime">To</label>
+        </IftaLabel>
+      </div>
+      <div>
+        <IftaLabel>
+          <Textarea id="description" v-model="description" rows="5" cols="30" style="resize: none" />
+          <label for="description">Description</label>
+        </IftaLabel>
+      </div>
+      <div id="event-edit-save-button">
+        <Button label="Save" @click="visible = false;" />
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -29,33 +54,43 @@ import { PropType, ref, watch } from 'vue'
 import { useEventsStore } from "../../store/events-store.ts";
 
 // components
-import Panel from 'primevue/panel';
 import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
 import DatePicker from 'primevue/datepicker';
-
-const value = ref(null);
-const startDateTime = ref();
-const endDateTime = ref();
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import Textarea from 'primevue/textarea';
 
 const props = defineProps({
   calendarEvent: {
-    type: Object as PropType<{ title: string; id: number | string }>,
+    type: Object as PropType<{
+      title: string; id: number | string,
+      description: string, location: string,
+      start: string, end: string
+    }>,
     required: true,
   },
 })
 
-const isChecked = ref(false)
+const title = ref(props.calendarEvent.title);
+const startDateTime = ref(new Date(props.calendarEvent.start));
+const endDateTime = ref(new Date(props.calendarEvent.end));
 
+const isChecked = ref(false)
 watch(isChecked, () => {
   eventsStore.toggleEvent(props.calendarEvent!.id)
 })
 
 const eventsStore = useEventsStore()
 
+const visible = ref(false);
+
+const description = ref(props.calendarEvent.description);
+const location = ref(props.calendarEvent.location);
+
 </script>
 
-<style>
+<style lang="css" scoped>
 .custom-event-modal {
   padding: var(--sx-spacing-padding6);
   background-color: var(--sx-color-background);
@@ -65,12 +100,49 @@ const eventsStore = useEventsStore()
   overflow-y: scroll;
 }
 
-#title {
+#title,
+#location,
+#description {
   width: 100%;
+}
+
+.p-dialog-content div {
+  margin: 5px 0;
 }
 
 #datetime {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+#datetime span {
+  flex-grow: 1;
+}
+
+.sx__calendar-wrapper button {
+  background-color: none;
+  color: var(--sx-on-primary-container);
+}
+
+.event-title-container {
+  display: flex;
+  justify-content: space-between;
+  justify-items: center;
+}
+
+.event-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.event-subtitle-container {
+  font-size: 0.75rem;
+}
+
+#event-edit-save-button {
+  display: flex;
+  justify-content: center;
 }
 </style>

@@ -8,8 +8,8 @@
 
     <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
       <div class="user-form-element">
-        <label for="emailLogin">Email</label>
-        <InputText id="emailLogin" autocomplete="off" />
+        <label for="usernameLogin">Username</label>
+        <InputText id="usernameLogin" autocomplete="off" v-model="usernameLogin" />
       </div>
       <div class="user-form-element">
         <label for="passwordLogin">Password</label>
@@ -17,14 +17,18 @@
       </div>
       <div class="user-form-button-group">
         <Button type="button" label="Cancel" severity="secondary" @click="visibleLogin = false"></Button>
-        <Button type="button" label="Save" @click="visibleLogin = false"></Button>
+        <Button type="button" label="Submit" @click="visibleLogin = false"></Button>
       </div>
     </Dialog>
 
     <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
       <div class="user-form-element">
         <label for="emailSignup">Email</label>
-        <InputText id="emailSignup" autocomplete="off" />
+        <InputText id="emailSignup" autocomplete="off" v-model="emailSignup" />
+      </div>
+      <div class="user-form-element">
+        <label for="usernameSignup">Username</label>
+        <InputText id="usernameSignup" autocomplete="off" v-model="usernameSignup" />
       </div>
       <div class="user-form-element">
         <label for="passwordSignup">Password</label>
@@ -32,7 +36,7 @@
       </div>
       <div class="user-form-button-group">
         <Button type="button" label="Cancel" severity="secondary" @click="visibleSignup = false"></Button>
-        <Button type="button" label="Save" @click="visibleSignup = false"></Button>
+        <Button type="button" label="Submit" @click="signup"></Button>
       </div>
     </Dialog>
   </div>
@@ -48,7 +52,9 @@ import Password from "primevue/password";
 import SelectButton from 'primevue/selectbutton';
 
 import { ref } from "vue";
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
+
+import { client } from "../../api/index";
 
 const props = defineProps({
   view: {
@@ -59,8 +65,27 @@ const props = defineProps({
 
 const visibleLogin = ref(false);
 const visibleSignup = ref(false);
+
+const usernameLogin = ref(null);
 const pwLogin = ref(null);
+async function login() {
+  const res = await client.users.loginUser.mutate({
+    username: usernameLogin.value, password: pwLogin.value
+  });
+  console.log(res.user);
+}
+
+const emailSignup = ref(null);
+const usernameSignup = ref(null);
 const pwSignup = ref(null);
+async function signup() {
+  const res = await client.users.createUsers.mutate({
+    username: usernameSignup.value,
+    password: pwSignup.value,
+    email: emailSignup.value,
+  });
+  console.log(res.user);
+}
 
 const router = useRouter();
 const view = ref(props.view || "Schedule");

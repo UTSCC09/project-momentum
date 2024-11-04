@@ -79,7 +79,7 @@ const emailSignup = ref(null);
 const usernameSignup = ref(null);
 const pwSignup = ref(null);
 async function signup() {
-  const res = await client.users.createUsers.mutate({
+  const res = await client.users.createUser.mutate({
     username: usernameSignup.value,
     password: pwSignup.value,
     email: emailSignup.value,

@@ -37,9 +37,7 @@ export const userRouter = trpc.router({
         const { username, password, email } = input;
 
         const existingUser = await User.findOne({ where: {[Op.or]: [{ username }, { email }]} }) || null;
-        if (existingUser) {
-            throw new TRPCError({ code: 'CONFLICT', message: 'User already exists' });
-        }
+        if (existingUser) { throw new TRPCError({ code: 'CONFLICT', message: 'User already exists' }); }
         
         try {
             const hashedPassword = await argon2.hash(password);
@@ -55,7 +53,7 @@ export const userRouter = trpc.router({
             return { success: createStatus, user: createdUser, token: token };
         } catch (error) {
           console.error("Create User Error:", error);
-          return { success: createStatus, error: error };
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create user' });
       }
     }),
 

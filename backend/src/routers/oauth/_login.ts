@@ -1,5 +1,6 @@
 import { trpc } from '../../trpc';
 import { z } from 'zod';
+import { Op } from 'sequelize';
 import { SignJWT, jwtVerify } from 'jose';
 import { TRPCError } from '@trpc/server';
 import { User } from '../../model/user/user';
@@ -34,6 +35,11 @@ export const userRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         let createStatus = false
         const { username, password, email } = input;
+
+        const existingUser = await User.findOne({ where: {[Op.or]: [{ username }, { email }]} }) || null;
+        if (existingUser) {
+            throw new TRPCError({ code: 'CONFLICT', message: 'User already exists' });
+        }
         
         try {
             const hashedPassword = await argon2.hash(password);
@@ -48,10 +54,10 @@ export const userRouter = trpc.router({
                 .sign(JWT_SECRET);
             return { success: createStatus, user: createdUser, token: token };
         } catch (error) {
-            console.error(error);
-            createStatus = false;
-        }
-      }),
+          console.error("Create User Error:", error);
+          return { success: createStatus, error: error };
+      }
+    }),
 
     loginUser: trpc.procedure
     .input(z.object({ username: z.string(), password: z.string() }))

@@ -84,7 +84,7 @@ async function signup() {
     password: pwSignup.value,
     email: emailSignup.value,
   });
-  console.log(res.user);
+  console.log(res);
 }
 
 const router = useRouter();

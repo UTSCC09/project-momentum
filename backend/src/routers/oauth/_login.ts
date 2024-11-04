@@ -90,10 +90,4 @@ export const userRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         
     }),
-
-
-    varifyUser: userProcedure
-    .query(() => {
-        return "Hello, User!"
-    }),
 })

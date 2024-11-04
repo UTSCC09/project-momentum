@@ -30,7 +30,10 @@ export const taskRouter = trpc.router({
             });
 
             console.log(task);
-            return task;
+            return {
+                task: task,
+                temp: "temp"
+            };
         } catch (error){
             console.log(error);
         }
@@ -43,7 +46,10 @@ export const taskRouter = trpc.router({
         const { taskId } = input;
         const task = await Task.findOne({ where: { id: taskId } });
         if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
-        return task;
+        return {
+            task: task,
+            temp: "temp"
+        };
     }),
     
     getTaskbyUser: userProcedure
@@ -51,7 +57,10 @@ export const taskRouter = trpc.router({
     .query(async ({ input }) => {
         const { userId } = input;
         const tasks = await Task.findAll({ where: { uid: userId } });
-        return tasks;
+        return {
+            task: tasks,
+            temp: "temp"
+        };
     }),
 
     getTaskbyProject: userProcedure
@@ -59,7 +68,10 @@ export const taskRouter = trpc.router({
     .query(async ({ input }) => {
         const { projectId } = input;
         const tasks = await Task.findAll({ where: { pid: projectId } });
-        return tasks;
+        return {
+            task: tasks,
+            temp: "temp"
+        };
     }),
 
     updateTask: userProcedure
@@ -85,7 +97,10 @@ export const taskRouter = trpc.router({
         task.pid = project_id || task.pid;
 
         await task.save();
-        return task;
+        return {
+            task: task,
+            temp: "temp"
+        };
     }),
 
     deleteTask: userProcedure
@@ -98,7 +113,10 @@ export const taskRouter = trpc.router({
         if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         await task.destroy();
-        return task;
+        return {
+            task: task,
+            temp: "temp"
+        };
     }),
 
 })

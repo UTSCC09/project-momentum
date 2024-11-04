@@ -50,7 +50,10 @@ export const meetingRouter = trpc.router({
                 ...(new_recurring ? { recurring_id: new_recurring.id } : {})
             });
 
-            return meeting;
+            return {
+                meeting: meeting,
+                temp: "temp"
+            };
         }
         catch (error){
             await Recursion.destroy({ where: { id: new_recurring.id } });
@@ -64,21 +67,30 @@ export const meetingRouter = trpc.router({
         const { meetingId } = input;
         const meeting = await Meeting.findOne({ where: { id: meetingId } });
         if (!meeting) throw new TRPCError({ code: 'NOT_FOUND', message: 'Meeting not found' });
-        return meeting;
+        return {
+            meeting: meeting,
+            temp: "temp"
+        };
     }),
 
     getMeetingbyUser: userProcedure
     .input(z.object({userId: z.string()}))
     .query(async ({ input }) => {
         const meetings = await Meeting.findAll({ where: { uid: input.userId } });
-        return meetings;
+        return {
+            meetings: meetings,
+            temp: "temp"
+        };
     }),
 
     getMeetingbyProject: userProcedure
     .input(z.object({projectId: z.string()}))
     .query(async ({ input }) => {
         const meetings = await Meeting.findAll({ where: { pid: input.projectId } });
-        return meetings;
+        return {
+            meetings: meetings,
+            temp: "temp"
+        };
     }),
 
     updateMeeting: userProcedure
@@ -121,7 +133,10 @@ export const meetingRouter = trpc.router({
                 update_recurring.repeat = recurring.repeat;
                 await update_recurring.save();
             }
-            return meeting;
+            return {
+                meeting: meeting,
+                temp: "temp"
+            };
         } catch (error){
             console.log(error);
         }
@@ -138,7 +153,10 @@ export const meetingRouter = trpc.router({
             if (meeting.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
             await meeting.destroy();
-            return meeting;
+            return {
+                meeting: meeting,
+                temp: "temp"
+            };
         } catch (error){
             console.log(error);
         }

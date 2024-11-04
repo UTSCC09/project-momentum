@@ -46,7 +46,10 @@ export const eventRouter = trpc.router({
                 ...(new_recurring ? { recurring_id: new_recurring.id } : {})
             });
 
-            return event;
+            return {
+                event: event,
+                temp: "temp"
+            };
         }
         catch (error){
             await Recursion.destroy({ where: { id: new_recurring.id } });
@@ -60,7 +63,10 @@ export const eventRouter = trpc.router({
         const { eventId } = input;
         const event = await Event.findOne({ where: { id: eventId } });
         if (!event) throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' });
-        return event;
+        return {
+            event: event,
+            temp: "temp"
+        };
     }),
 
     getEventbyUser: userProcedure
@@ -68,7 +74,10 @@ export const eventRouter = trpc.router({
     .query(async ({ input }) => {
         const { userId } = input;
         const events = await Event.findAll({ where: { uid: userId } });
-        return events;
+        return {
+            event: events,
+            temp: "temp"
+        };
     }),
 
     updateEvent: userProcedure
@@ -107,7 +116,10 @@ export const eventRouter = trpc.router({
             }
 
             await event.save();
-            return event;
+            return {
+                event: event,
+                temp: "temp"
+            };
         }
         catch (error){
             console.log(error);
@@ -123,6 +135,9 @@ export const eventRouter = trpc.router({
         if (event.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         await event.destroy();
-        return event;
+        return {
+            event: event,
+            temp: "temp"
+        };
     })
 })

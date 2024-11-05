@@ -1,7 +1,7 @@
 import { trpc } from '../../trpc';
 import { z } from 'zod';
 import { Op } from 'sequelize';
-import { serialize } from 'cookie';
+import cookie from 'cookie';
 import { SignJWT, jwtVerify } from 'jose';
 import { TRPCError } from '@trpc/server';
 import { User } from '../../model/user/user';
@@ -83,15 +83,7 @@ export const userRouter = trpc.router({
           .setExpirationTime("30d")
           .sign(JWT_SECRET);
 
-        const serializedCookie = serialize('token', token, {
-          httpOnly: true,
-          path: '/',
-          maxAge: 2592000, // 30 days
-          sameSite: 'none', // Required for cross-origin cookies
-          secure: true, // Required for SameSite=None on HTTPS
-        });
-        
-        ctx.res.setHeader('Set-Cookie', serializedCookie);
+        ctx.res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=None; Secure`);
   
         return { success: true, user, token };
       } catch (error) {

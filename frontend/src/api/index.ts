@@ -1,21 +1,36 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { AppRouter } from "../../../backend/src/index";
 
-// Declare a token variable that can be updated
+// Token and UID variables to store the latest values
 let token: string | null = null;
 let uid: string | null = null;
 
+// Function to update token and uid dynamically
+export function setAuthCredentials(newToken: string | null, newUid: string | null) {
+  token = newToken;
+  uid = newUid;
+}
+
 export const client = createTRPCProxyClient<AppRouter>({
-  links: [httpBatchLink({
-    url: "http://localhost:3000/trpc",
-    async headers() {
-      return {
-        authorization: token ? `Bearer ${token}` : "",
-        uid: uid ? uid : "",
-      };
-    }
-  })],
+  links: [
+    httpBatchLink({
+      url: "http://localhost:3000/trpc",
+      // Define a custom fetch function to include credentials
+      fetch: async (input, init) => {
+        return fetch(input, {
+          ...init,
+          credentials: 'include', // Ensures cookies are included with requests
+          headers: {
+            ...init?.headers,
+            authorization: token ? `Bearer ${token}` : "",
+            uid: uid || "",  // Using uid directly with a fallback
+          },
+        });
+      },
+    }),
+  ],
 });
+
 
 // async function main() {
   // const hello2 = await client.users.createUser.mutate({username: "test", password: "test", email: "test@email.com"});

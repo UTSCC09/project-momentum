@@ -7,21 +7,23 @@
     <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
 
     <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
+      <div class="error-message">{{ msgLogin }}</div>
       <div class="user-form-element">
         <label for="usernameLogin">Username</label>
         <InputText id="usernameLogin" autocomplete="off" v-model="usernameLogin" />
       </div>
       <div class="user-form-element">
         <label for="passwordLogin">Password</label>
-        <Password inputId="passwordLogin" v-model="pwLogin" />
+        <Password inputId="passwordLogin" v-model="pwLogin" :feedback="false" />
       </div>
       <div class="user-form-button-group">
-        <Button type="button" label="Cancel" severity="secondary" @click="visibleLogin = false"></Button>
+        <Button type="button" label="Cancel" severity="secondary" @click="hideLoginDialog"></Button>
         <Button type="button" label="Submit" @click="login"></Button>
       </div>
     </Dialog>
 
     <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
+      <div class="error-message">{{ msgSignup }}</div>
       <div class="user-form-element">
         <label for="emailSignup">Email</label>
         <InputText id="emailSignup" autocomplete="off" v-model="emailSignup" />
@@ -35,7 +37,7 @@
         <Password inputId="passwordSignup" v-model="pwSignup" />
       </div>
       <div class="user-form-button-group">
-        <Button type="button" label="Cancel" severity="secondary" @click="visibleSignup = false"></Button>
+        <Button type="button" label="Cancel" severity="secondary" @click="hideSignupDialog"></Button>
         <Button type="button" label="Submit" @click="signup"></Button>
       </div>
     </Dialog>
@@ -63,28 +65,42 @@ const props = defineProps({
   },
 });
 
+const msgLogin = ref(null);
+const msgSignup = ref(null);
+
 const visibleLogin = ref(false);
 const visibleSignup = ref(false);
 
 const usernameLogin = ref(null);
 const pwLogin = ref(null);
-async function login() {
-  const res = await client.users.loginUser.mutate({
+function login() {
+  client.users.loginUser.mutate({
     username: usernameLogin.value, password: pwLogin.value
+  })
+  .then((res) => {
+    hideLoginDialog();
+  })
+  .catch((err) => {
+    msgLogin.value = err.message;
   });
-  console.log(res);
 }
 
 const emailSignup = ref(null);
 const usernameSignup = ref(null);
 const pwSignup = ref(null);
-async function signup() {
-  const res = await client.users.createUser.mutate({
+function signup() {
+  const res = client.users.createUser.mutate({
     username: usernameSignup.value,
     password: pwSignup.value,
     email: emailSignup.value,
+  })
+  .then((res) => {
+    clearSignupDialog();
+    msgSignup.value = "Success";
+  })
+  .catch((err) => {
+    msgSignup.value = err.message;
   });
-  console.log(res);
 }
 
 const router = useRouter();
@@ -137,6 +153,29 @@ const items = ref([
 const toggle = (event) => {
   menu.value.toggle(event);
 };
+
+function clearLoginDialog() {
+  usernameLogin.value = "";
+  pwLogin.value = "";
+  msgLogin.value = "";
+}
+
+function hideLoginDialog() {
+  clearLoginDialog();
+  visibleLogin.value = false;
+}
+
+function clearSignupDialog() {
+  usernameSignup.value = "";
+  emailSignup.value = "";
+  pwSignup.value = "";
+  msgSignup.value = "";
+}
+
+function hideSignupDialog() {
+  clearSignupDialog();
+  visibleSignup.value = false;
+}
 </script>
 
 <style lang="css" scoped>
@@ -162,5 +201,10 @@ const toggle = (event) => {
 
 InputText {
   flex: 1 1 auto;
+}
+
+.error-message {
+  color: var(--p-button-text-secondary-color);
+  margin-bottom: 5px;
 }
 </style>

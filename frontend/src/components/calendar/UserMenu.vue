@@ -17,7 +17,7 @@
       </div>
       <div class="user-form-button-group">
         <Button type="button" label="Cancel" severity="secondary" @click="visibleLogin = false"></Button>
-        <Button type="button" label="Submit" @click="visibleLogin = false"></Button>
+        <Button type="button" label="Submit" @click="login"></Button>
       </div>
     </Dialog>
 
@@ -72,7 +72,7 @@ async function login() {
   const res = await client.users.loginUser.mutate({
     username: usernameLogin.value, password: pwLogin.value
   });
-  console.log(res.user);
+  console.log(res);
 }
 
 const emailSignup = ref(null);

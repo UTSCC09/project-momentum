@@ -7,9 +7,8 @@ import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
 
-export const taskRouter = trpc.router({
-
-    createTask: userProcedure
+export const calendarRouter = trpc.router({
+    getCalendar: userProcedure
     .input(z.object({
         userId: z.string().optional(),
         project_id: z.string().optional(),
@@ -31,28 +30,37 @@ export const taskRouter = trpc.router({
             throw new TRPCError({ code: "BAD_REQUEST", message: "Time Interval too Long" });
         }
 
+        // Build where conditions dynamically based on available parameters
+        const meetingWhereConditions: any = { 
+            start_time: { [Op.gte]: start_date },
+            end_time: { [Op.lte]: end_date }
+        };
+        const eventWhereConditions: any = { 
+            time: { [Op.gte]: start_date, [Op.lte]: end_date }
+        };
+
+        if (uid) {
+            meetingWhereConditions.uid = uid;
+            eventWhereConditions.uid = uid;
+        }
+        if (project_id) {
+            meetingWhereConditions.project_id = project_id;
+            eventWhereConditions.project_id = project_id;
+        }
+
         try {
             const meetings = await Meeting.findAll({
-                where: {
-                    uid: uid,
-                    project_id: project_id,
-                    start_time: { [Op.gte]: start_date},
-                    end_time: { [Op.lte]: end_date }
-                }
+                where: meetingWhereConditions,
             });
 
             const events = await Event.findAll({
-                where: {
-                    uid: uid,
-                    project_id: project_id,
-                    time: { [Op.gte]: start_date, [Op.lte]: end_date},
-                }
+                where: eventWhereConditions,
             });
 
-            return {calendar: {meetings: meetings, events: events}};
-
+            return { calendar: { meetings: meetings, events: events } };
         } catch (error) {
             console.log(error);
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "An error occurred while fetching data." });
         }
     }),
-})
+});

@@ -5,13 +5,21 @@ export const trpc = initTRPC.context<inferAsyncReturnType<typeof createContext>>
 
 export function createContext({ req, res }: CreateExpressContextOptions) {
 
-  console.log(res);
+  const cookieHeader = req.headers.cookie;
+  let token = null;
 
-  const authorization = req.headers.authorization || "";
+  if (cookieHeader) {
+    const cookies = cookieHeader.split('; ');
+    const tokenCookie = cookies.find(cookie => cookie.startsWith("token="));
+    
+    if (tokenCookie) {
+      token = tokenCookie.split('=')[1];
+    }
+  }
   const userId = req.headers.uid || "";
 
   return {
-    authorization : authorization,
+    authorization : token,
     userId : userId,
     res,
   };

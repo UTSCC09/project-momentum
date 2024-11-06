@@ -22,7 +22,6 @@ export const client = createTRPCProxyClient<AppRouter>({
           credentials: 'include', // Ensures cookies are included with requests
           headers: {
             ...init?.headers,
-            authorization: token ? `Bearer ${token}` : "",
             uid: uid || "",  // Using uid directly with a fallback
           },
         });

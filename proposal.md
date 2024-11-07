@@ -2,9 +2,9 @@
 
 ## Authors
 
-[Kevin](mailto:kwei.zhang@mail.utoronto.ca)  
+[Kevin Zhang](mailto:kwei.zhang@mail.utoronto.ca)  
 [Minh Chau Nguyen](mailto:chaum.nguyen@mail.utoronto.ca)  
-[Megan](mailto:meganmujia.liu@mail.utoronto.ca)
+[Megan Liu](mailto:meganmujia.liu@mail.utoronto.ca)
 
 ## Description
 

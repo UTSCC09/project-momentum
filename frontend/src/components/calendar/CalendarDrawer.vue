@@ -66,29 +66,29 @@
             class="input-field" />
           <label for="eventEndDatetime">End time</label>
         </IftaLabel>
-      </div>
-      <div class="input-group">
-        <IftaLabel>
+        <div class="checkbox">
           <Checkbox v-model="eventRepeat" inputId="eventRepeat" :binary="true" />
           <label for="eventRepeat">Repeat</label>
-        </IftaLabel>
+        </div>
+      </div>
+      <div class="input-group">
         <IftaLabel>
           <Select v-model="eventRepeatFrequency" inputId="eventRepeatFrequency" :options="frequencies"
             optionLabel="name" optionValue="value" class="input-field" />
           <label for="eventRepeatFrequency">Frequency</label>
         </IftaLabel>
         <IftaLabel>
-          <InputNumber v-model="eventRepeatEvery" inputId="eventRepeatEvery" :min="1" fluid />
+          <InputNumber v-model="eventRepeatEvery" inputId="eventRepeatEvery" :min="1" class="input-field" />
           <label for="eventRepeatEvery">Every</label>
         </IftaLabel>
         <IftaLabel>
           <MultiSelect v-model="eventRepeatWeeklyDates" inputId="eventRepeatWeeklyDates" :options="repeatWeeklyDates"
-            optionLabel="name" optionValue="value" filter />
+            optionLabel="name" optionValue="value" filter class="input-field" />
           <label for="eventRepeatWeeklyDates">Weekly</label>
         </IftaLabel>
         <IftaLabel>
           <MultiSelect v-model="eventRepeatMonthlyDates" inputId="eventRepeatMonthlyDates" :options="repeatMonthlyDates"
-            optionLabel="name" optionValue="value" filter />
+            optionLabel="name" optionValue="value" filter class="input-field" />
           <label for="eventRepeatMonthlyDates">Monthly</label>
         </IftaLabel>
       </div>
@@ -261,6 +261,7 @@ const save = () => {
   display: flex;
   gap: 5px;
   justify-content: space-between;
+  align-items: center;
 }
 
 .input-group .p-iftalabel {
@@ -274,5 +275,12 @@ const save = () => {
 .save-button {
   display: flex;
   justify-content: center;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--p-iftalabel-color);
 }
 </style>

@@ -47,6 +47,12 @@ export const Event = sequelize.define("Event", {
         type: DataTypes.TIME,
         allowNull: true,
     },
+
+    recurring:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
     
     recurring_id:{
         type: DataTypes.UUID,

@@ -24,9 +24,22 @@ export const Recursion = sequelize.define("Recursion", {
     },
 
     /* Need to validate */
-    repeat: {
-        type: DataTypes.JSON,
+    repeat_type: {
+        type: DataTypes.STRING,
+        validate:{
+            isIn: [["Daily", "Weekly", "Monthly"]],
+        },
         allowNull: false,
+    },
+
+    repeat_interval: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+
+    repeat_on: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
 })
 

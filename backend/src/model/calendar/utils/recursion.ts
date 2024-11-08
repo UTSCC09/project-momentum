@@ -25,10 +25,7 @@ export const Recursion = sequelize.define("Recursion", {
 
     /* Need to validate */
     repeat_type: {
-        type: DataTypes.STRING,
-        validate:{
-            isIn: [["Daily", "Weekly", "Monthly"]],
-        },
+        type: DataTypes.ENUM('daily', 'weekly', 'monthly'),
         allowNull: false,
     },
 

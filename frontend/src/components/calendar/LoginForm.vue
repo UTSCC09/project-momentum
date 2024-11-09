@@ -3,12 +3,18 @@
     <Toast />
     <Form :resolver @submit="onFormSubmit">
       <FormField v-slot="$field" name="username" initialValue="">
-        <InputText type="text" placeholder="Username" />
+        <IftaLabel>
+          <InputText type="text" id="username" />
+          <label for="username">Username</label>
+        </IftaLabel>
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
       <FormField v-slot="$field" name="password" initialValue="">
-        <Password placeholder="Password" :feedback="false" toggleMask fluid />
+        <IftaLabel>
+          <Password inputId="password" :feedback="false" toggleMask fluid />
+          <label for="password">Password</label>
+        </IftaLabel>
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
@@ -21,6 +27,7 @@
 import { Form } from '@primevue/forms';
 import { FormField } from '@primevue/forms';
 import Button from 'primevue/button';
+import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import Password from 'primevue/password';
@@ -73,5 +80,9 @@ const onFormSubmit = ({ values, valid, reset }) => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+input {
+  width: 100%;
 }
 </style>

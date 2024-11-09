@@ -4,7 +4,7 @@
     <Form :resolver @submit="onFormSubmit">
       <FormField v-slot="$field" name="username" initialValue="">
         <IftaLabel>
-          <InputText type="text" id="username" />
+          <InputText type="text" id="username" fluid />
           <label for="username">Username</label>
         </IftaLabel>
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
@@ -33,7 +33,6 @@ import Message from 'primevue/message';
 import Password from 'primevue/password';
 import Toast from 'primevue/toast';
 
-import { reactive } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
@@ -80,9 +79,5 @@ const onFormSubmit = ({ values, valid, reset }) => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-}
-
-input {
-  width: 100%;
 }
 </style>

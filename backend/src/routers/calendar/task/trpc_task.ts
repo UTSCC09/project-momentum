@@ -10,14 +10,14 @@ export const taskRouter = trpc.router({
     createTask: userProcedure
     .input(z.object({
         name: z.string(),
-        description: z.string(),
-        location: z.string(),
-        deadline: z.string(),
+        description: z.string().optional(),
+        location: z.string().optional(),
+        deadline: z.string().optional(),
         project_id: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
-        const { name, description, location, deadline, project_id } = input;
+        const { name, description = null, location = null, deadline = null, project_id } = input;
 
         try{
             const task = await Task.create({
@@ -29,7 +29,6 @@ export const taskRouter = trpc.router({
                 ...(project_id ? { pid: project_id } : {})
             });
 
-            console.log(task);
             return {
                 task: task,
                 temp: "temp"

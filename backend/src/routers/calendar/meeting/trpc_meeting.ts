@@ -10,8 +10,8 @@ export const meetingRouter = trpc.router({
     createMeeting: userProcedure
     .input(z.object({
         name: z.string(),
-        description: z.string(),
-        location: z.string(),
+        description: z.string().optional(),
+        location: z.string().optional(),
         start_time: z.string(),
         end_time: z.string(),
         project_id: z.string().optional(),
@@ -24,7 +24,8 @@ export const meetingRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         let new_recurring: any = null;
-        const { name, description, location, start_time, end_time, project_id, recurring } = input;
+        const { name, description = null, location = null , start_time,
+             end_time, project_id, recurring } = input;
 
         try{
             if (recurring){

@@ -10,8 +10,8 @@ export const eventRouter = trpc.router({
     createEvent: userProcedure
     .input(z.object({
         name: z.string(),
-        description: z.string(),
-        location: z.string(),
+        description: z.string().optional(),
+        location: z.string().optional(),
         time: z.string(),
         recurring: z.object({
             start: z.string(),
@@ -22,7 +22,7 @@ export const eventRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         let new_recurring: any = null;
-        const { name, description, location, time, recurring } = input;
+        const { name, description = null, location = null, time, recurring } = input;
 
         try{
             if (recurring){

@@ -87,3 +87,11 @@ const toggle = (event) => {
   menu.value.toggle(event);
 };
 </script>
+
+<style lang="css" scoped>
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sx-spacing-padding4);
+}
+</style>

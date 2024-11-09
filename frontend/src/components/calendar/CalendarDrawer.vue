@@ -62,3 +62,14 @@ const items = [
   }
 ];
 </script>
+
+<style lang="css" scoped>
+.calendar-drawer-container {
+  padding: var(--sx-spacing-padding6);
+  position: sticky;
+  top: var(--sx-spacing-padding6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>

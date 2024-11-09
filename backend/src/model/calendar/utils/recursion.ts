@@ -31,7 +31,7 @@ export const Recursion = sequelize.define("Recursion", {
 
     repeat_interval: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
 
     repeat_on: {

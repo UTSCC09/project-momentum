@@ -206,6 +206,22 @@ function hideCreateEventDialog() {
   clearCreateEventDialog();
   eventVisible.value = false;
 }
+function submitCreateEventDialog() {
+  client.tasks.createEvent.mutate({
+    name: taskTitle.value,
+    description: taskDescription.value,
+    location: taskLocation.value,
+    deadline: formatDate(taskDeadline.value),
+    project_id: taskProject.value,
+  })
+    .then((res) => {
+      console.log(res);
+      hideCreateEventDialog();
+    })
+    .catch((err) => {
+      eventMsg.value = err.message;
+    });
+}
 
 const items = [
   {
@@ -236,6 +252,8 @@ const items = [
     }
   }
 ];
+
+const projects = ref([]);
 
 const save = () => {
   console.log("Save");

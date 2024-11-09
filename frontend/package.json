@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@primevue/forms": "^4.2.1",
     "@primevue/themes": "^4.1.1",
     "@schedule-x/current-time": "^2.4.1",
     "@schedule-x/drag-and-drop": "^2.4.1",
@@ -24,7 +25,8 @@
     "primevue": "^4.1.1",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",

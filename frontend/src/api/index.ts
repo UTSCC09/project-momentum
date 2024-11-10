@@ -2,7 +2,7 @@ import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { AppRouter } from "../../../backend/src/index";
 
 // Token and UID variables to store the latest values
-// let token: string | null = null;
+let token: string | null = null;
 let uid: string | null = null;
 
 // Function to update token and uid dynamically

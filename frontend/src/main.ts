@@ -10,6 +10,7 @@ import ToastService from 'primevue/toastservice';
 
 // components
 import Calendar from './components/calendar/Calendar.vue';
+import CalendarWithSidebar from './components/calendar/CalendarWithSidebar.vue';
 import Kanban from './components/kanban/Kanban.vue';
 
 // stylesheet, order is important!
@@ -20,7 +21,8 @@ import 'primeicons/primeicons.css'
 import { definePreset } from '@primevue/themes';
 
 const routes = [
-  { path: '/', component: Calendar },
+  { path: '/schedule', component: Calendar },
+  { path: '/all', component: CalendarWithSidebar, alias: '/' },
   { path: '/tasks', component: Kanban },
 ];
 

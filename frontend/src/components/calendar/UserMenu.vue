@@ -22,8 +22,8 @@ import Menu from "primevue/menu";
 import Dialog from 'primevue/dialog';
 import SelectButton from 'primevue/selectbutton';
 
-import LoginForm from './LoginForm.vue';
-import SignupForm from './SignupForm.vue';
+import LoginForm from '../forms/LoginForm.vue';
+import SignupForm from '../forms/SignupForm.vue';
 
 import { ref } from "vue";
 import { useRouter } from 'vue-router';

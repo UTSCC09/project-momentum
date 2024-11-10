@@ -1,18 +1,20 @@
 <template>
-  <div class="calendar-drawer-container">
-    <SplitButton label="Create" :model="items" />
+  <div class="calendar-drawer-background">
+    <div class="calendar-drawer-container">
+      <SplitButton label="Create" :model="items" />
 
-    <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
-      <TaskForm @close="taskVisible = false;"/>
-    </Dialog>
+      <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
+        <TaskForm @close="taskVisible = false;" />
+      </Dialog>
 
-    <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
-      <EventForm @close="eventVisible = false;"/>
-    </Dialog>
+      <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
+        <EventForm @close="eventVisible = false;" />
+      </Dialog>
 
-    <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
-      <EventForm @close="meetingVisible = false;"/>
-    </Dialog>
+      <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
+        <EventForm @close="meetingVisible = false;" />
+      </Dialog>
+    </div>
   </div>
 </template>
 
@@ -20,9 +22,9 @@
 import SplitButton from 'primevue/splitbutton';
 import Dialog from 'primevue/dialog';
 
-import TaskForm from './TaskForm.vue';
-import EventForm from './EventForm.vue';
-import MeetingForm from './MeetingForm.vue';
+import TaskForm from '../forms/TaskForm.vue';
+import EventForm from '../forms/EventForm.vue';
+import MeetingForm from '../forms/MeetingForm.vue';
 
 import { ref } from 'vue';
 import { client } from "../../api/index";

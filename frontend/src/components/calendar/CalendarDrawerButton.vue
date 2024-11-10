@@ -1,9 +1,24 @@
 <template>
-  <Button icon="pi pi-bars" @click="$emit('toggle-drawer')"/>
+  <Button icon="pi pi-bars" @click="toggle"/>
 </template>
 
 <script setup>
 import Button from "primevue/button";
+
+import { useRouter, useRoute } from 'vue-router';
+import { ref } from 'vue';
+
+const router = useRouter();
+const route = useRoute();
+
+function toggle() {
+  if (route.fullPath == '/' || route.fullPath == '/all') {
+    router.push('/schedule');
+  }
+  else {
+    router.push('/');
+  }
+}
 </script>
 
 <style lang="css" scoped>

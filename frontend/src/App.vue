@@ -4,14 +4,7 @@ import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <div class="calendar-container">
-    <div class="calendar-drawer">
-      <CalendarDrawer />
-    </div>
-    <div class="calendar-main">
-      <RouterView />
-    </div>
-  </div>
+  <RouterView />
 </template>
 
 <style lang="css" scoped>
@@ -21,7 +14,7 @@ import { RouterView } from 'vue-router';
   align-content: flex-start;
 }
 
-.calendar-drawer {
+.calendar-drawer-background {
   flex: 1 0 15vw;
   padding: var(--sx-spacing-padding6);
 }

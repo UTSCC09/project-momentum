@@ -19,7 +19,7 @@ export const eventRouter = trpc.router({
             end: z.string(),
             repeat_type: z.enum(['daily', 'weekly', 'monthly']),
             repeat_interval: z.number().optional(),
-            repeat_on: z.string().optional(),
+            repeat_on: z.number().array().optional(),
         }).optional(),
     }))
     .mutation(async ({ input, ctx }) => {

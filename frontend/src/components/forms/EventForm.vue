@@ -50,7 +50,7 @@
           <label for="repeat">Repeat</label>
         </FormField>
       </div>
-      <div class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <div class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
         <FormField v-slot="$field" name="frequency">
           <IftaLabel>
             <Select inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
@@ -81,6 +81,14 @@
             <MultiSelect inputId="monthly" :options="monthlyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
             <label for="monthly">Monthly</label>
+          </IftaLabel>
+          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          </Message>
+        </FormField>
+        <FormField v-slot="$field" name="endRepeat">
+          <IftaLabel>
+            <DatePicker inputId="endRepeat" showTime hourFormat="24" fluid />
+            <label for="endRepeat">Repeat ends</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
@@ -119,8 +127,8 @@ import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
-// import { client } from "../../api/index";
-// import { formatDatetime } from "../../api/utils";
+import { client } from "../../api/index";
+import { formatDatetime } from "../../api/utils";
 
 const emit = defineEmits(['close']);
 
@@ -157,6 +165,7 @@ const resolver = zodResolver(
     every: z.any(),
     weekly: z.any(),
     monthly: z.any(),
+    endRepeat: z.date(),
     project_id: z.string().optional(),
   })
 );
@@ -164,21 +173,34 @@ const resolver = zodResolver(
 const onFormSubmit = ({ values, valid, reset }) => {
   console.log(values);
   if (valid) {
-    console.log("valid");
-    // client.tasks.createTask.mutate({
-    //   ...values,
-    //   deadline: formatDate(values.deadline)
-    // })
-    //   .then((res) => {
-    //     emit('close');
-    //     reset();
-    //     console.log(res);
-    //     toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //     toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, });
-    //   });
+    const req = {
+      name: values.name,
+      description: values.description,
+      location: values.location,
+      start_time: formatDatetime(values.startTime),
+      end_time: formatDatetime(values.endTime),
+    }
+    if (values.repeat) {
+      req.recurring = {
+        start: formatDatetime(values.startTime),
+        end: formatDatetime(values.endRepeat),
+        repeat_type: values.frequency,
+        repeat_interval: values.every,
+        repeat_on: values.weekly || values.monthly,
+      }
+    }
+    console.log(req);
+    client.events.createEvent.mutate(req)
+      .then((res) => {
+        emit('close');
+        reset();
+        console.log(res);
+        toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, });
+      });
   }
 };
 

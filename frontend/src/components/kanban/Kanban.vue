@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useToast } from "primevue/usetoast";
 import Menu from 'primevue/menu';

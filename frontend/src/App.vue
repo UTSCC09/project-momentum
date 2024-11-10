@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import CalendarDrawer from './components/calendar/CalendarDrawer.vue';
 import { RouterView } from 'vue-router';
 </script>
 

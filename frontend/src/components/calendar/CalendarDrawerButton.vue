@@ -2,7 +2,7 @@
   <Button icon="pi pi-bars" @click="toggle"/>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Button from "primevue/button";
 
 import { useRouter, useRoute } from 'vue-router';

@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Avatar from "primevue/avatar";
 import Menu from "primevue/menu";
 import Dialog from 'primevue/dialog';

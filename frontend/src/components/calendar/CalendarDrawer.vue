@@ -12,7 +12,7 @@
       </Dialog>
 
       <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
-        <EventForm @close="meetingVisible = false;" />
+        <MeetingForm @close="meetingVisible = false;" />
       </Dialog>
     </div>
   </div>
@@ -27,7 +27,6 @@ import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
 
 import { ref } from 'vue';
-import { client } from "../../api/index";
 
 const taskVisible = ref(false);
 const eventVisible = ref(false);

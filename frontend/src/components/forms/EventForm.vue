@@ -110,7 +110,6 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import MultiSelect from 'primevue/multiselect';
-import Password from 'primevue/password';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
@@ -120,29 +119,29 @@ import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
-import { client } from "../../api/index";
-import { formatDatetime } from "../../api/utils";
+// import { client } from "../../api/index";
+// import { formatDatetime } from "../../api/utils";
 
 const emit = defineEmits(['close']);
 
-const props = defineProps({
-  initialValues: {
-    type: Object as PropType<{
-      name: string,
-      description: string,
-      location: string,
-      startTime: Date,
-      endTime: Date,
-      repeat: boolean,
-      frequency: "daily" | "monthly" | "weekly",
-      every: number,
-      weekly: number[],
-      monthly: number[],
-      project_id?: any,
-    }>,
-    required: false,
-  },
-})
+// const props = defineProps({
+//   initialValues: {
+//     type: Object as PropType<{
+//       name: string,
+//       description: string,
+//       location: string,
+//       startTime: Date,
+//       endTime: Date,
+//       repeat: boolean,
+//       frequency: "daily" | "monthly" | "weekly",
+//       every: number,
+//       weekly: number[],
+//       monthly: number[],
+//       project_id?: any,
+//     }>,
+//     required: false,
+//   },
+// })
 
 const toast = useToast();
 

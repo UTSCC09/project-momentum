@@ -12,7 +12,8 @@ export const eventRouter = trpc.router({
         name: z.string(),
         description: z.string().optional(),
         location: z.string().optional(),
-        time: z.string(),
+        start_time: z.string(),
+        end_time: z.string(),
         recurring: z.object({
             start: z.string(),
             end: z.string(),
@@ -24,7 +25,7 @@ export const eventRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         let new_recurring: any = null;
-        const { name, description = null, location = null, time, recurring } = input;
+        const { name, description = null, location = null, start_time, end_time, recurring } = input;
 
         try{
             if (recurring){
@@ -47,7 +48,8 @@ export const eventRouter = trpc.router({
                 name: name,
                 description: description,
                 location: location,
-                time: time,
+                start_time: start_time,
+                end_time: end_time,
                 ...(new_recurring ? { recurring_id: new_recurring.id } : {})
             });
 
@@ -91,7 +93,8 @@ export const eventRouter = trpc.router({
         name: z.string().optional(),
         description: z.string().optional(),
         location: z.string().optional(),
-        time: z.string().optional(),
+        start_time: z.string().optional(),
+        end_time: z.string().optional(),
         recurring: z.object({
             start: z.string().optional(),
             end: z.string().optional(),
@@ -101,7 +104,7 @@ export const eventRouter = trpc.router({
         }).optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-        const { eventId, name, description, location, time, recurring } = input;
+        const { eventId, name, description, location, start_time, end_time, recurring } = input;
         
         try {
             const event = await Event.findOne({ where: { id: eventId } }) as any;
@@ -111,7 +114,8 @@ export const eventRouter = trpc.router({
             event.name = name || event.name;
             event.description = description || event.description;
             event.location = location || event.location;
-            event.time = time || event.time;
+            event.start_time = start_time || event.start_time;
+            event.end_time = end_time || event.end_time;
             const recurring_id = event.recurring_id;
             if (recurring){
                 const update_recurring = await Recursion.findOne({ where: { id: recurring_id } }) as any;

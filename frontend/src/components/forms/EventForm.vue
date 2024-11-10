@@ -121,7 +121,7 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDate } from "../../api/utils";
+import { formatDatetime } from "../../api/utils";
 
 const emit = defineEmits(['close']);
 

@@ -12,19 +12,21 @@ export const calendarRouter = trpc.router({
     .input(z.object({
         userId: z.string().optional(),
         project_id: z.string().optional(),
-        start_date: z.date(),
-        end_date: z.date(),
+        start_date: z.string().date(),
+        end_date: z.string().date(),
     }))
     .query(async ({ input, ctx }) => {
         const uid = input.userId || ctx.userId;
         const { project_id, start_date, end_date } = input;
+        const startDate = new Date(start_date);
+        const endDate = new Date(end_date);
 
         // Check that end_date is after start_date
-        if (end_date < start_date) {
+        if (endDate < startDate) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "End date must be after start date." });
         }
 
-        const differenceInTime = end_date.getTime() - start_date.getTime();
+        const differenceInTime = endDate.getTime() - startDate.getTime();
         const differenceInDays = differenceInTime / (1000 * 60 * 60 * 24);
         if (differenceInDays > 30) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Time Interval too Long" });
@@ -32,11 +34,11 @@ export const calendarRouter = trpc.router({
 
         // Build where conditions dynamically based on available parameters
         const meetingWhereConditions: any = { 
-            start_time: { [Op.gte]: start_date },
-            end_time: { [Op.lte]: end_date }
+            start_time: { [Op.gte]: startDate },
+            end_time: { [Op.lte]: endDate }
         };
         const eventWhereConditions: any = { 
-            time: { [Op.gte]: start_date, [Op.lte]: end_date }
+            time: { [Op.gte]: startDate, [Op.lte]: endDate }
         };
 
         if (uid) {

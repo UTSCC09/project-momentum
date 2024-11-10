@@ -70,7 +70,7 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDate } from "../../api/utils";
+import { formatDatetime } from "../../api/utils";
 
 const emit = defineEmits(['close']);
 
@@ -90,7 +90,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
   if (valid) {
     client.tasks.createTask.mutate({
       ...values,
-      deadline: formatDate(values.deadline)
+      deadline: formatDatetime(values.deadline)
     })
       .then((res) => {
         emit('close');

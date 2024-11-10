@@ -18,6 +18,16 @@ import CustomEventModal from './CustomEventModal.vue'
 import UserMenu from './UserMenu.vue'
 import CalendarDrawerButton from './CalendarDrawerButton.vue'
 
+import { client } from "../../api/index";
+import { formatDate } from "../../api/utils";
+
+function getCurrentWeek() {
+  const curr = new Date();
+  const firstday = formatDate(new Date(curr.setDate(curr.getDate() - curr.getDay() + 1)));
+  const lastday = formatDate(new Date(curr.setDate(curr.getDate() - curr.getDay() + 7)));
+  return { start_date: firstday, end_date: lastday };
+}
+
 const config = {
   // isDark: true,
   // selectedDate: '2023-12-19',
@@ -27,72 +37,73 @@ const config = {
     createViewMonthGrid(),
     createViewMonthAgenda(),
   ],
+  defaultView: createViewWeek().name,
   events: [
-  {
-    "id": 1,
-    "title": "Team Meeting",
-    "description": "Monthly team meeting to discuss project updates and goals.",
-    "location": "Conference Room A",
-    "start": "2024-11-10 10:00",
-    "end": "2024-11-10 11:00"
-  },
-  {
-    "id": 2,
-    "title": "Doctor Appointment",
-    "description": "Routine check-up with Dr. Smith.",
-    "location": "Health Clinic, 123 Main St.",
-    "start": "2024-11-11 14:30",
-    "end": "2024-11-11 15:00"
-  },
-  {
-    "id": 3,
-    "title": "Project Kickoff",
-    "description": "Kickoff meeting for the new project with stakeholders.",
-    "location": "Zoom",
-    "start": "2024-11-12 09:00",
-    "end": "2024-11-12 10:00"
-  },
-  {
-    "id": 4,
-    "title": "Workshop: Effective Communication",
-    "description": "A workshop on improving communication skills.",
-    "location": "Training Room B",
-    "start": "2024-11-15 13:00",
-    "end": "2024-11-15 15:00"
-  },
-  {
-    "id": 5,
-    "title": "Birthday Party",
-    "description": "Celebrating Sarah's birthday with friends and family.",
-    "location": "Home",
-    "start": "2024-11-20 17:00",
-    "end": "2024-11-20 21:00"
-  },
-  {
-    "id": 6,
-    "title": "Yoga Class",
-    "description": "Evening yoga session to unwind and relax.",
-    "location": "Yoga Studio, 456 Elm St.",
-    "start": "2024-11-21 18:00",
-    "end": "2024-11-21 19:00"
-  },
-  {
-    "id": 7,
-    "title": "Sales Presentation",
-    "description": "Presentation of the Q4 sales strategy to the board.",
-    "location": "Main Hall",
-    "start": "2024-11-22 11:00",
-    "end": "2024-11-22 12:30"
-  },
-  {
-    "id": 8,
-    "title": "Charity Run",
-    "description": "Participating in a charity run to support local shelters.",
-    "location": "City Park",
-    "start": "2024-11-25 08:00",
-    "end": "2024-11-25 10:00"
-  }
-],
+    {
+      "id": 1,
+      "title": "Team Meeting",
+      "description": "Monthly team meeting to discuss project updates and goals.",
+      "location": "Conference Room A",
+      "start": "2024-11-10 10:00",
+      "end": "2024-11-10 11:00"
+    },
+    {
+      "id": 2,
+      "title": "Doctor Appointment",
+      "description": "Routine check-up with Dr. Smith.",
+      "location": "Health Clinic, 123 Main St.",
+      "start": "2024-11-11 14:30",
+      "end": "2024-11-11 15:00"
+    },
+    {
+      "id": 3,
+      "title": "Project Kickoff",
+      "description": "Kickoff meeting for the new project with stakeholders.",
+      "location": "Zoom",
+      "start": "2024-11-12 09:00",
+      "end": "2024-11-12 10:00"
+    },
+    {
+      "id": 4,
+      "title": "Workshop: Effective Communication",
+      "description": "A workshop on improving communication skills.",
+      "location": "Training Room B",
+      "start": "2024-11-15 13:00",
+      "end": "2024-11-15 15:00"
+    },
+    {
+      "id": 5,
+      "title": "Birthday Party",
+      "description": "Celebrating Sarah's birthday with friends and family.",
+      "location": "Home",
+      "start": "2024-11-20 17:00",
+      "end": "2024-11-20 21:00"
+    },
+    {
+      "id": 6,
+      "title": "Yoga Class",
+      "description": "Evening yoga session to unwind and relax.",
+      "location": "Yoga Studio, 456 Elm St.",
+      "start": "2024-11-21 18:00",
+      "end": "2024-11-21 19:00"
+    },
+    {
+      "id": 7,
+      "title": "Sales Presentation",
+      "description": "Presentation of the Q4 sales strategy to the board.",
+      "location": "Main Hall",
+      "start": "2024-11-22 11:00",
+      "end": "2024-11-22 12:30"
+    },
+    {
+      "id": 8,
+      "title": "Charity Run",
+      "description": "Participating in a charity run to support local shelters.",
+      "location": "City Park",
+      "start": "2024-11-25 08:00",
+      "end": "2024-11-25 10:00"
+    }
+  ],
 };
 
 const plugins = [
@@ -104,11 +115,25 @@ const customComponents = {
   eventModal: CustomEventModal,
   headerContentRightAppend: UserMenu,
   headerContentLeftPrepend: CalendarDrawerButton
-}
+};
 
 // Do not use a ref here, as the calendar instance is not reactive, and doing so might cause issues
 // For updating events, use the events service plugin
-const calendarApp = createCalendar(config, plugins)
+const calendarApp = createCalendar(config, plugins);
+
+client.calendar.getCalendar.query(getCurrentWeek())
+  .then((res) => {
+    console.log(res.calendar);
+    for (let event of res.calendar.events) {
+      calendarApp.eventsService.add(event);
+    }
+    for (let meeting of res.calendar.meetings) {
+      calendarApp.eventsService.add(meeting);
+    }
+  })
+  .catch((err) => {
+    console.log(err);
+  })
 </script>
 
 <template>

@@ -28,7 +28,6 @@ import MeetingForm from '../forms/MeetingForm.vue';
 
 import { ref } from 'vue';
 import { client } from "../../api/index";
-import { formatDate } from "../../api/utils";
 
 const taskVisible = ref(false);
 const eventVisible = ref(false);

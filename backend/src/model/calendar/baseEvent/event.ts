@@ -44,12 +44,12 @@ export const Event = sequelize.define("Event", {
     },
     
     start_time:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
     },
 
     end_time:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
     },
 

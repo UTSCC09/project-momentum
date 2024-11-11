@@ -17,7 +17,7 @@ export const calendarRouter = trpc.router({
     }))
     .query(async ({ input, ctx }) => {
         const uid = input.userId || ctx.userId;
-        const { project_id, start_date, end_date } = input;
+        const { project_id = null, start_date, end_date } = input;
         const startDate = new Date(start_date);
         const endDate = new Date(end_date);
 
@@ -38,7 +38,8 @@ export const calendarRouter = trpc.router({
             end_time: { [Op.lte]: endDate }
         };
         const eventWhereConditions: any = { 
-            time: { [Op.gte]: startDate, [Op.lte]: endDate }
+            start_time: { [Op.gte]: startDate },
+            end_time: { [Op.lte]: endDate }
         };
 
         if (uid) {
@@ -49,6 +50,9 @@ export const calendarRouter = trpc.router({
             meetingWhereConditions.project_id = project_id;
             eventWhereConditions.project_id = project_id;
         }
+
+        console.log(meetingWhereConditions);
+        console.log(eventWhereConditions);
 
         try {
             const meetings = await Meeting.findAll({

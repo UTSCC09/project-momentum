@@ -25,17 +25,24 @@ export const eventRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         let new_recurring: any = null;
-        const { name, description = null, location = null, start_time, end_time, recurring } = input;
+        const { name, description = null, location = null, start_time, end_time, recurring = null } = input;
+
+        console.log(name, description, location, start_time, end_time, recurring);
 
         try{
             if (recurring){
                 const { repeat_type, repeat_interval = null, repeat_on = null } = recurring;
+                let repeat_on_str = null;
+                if(repeat_on){
+                    repeat_on_str = repeat_on.join(',');
+                    console.log(repeat_on);
+                } 
                 new_recurring = await Recursion.create({
                     start: recurring.start,
                     end: recurring.end,
                     repeat_type: repeat_type,
                     repeat_interval: repeat_interval,
-                    repeat_on: repeat_on,
+                    repeat_on: repeat_on_str,
                 });
             }
         } catch (error){

@@ -33,14 +33,8 @@ export const calendarRouter = trpc.router({
         }
 
         // Build where conditions dynamically based on available parameters
-        const meetingWhereConditions: any = { 
-            start_time: { [Op.gte]: startDate },
-            end_time: { [Op.lte]: endDate }
-        };
-        const eventWhereConditions: any = { 
-            start_time: { [Op.gte]: startDate },
-            end_time: { [Op.lte]: endDate }
-        };
+        const meetingWhereConditions : any = {}
+        const eventWhereConditions: any = {};
 
         if (uid) {
             meetingWhereConditions.uid = uid;
@@ -51,19 +45,27 @@ export const calendarRouter = trpc.router({
             eventWhereConditions.project_id = project_id;
         }
 
-        console.log(meetingWhereConditions);
-        console.log(eventWhereConditions);
-
         try {
             const meetings = await Meeting.findAll({
                 where: meetingWhereConditions,
             });
 
-            const events = await Event.findAll({
+            const eventConstCondition = eventWhereConditions;
+            eventConstCondition.start_time = { [Op.gte]: startDate};
+            eventConstCondition.end_time = { [Op.lte]: endDate };
+
+            const eventsRecurringCondition = eventWhereConditions;
+            eventsRecurringCondition.recurring = true;
+
+            const constEvents = await Event.findAll({
                 where: eventWhereConditions,
             });
 
-            return { calendar: { meetings: meetings, events: events } };
+            const recurringEvents = await Event.findAll({
+                where: eventsRecurringCondition,
+            });
+
+            return { calendar: { meetings: meetings, events: constEvents, recurringEvents: recurringEvents} };
         } catch (error) {
             console.log(error);
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "An error occurred while fetching data." });

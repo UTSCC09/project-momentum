@@ -31,12 +31,12 @@ export const Recursion = sequelize.define("Recursion", {
 
     repeat_interval: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
     },
 
     repeat_on: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
     },
 })
 

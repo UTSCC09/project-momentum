@@ -50,7 +50,6 @@ export const eventRouter = trpc.router({
         }
 
         try{
-            console.log(new_recurring);
             const event = await Event.create({
                 uid: uid,
                 name: name,

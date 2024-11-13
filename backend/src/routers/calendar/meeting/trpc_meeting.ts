@@ -53,7 +53,7 @@ export const meetingRouter = trpc.router({
                 start_time: start_time,
                 end_time: end_time,
                 ...(project_id ? { pid: project_id } : {}),
-                ...(new_recurring ? { recurring_id: new_recurring.id } : {})
+                ...(new_recurring ? { recurring_id: new_recurring.id, recurring: true } : { recurring: false })
             });
 
             return {

@@ -1,5 +1,4 @@
 import { Sequelize } from "sequelize";
-import { User } from "./model/user/user"
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -18,8 +17,9 @@ export async function connectDB(){
         await sequelize.sync();
 
         console.log("success connect to database");
-    } catch {
-        console.error("failed connect to database")
+    } catch(error) {
+        console.log(error);
+        console.error("failed connect to database", error);
     }
     return null;
 }

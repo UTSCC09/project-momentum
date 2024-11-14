@@ -51,7 +51,7 @@
 
 <script lang="ts" setup>
 import { PropType, ref, watch } from 'vue'
-import { useEventsStore } from "../../store/events-store.ts";
+import { useEventsStore } from "../../stores/events.store.ts";
 
 // components
 import IftaLabel from 'primevue/iftalabel';

@@ -27,8 +27,11 @@ import SignupForm from '../forms/SignupForm.vue';
 
 import { ref } from "vue";
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../stores/auth.store.ts';
 
 import { client } from "../../api/index";
+
+const authStore = useAuthStore();
 
 const props = defineProps({
   view: {
@@ -44,14 +47,23 @@ const router = useRouter();
 const view = ref(props.view || "Schedule");
 const views = ref(['Schedule', 'Tasks']);
 function switchView(newView) {
-  newView == 'Tasks' ? router.push("/tasks") : router.push("/");
+  newView == 'Tasks' ? router.push("/tasks") : router.push("/all");
 }
 
 const menu = ref();
 const items = ref([
   {
     label: 'Profile',
-    items: [
+    items: authStore.user ? [
+      {
+        label: 'Log out',
+        icon: 'pi pi-sign-out',
+        command: () => {
+          authStore.logout();
+          router.push("/");
+        }
+      }
+    ] : [
       {
         label: 'Log in',
         icon: 'pi pi-sign-in',

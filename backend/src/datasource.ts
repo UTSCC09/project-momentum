@@ -5,9 +5,10 @@ dotenv.config();
 
 const dbUsername = process.env.MYSQL_USERNAME || 'root'
 const dbPassword = process.env.MYSQL_PASSWORD
+const dbHost = process.env.VM_HOST || 'localhost'
 
 export const sequelize = new Sequelize('CSCC09', dbUsername, dbPassword, {
-    host: 'localhost',
+    host: dbHost, 
     dialect: 'mysql'
 })
 

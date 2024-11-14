@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
+import { useAuthStore } from './stores/auth.store.ts';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const authStore = useAuthStore();
+if (authStore.user) router.push("/all");
 </script>
 
 <template>
   <RouterView />
 </template>
-
-<style lang="css" scoped>
-.calendar-container {
-  display: flex;
-  justify-content: space-between;
-  align-content: flex-start;
-}
-
-.calendar-drawer-background {
-  flex: 1 0 15vw;
-  padding: var(--sx-spacing-padding6);
-}
-
-.calendar-main {
-  flex: 6 0 85vw;
-}
-</style>

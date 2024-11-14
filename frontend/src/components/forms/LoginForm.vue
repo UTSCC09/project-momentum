@@ -38,10 +38,13 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
+import { useAuthStore } from "../../stores/auth.store.ts";
 
 const emit = defineEmits(['close']);
 
 const toast = useToast();
+
+const authStore = useAuthStore();
 
 const resolver = zodResolver(
   z.object({
@@ -57,6 +60,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
         emit('close');
         reset();
         console.log(res);
+        authStore.login(res.user.username);
         toast.add({ severity: 'success', summary: 'Login successful.', life: 3000 });
       })
       .catch((err) => {

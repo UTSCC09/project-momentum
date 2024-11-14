@@ -12,11 +12,11 @@ const router = useRouter();
 const route = useRoute();
 
 function toggle() {
-  if (route.fullPath == '/' || route.fullPath == '/all') {
+  if (route.fullPath == '/all') {
     router.push('/schedule');
   }
   else {
-    router.push('/');
+    router.push('/all');
   }
 }
 </script>

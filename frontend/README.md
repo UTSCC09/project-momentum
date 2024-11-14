@@ -6,10 +6,11 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 
 ## Deployment
 ```
+cd frontend
 docker build -t frontend -f Dockerfile .
 docker run -d --rm -p 80:4173 frontend
 ```
 
-Frontend is now accessible at http://34.130.169.150/.
+Frontend is now accessible at http://34.130.127.231/.
 
 **TODO:** Fix build error. Currently, `npm run build` only does `vite build` instead of `vue-tsc -b && vite build`. Need to fix build error and enable `vue-tsc -b`.

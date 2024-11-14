@@ -17,7 +17,7 @@ export const taskRouter = trpc.router({
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
-        const { name, description = null, location = null, deadline = null, project_id } = input;
+        const { name, description = null, location = null, deadline = null, project_id = null } = input;
 
         try{
             const task = await Task.create({
@@ -26,7 +26,7 @@ export const taskRouter = trpc.router({
                 description: description,
                 location: location,
                 deadline: deadline,
-                ...(project_id ? { pid: project_id } : {})
+                pid: project_id,
             });
 
             return {
@@ -52,10 +52,19 @@ export const taskRouter = trpc.router({
     }),
     
     getTaskbyUser: userProcedure
-    .input(z.object({userId: z.string()}))
+    .input(z.object({
+        userId: z.string(), 
+        deadline: z.string().optional(),
+        progress: z.boolean().optional(),
+    }))
     .query(async ({ input }) => {
-        const { userId } = input;
-        const tasks = await Task.findAll({ where: { uid: userId } });
+        const { userId, deadline, progress } = input;
+        const tasks = await Task.findAll({ 
+            where: { 
+                uid: userId, 
+                ...(deadline ? { deadline: deadline } : {}),
+                ...(progress ? { progress: progress } : {}),
+            } });
         return {
             task: tasks,
             temp: "temp"
@@ -63,10 +72,19 @@ export const taskRouter = trpc.router({
     }),
 
     getTaskbyProject: userProcedure
-    .input(z.object({projectId: z.string()}))
+    .input(z.object({
+        projectId: z.string(), 
+        deadline: z.string().optional(),
+        progress: z.boolean().optional(),
+    }))
     .query(async ({ input }) => {
-        const { projectId } = input;
-        const tasks = await Task.findAll({ where: { pid: projectId } });
+        const { projectId, deadline, progress } = input;
+        const tasks = await Task.findAll({ 
+            where: { 
+                pid: projectId, 
+                ...(deadline ? { deadline: deadline } : {}),
+                ...(progress ? { progress: progress } : {}),
+            } });
         return {
             task: tasks,
             temp: "temp"
@@ -81,9 +99,17 @@ export const taskRouter = trpc.router({
         location: z.string().optional(),
         deadline: z.string().optional(),
         project_id: z.string().optional(),
+        progress: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-        const { taskId, name, description, location, deadline, project_id } = input;
+        const { 
+            taskId, 
+            name = null, 
+            description = null, 
+            location = null, 
+            deadline = null, 
+            project_id = null, 
+            progress = null } = input;
         const task = await Task.findByPk(taskId) as any;
 
         if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
@@ -94,7 +120,7 @@ export const taskRouter = trpc.router({
         task.location = location || task.location;
         task.deadline = deadline || task.deadline;
         task.pid = project_id || task.pid;
-
+        task.progress = progress || task.progress;
         await task.save();
         return {
             task: task,

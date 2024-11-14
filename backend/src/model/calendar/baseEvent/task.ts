@@ -56,22 +56,10 @@ export const Task = sequelize.define("Task", {
     },
     
     progress:{
-        type: DataTypes.STRING,
+        type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: "Not Started",
-        validate:{
-            isIn: [["Not Started", "Initiated", "Midway", "Nearly Complete", "Complete"]],
-        },
+        defaultValue: false,
     },
-
-    progress_number:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-        validate:{
-            isIn: [[0, 25, 50, 75, 100]],
-        },
-    }
 })
 
 User.hasMany(Task, {foreignKey: 'uid'});

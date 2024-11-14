@@ -142,8 +142,6 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-
-  // 
 });
 
 oauthGoogleRouter.get('/user', async (req, res) => {

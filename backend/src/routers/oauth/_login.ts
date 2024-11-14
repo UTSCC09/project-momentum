@@ -83,8 +83,8 @@ export const userRouter = trpc.router({
           .sign(JWT_SECRET);
 
           ctx.res.setHeader('Set-Cookie', [
-            `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=None; Secure`,
-            `userId=${(user as any).id}; HttpOnly; Path=/; Max-Age=2592000; SameSite=None; Secure`
+            `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax;`,
+            `userId=${(user as any).id}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax;`
           ]);
           
   

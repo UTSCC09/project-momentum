@@ -1,14 +1,14 @@
 import { Sequelize } from "sequelize";
-import { User } from "./model/user/user"
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const dbUsername = process.env.MYSQL_USERNAME || 'root'
 const dbPassword = process.env.MYSQL_PASSWORD
+const dbHost = process.env.VM_HOST || 'localhost'
 
 export const sequelize = new Sequelize('CSCC09', dbUsername, dbPassword, {
-    host: 'localhost',
+    host: dbHost, 
     dialect: 'mysql'
 })
 
@@ -18,8 +18,9 @@ export async function connectDB(){
         await sequelize.sync();
 
         console.log("success connect to database");
-    } catch {
-        console.error("failed connect to database")
+    } catch(error) {
+        console.log(error);
+        console.error("failed connect to database", error);
     }
     return null;
 }

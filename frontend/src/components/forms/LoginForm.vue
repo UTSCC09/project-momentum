@@ -20,6 +20,7 @@
       </FormField>
       <Button type="submit" severity="primary" label="Log in" />
     </Form>
+    <Button class="google-oauth" icon="pi pi-google" variant="outlined" label="Log in with Google" @click="googleLogin" fluid />
   </div>
 </template>
 
@@ -54,26 +55,29 @@ const resolver = zodResolver(
 );
 
 const onFormSubmit = ({ values, valid, reset }) => {
+  if (valid) {
+    client.users.loginUser.mutate(values)
+      .then((res) => {
+        emit('close');
+        reset();
+        console.log(res);
+        authStore.login(res.user.username);
+        toast.add({ severity: 'success', summary: 'Login successful.', life: 3000 });
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.add({ severity: 'error', summary: `Login failed: ${err.message}.`, });
+      });
+  }
+};
+
+function googleLogin() {
   fetch('http://localhost:3000/api/oauth/google/signin', {
     method: 'POST',
   })
-  .then(response => response.json())
-  .then(data => {window.location.href = data.url;})
-//   if (valid) {
-//     client.users.loginUser.mutate(values)
-//       .then((res) => {
-//         emit('close');
-//         reset();
-//         console.log(res);
-//         authStore.login(res.user.username);
-//         toast.add({ severity: 'success', summary: 'Login successful.', life: 3000 });
-//       })
-//       .catch((err) => {
-//         console.error(err);
-//         toast.add({ severity: 'error', summary: `Login failed: ${err.message}.`, });
-//       });
-//   }
-};
+    .then(response => response.json())
+    .then(data => { window.location.href = data.url; })
+}
 </script>
 
 <style lang="css" scoped>
@@ -88,5 +92,9 @@ const onFormSubmit = ({ values, valid, reset }) => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.google-oauth {
+  margin-top: 1rem;
 }
 </style>

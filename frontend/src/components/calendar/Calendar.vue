@@ -9,6 +9,8 @@ import {
 } from '@schedule-x/calendar'
 
 // plugins
+import { useCalendarStore } from '../../stores/calendar.store.ts';
+
 import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
 import { createResizePlugin } from '@schedule-x/resize'
 import { createEventModalPlugin } from '@schedule-x/event-modal'
@@ -19,7 +21,7 @@ import UserMenu from './UserMenu.vue'
 import CalendarDrawerButton from './CalendarDrawerButton.vue'
 
 import { client } from "../../api/index";
-import { formatDate } from "../../api/utils";
+import { formatDate, formatDatetime } from "../../api/utils";
 
 function getCurrentWeek() {
   const curr = new Date();
@@ -121,15 +123,26 @@ const customComponents = {
 // For updating events, use the events service plugin
 const calendarApp = createCalendar(config, plugins);
 
+const calendarStore = useCalendarStore();
+calendarStore.setEventsService(calendarApp.eventsService);
+
 client.calendar.getCalendar.query(getCurrentWeek())
   .then((res) => {
     console.log(res.calendar);
     for (let event of res.calendar.events) {
-      calendarApp.eventsService.add(event);
+      calendarStore.addEvent({
+        id: 0,
+        title: event.name,
+        description: event.description,
+        location: event.location,
+        start: formatDatetime(event.start_time).slice(0, 16),
+        end: formatDatetime(event.end_time).slice(0, 16),
+      })
     }
-    for (let meeting of res.calendar.meetings) {
-      calendarApp.eventsService.add(meeting);
-    }
+    // for (let meeting of res.calendar.meetings) {
+    //   calendarApp.eventsService.add(meeting);
+    // }
+    console.log(calendarApp.eventsService.getAll());
   })
   .catch((err) => {
     console.log(err);

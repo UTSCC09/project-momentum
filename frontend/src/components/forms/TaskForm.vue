@@ -97,7 +97,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
     if (values.project_id) {
       req.project_id = values.project_id;
     }
-    console.log(req);
     client.tasks.createTask.mutate(req)
       .then((res) => {
         emit('close');

@@ -12,6 +12,7 @@ import ToastService from 'primevue/toastservice';
 import Calendar from './components/calendar/Calendar.vue';
 import CalendarWithSidebar from './components/calendar/CalendarWithSidebar.vue';
 import Kanban from './components/kanban/Kanban.vue';
+import Home from './components/Home.vue';
 
 // stylesheet, order is important!
 import '@schedule-x/theme-default/dist/index.css';
@@ -22,8 +23,9 @@ import { definePreset } from '@primevue/themes';
 
 const routes = [
   { path: '/schedule', component: Calendar },
-  { path: '/all', component: CalendarWithSidebar, alias: '/' },
+  { path: '/all', component: CalendarWithSidebar },
   { path: '/tasks', component: Kanban },
+  { path: '/', component: Home }
 ];
 
 const router = createRouter({

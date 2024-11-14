@@ -75,10 +75,6 @@ const items = ref([
         label: 'Google',
         icon: 'pi pi-google',
       },
-      {
-        label: 'Microsoft',
-        icon: 'pi pi-microsoft',
-      },
     ]
   }
 ]);

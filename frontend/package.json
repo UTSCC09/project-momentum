@@ -20,6 +20,7 @@
     "@schedule-x/theme-default": "^2.4.1",
     "@schedule-x/vue": "^2.3.1",
     "@trpc/client": "^10.45.2",
+    "animejs": "^3.2.2",
     "pinia": "^2.2.4",
     "primeicons": "^7.0.0",
     "primevue": "^4.1.1",

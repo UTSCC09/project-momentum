@@ -88,10 +88,17 @@ const resolver = zodResolver(
 
 const onFormSubmit = ({ values, valid, reset }) => {
   if (valid) {
-    client.tasks.createTask.mutate({
-      ...values,
-      deadline: formatDatetime(values.deadline)
-    })
+    const req = {
+      name: values.name,
+      description: values.description,
+      location: values.location,
+      deadline: formatDatetime(values.deadline),
+    }
+    if (values.project_id) {
+      req.project_id = values.project_id;
+    }
+    console.log(req);
+    client.tasks.createTask.mutate(req)
       .then((res) => {
         emit('close');
         reset();

@@ -6,7 +6,7 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
-
+import { Recursion } from '../../model/calendar/utils/recursion';
 export const calendarRouter = trpc.router({
     getCalendar: userProcedure
     .input(z.object({
@@ -50,12 +50,14 @@ export const calendarRouter = trpc.router({
                 where: meetingWhereConditions,
             });
 
-            const eventConstCondition = eventWhereConditions;
+            const eventConstCondition = {...eventWhereConditions};
             eventConstCondition.start_time = { [Op.gte]: startDate};
             eventConstCondition.end_time = { [Op.lte]: endDate };
+            console.log(eventConstCondition);
 
-            const eventsRecurringCondition = eventWhereConditions;
+            const eventsRecurringCondition = {...eventWhereConditions};
             eventsRecurringCondition.recurring = true;
+            console.log(eventsRecurringCondition);
 
             const constEvents = await Event.findAll({
                 where: eventWhereConditions,
@@ -63,6 +65,15 @@ export const calendarRouter = trpc.router({
 
             const recurringEvents = await Event.findAll({
                 where: eventsRecurringCondition,
+                include: [{
+                    model: Recursion,
+                    as: 'Recursion',
+                    required: false,
+                    where: {
+                        start: { [Op.lte]: endDate },
+                        end: { [Op.gte]: startDate },
+                    },
+                }],
             });
 
             return { calendar: { meetings: meetings, events: constEvents, recurringEvents: recurringEvents} };

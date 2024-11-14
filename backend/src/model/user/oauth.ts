@@ -14,24 +14,10 @@ export const Oauth = sequelize.define("Oauth", {
         onDelete: 'CASCADE'
     },
 
-    // restrict on name, update the array if other oauth added
-    type:{
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate:{
-            isIn: [["google", "microsoft"]],
-        }
-    },
-
     oauthId:{
         type: DataTypes.STRING,
         allowNull: false,
     },
-
-    token:{
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
 })
 
 User.hasMany(Oauth, { foreignKey: 'userId' });

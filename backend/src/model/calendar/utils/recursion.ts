@@ -1,6 +1,6 @@
 import { sequelize } from "../../../datasource";
 import { DataTypes } from "sequelize";
-
+import { Event } from "../baseEvent/event";
 /* Recursion Table */
 
 export const Recursion = sequelize.define("Recursion", {
@@ -39,4 +39,3 @@ export const Recursion = sequelize.define("Recursion", {
         allowNull: false,
     },
 })
-

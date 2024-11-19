@@ -80,8 +80,8 @@ function googleLogin() {
   fetch('http://localhost:3000/api/oauth/google/signin', {
     method: 'POST',
   })
-    .then(() => router.push("/all"))
-    .catch ((err) => toast.add({ severity: 'error', summary: `Login failed: ${err.message}.`, life: 3000 }));
+    .then((response) => response.json())
+    .then(data => { window.location.href = data.url });
 }
 </script>
 

@@ -11,6 +11,7 @@
   "dependencies": {
     "@primevue/forms": "^4.2.1",
     "@primevue/themes": "^4.1.1",
+    "@schedule-x/calendar-controls": "^2.6.0",
     "@schedule-x/current-time": "^2.4.1",
     "@schedule-x/drag-and-drop": "^2.4.1",
     "@schedule-x/event-modal": "^2.4.1",

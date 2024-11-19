@@ -7,7 +7,10 @@ export function formatDatetime(date: Date | string) {
 }
 
 // Format: YYYY-MM-DD
-export function formatDate(date: Date) {
+export function formatDate(date: Date | string) {
+  if (typeof date == "string") {
+    return new Date(date).toISOString().slice(0, 10);
+  }
   return date.toISOString().slice(0, 10);
 }
 

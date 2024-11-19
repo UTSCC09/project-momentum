@@ -29,20 +29,24 @@ import Dialog from 'primevue/dialog';
 
 import { ref } from "vue";
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+
 import { useAuthStore } from '../stores/auth.store.ts';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const toast = useToast();
 
 const urlParams = new URLSearchParams(window.location.search);
 const success = urlParams.get('success');
-const email = urlParams.get('email');
 if (success == 'true') {
+  const email = urlParams.get('email');
   authStore.login(email);
   window.location.href = location.protocol + '//' + location.host + location.pathname;
 }
 else {
-  // TODO handle error
+  const message = urlParams.get('error');
+  toast.add({ severity: 'error', summary: `Failed to log in with Google: ${message}.`, life: 3000 });
 }
 
 const visibleLogin = ref(false);

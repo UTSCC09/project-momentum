@@ -15,7 +15,8 @@ import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
 import { createResizePlugin } from '@schedule-x/resize'
 import { createEventModalPlugin } from '@schedule-x/event-modal'
 import { createCurrentTimePlugin } from '@schedule-x/current-time'
-import { createEventsServicePlugin } from '@schedule-x/events-service'
+import { createEventRecurrencePlugin, createEventsServicePlugin } from "@schedule-x/event-recurrence";
+
 import CustomEventModal from './CustomEventModal.vue'
 import UserMenu from './UserMenu.vue'
 import CalendarDrawerButton from './CalendarDrawerButton.vue'
@@ -131,7 +132,7 @@ client.calendar.getCalendar.query(getCurrentWeek())
     console.log(res.calendar);
     for (let event of res.calendar.events) {
       calendarStore.addEvent({
-        id: 0,
+        id: event.id,
         title: event.name,
         description: event.description,
         location: event.location,
@@ -142,7 +143,6 @@ client.calendar.getCalendar.query(getCurrentWeek())
     // for (let meeting of res.calendar.meetings) {
     //   calendarApp.eventsService.add(meeting);
     // }
-    console.log(calendarApp.eventsService.getAll());
   })
   .catch((err) => {
     console.log(err);

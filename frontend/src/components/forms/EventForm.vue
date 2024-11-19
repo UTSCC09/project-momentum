@@ -1,7 +1,7 @@
 <template>
   <div>
     <Toast />
-    <Form :initialValues :resolver @submit="onFormSubmit">
+    <Form :resolver @submit="onFormSubmit">
       <div class="input-group" style="grid-template-columns: 3fr 1fr;">
         <FormField v-slot="$field" name="name">
           <IftaLabel>
@@ -46,50 +46,59 @@
           </Message>
         </FormField>
         <FormField v-slot="$field" name="repeat" class="checkbox">
-          <Checkbox inputId="repeat" :binary="true" />
+          <Checkbox inputId="repeat" :binary="true" @change="toggleRecurrence" />
           <label for="repeat">Repeat</label>
         </FormField>
       </div>
-      <div class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
+      <div v-if="visibleRecurrence" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
         <FormField v-slot="$field" name="frequency">
           <IftaLabel>
-            <Select inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
+            <Select v-model="frequency" inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
             <label for="frequency">Frequency</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="every">
+        <FormField v-slot="$field" name="interval">
           <IftaLabel>
-            <InputNumber inputId="every" :min="1" showButtons fluid />
-            <label for="every">Every</label>
+            <InputNumber v-if="frequency=='daily'" inputId="interval" :min="1" suffix=" days" showButtons fluid />
+            <InputNumber v-if="frequency=='weekly'" inputId="interval" :min="1" suffix=" weeks" showButtons fluid />
+            <InputNumber v-if="frequency=='monthly'" inputId="interval" :min="1" suffix=" months" showButtons fluid />
+            <InputNumber v-if="!frequency" inputId="interval" :min="1" showButtons fluid />
+            <label for="interval">Every</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="weekly">
+        <FormField v-if="frequency=='daily' || frequency=='weekly'" v-slot="$field" name="byday">
           <IftaLabel>
-            <MultiSelect inputId="weekly" :options="weeklyDates" optionLabel="name" optionValue="value"
+            <MultiSelect inputId="byday" :options="weeklyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
-            <label for="weekly">Weekly</label>
+            <label for="byday">By day</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="monthly">
+        <FormField v-if="frequency=='monthly'" v-slot="$field" name="bymonth">
           <IftaLabel>
-            <MultiSelect inputId="monthly" :options="monthlyDates" optionLabel="name" optionValue="value"
+            <MultiSelect inputId="bymonth" :options="monthlyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
-            <label for="monthly">Monthly</label>
+            <label for="bymonth">By month</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="endRepeat">
-          <IftaLabel>
-            <DatePicker inputId="endRepeat" showTime hourFormat="24" fluid />
-            <label for="endRepeat">Repeat ends</label>
-          </IftaLabel>
+        <FormField v-slot="$field" name="until">
+          <InputGroup class="md:w-80">
+            <InputGroupAddon>
+              <ToggleButton v-model="countUntil" onLabel="Count" offLabel="Date" fluid />
+            </InputGroupAddon>
+            <IftaLabel>
+              <InputNumber v-if="countUntil" inputId="until" />
+              <DatePicker v-else inputId="until" />
+              <label for="until">Until</label>
+            </IftaLabel>
+          </InputGroup>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
@@ -114,6 +123,8 @@ import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import DatePicker from 'primevue/datepicker';
 import IftaLabel from 'primevue/iftalabel';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
@@ -121,6 +132,7 @@ import MultiSelect from 'primevue/multiselect';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
+import ToggleButton from 'primevue/togglebutton';
 
 import { ref } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
@@ -151,6 +163,9 @@ const emit = defineEmits(['close']);
 //   },
 // })
 
+const countUntil = ref(true);
+const frequency = ref();
+
 const toast = useToast();
 
 const resolver = zodResolver(
@@ -162,10 +177,10 @@ const resolver = zodResolver(
     endTime: z.date(),
     repeat: z.any(),
     frequency: z.any(),
-    every: z.any(),
-    weekly: z.any(),
-    monthly: z.any(),
-    endRepeat: z.date(),
+    interval: z.any().optional(),
+    byweek: z.any().optional(),
+    bymonth: z.any().optional(),
+    until: z.union([z.date(), z.number()]).optional(),
     project_id: z.string().optional(),
   })
 );
@@ -173,6 +188,7 @@ const resolver = zodResolver(
 const onFormSubmit = ({ values, valid, reset }) => {
   console.log(values);
   if (valid) {
+    console.log("valid");
     const req = {
       name: values.name,
       description: values.description,
@@ -181,13 +197,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
       end_time: formatDatetime(values.endTime),
     }
     if (values.repeat) {
-      req.recurring = {
-        start: formatDatetime(values.startTime),
-        end: formatDatetime(values.endRepeat),
-        repeat_type: values.frequency,
-        repeat_interval: values.every,
-        repeat_on: values.weekly || values.monthly,
-      }
+      req.rrule = "";
     }
     console.log(req);
     client.events.createEvent.mutate(req)
@@ -237,6 +247,27 @@ const monthlyDates = ref([
   { name: "28", value: 28 }, { name: "29", value: 29 }, { name: "30", value: 30 },
   { name: "31", value: 31 },
 ]);
+
+const visibleRecurrence = ref(false);
+
+function showRecurrence() {
+  visibleRecurrence.value = true;
+}
+
+function hideRecurrence() {
+  // clear and hide
+  visibleRecurrence.value = false;
+}
+
+function toggleRecurrence(event) {
+  // console.log(event.target.checked);
+  if (event.target.checked) {
+    showRecurrence();
+  }
+  else {
+    hideRecurrence();
+  }
+} 
 </script>
 
 <style lang="css" scoped>
@@ -256,6 +287,7 @@ const monthlyDates = ref([
 .input-group {
   display: grid;
   column-gap: 1rem;
+  align-items: center;
 }
 
 .checkbox {
@@ -268,5 +300,17 @@ const monthlyDates = ref([
 .checkbox {
   color: var(--p-iftalabel-color);
   width: fit-content;
+}
+
+.p-inputgroupaddon {
+  padding: 0;
+}
+
+.p-togglebutton {
+  --p-togglebutton-content-checked-shadow: none;
+  --p-togglebutton-content-checked-background: var(--p-surface-100);
+  width: 100%;
+  height: 100%;
+  font-size: small;
 }
 </style>

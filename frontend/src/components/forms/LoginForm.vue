@@ -20,7 +20,8 @@
       </FormField>
       <Button type="submit" severity="primary" label="Log in" />
     </Form>
-    <Button class="google-oauth" icon="pi pi-google" variant="outlined" label="Log in with Google" @click="googleLogin" fluid />
+    <Button class="google-oauth" icon="pi pi-google" variant="outlined" label="Log in with Google" @click="googleLogin"
+      fluid />
   </div>
 </template>
 
@@ -40,6 +41,10 @@ import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
 import { useAuthStore } from "../../stores/auth.store.ts";
+
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const emit = defineEmits(['close']);
 
@@ -66,7 +71,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
       })
       .catch((err) => {
         console.error(err);
-        toast.add({ severity: 'error', summary: `Login failed: ${err.message}.`, });
+        toast.add({ severity: 'error', summary: `Login failed: ${err.message}.`, life: 3000 });
       });
   }
 };
@@ -75,8 +80,8 @@ function googleLogin() {
   fetch('http://localhost:3000/api/oauth/google/signin', {
     method: 'POST',
   })
-    .then(response => response.json())
-    .then(data => { window.location.href = data.url; })
+    .then(() => router.push("/all"))
+    .catch ((err) => toast.add({ severity: 'error', summary: `Login failed: ${err.message}.`, life: 3000 }));
 }
 </script>
 

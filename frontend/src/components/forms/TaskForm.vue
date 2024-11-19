@@ -106,7 +106,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
       })
       .catch((err) => {
         console.error(err);
-        toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, });
+        toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, life: 3000 });
       });
   }
 };

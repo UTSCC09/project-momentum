@@ -59,15 +59,6 @@ export const Meeting = sequelize.define("Meeting", {
         type: DataTypes.TIME,
         allowNull: true,
     },
-    
-    recurring_id:{
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: Recursion,
-            key: "id",
-        },
-    },
 })
 
 

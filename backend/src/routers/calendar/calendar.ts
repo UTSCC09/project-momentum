@@ -49,34 +49,15 @@ export const calendarRouter = trpc.router({
             const meetings = await Meeting.findAll({
                 where: meetingWhereConditions,
             });
-
-            const eventConstCondition = {...eventWhereConditions};
-            eventConstCondition.start_time = { [Op.gte]: startDate};
-            eventConstCondition.end_time = { [Op.lte]: endDate };
-            console.log(eventConstCondition);
-
-            const eventsRecurringCondition = {...eventWhereConditions};
-            eventsRecurringCondition.recurring = true;
-            console.log(eventsRecurringCondition);
+            
+            eventWhereConditions.start_time = { [Op.gte]: startDate};
+            eventWhereConditions.end_time = { [Op.lte]: endDate };
 
             const constEvents = await Event.findAll({
-                where: eventWhereConditions,
+                where: {...eventWhereConditions, rrule: { [Op.ne]: null }},
             });
 
-            const recurringEvents = await Event.findAll({
-                where: eventsRecurringCondition,
-                include: [{
-                    model: Recursion,
-                    as: 'Recursion',
-                    required: false,
-                    where: {
-                        start: { [Op.lte]: endDate },
-                        end: { [Op.gte]: startDate },
-                    },
-                }],
-            });
-
-            return { calendar: { meetings: meetings, events: constEvents, recurringEvents: recurringEvents} };
+            return { calendar: { meetings: meetings, events: constEvents} };
         } catch (error) {
             console.log(error);
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "An error occurred while fetching data." });

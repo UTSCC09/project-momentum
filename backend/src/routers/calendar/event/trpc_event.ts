@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Event } from '../../../model/calendar/baseEvent/event';
-import { Recursion } from '../../../model/calendar/utils/recursion';
 
 export const eventRouter = trpc.router({
 
@@ -14,41 +13,14 @@ export const eventRouter = trpc.router({
         location: z.string().optional(),
         start_time: z.string(),
         end_time: z.string(),
-        recurring: z.object({
-            start: z.string(),
-            end: z.string(),
-            repeat_type: z.enum(['daily', 'weekly', 'monthly']),
-            repeat_interval: z.number().optional(),
-            repeat_on: z.number().array().optional(),
-        }).optional(),
+        rrule: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         let new_recurring: any = null;
-        const { name, description = null, location = null, start_time, end_time, recurring = null } = input;
+        const { name, description = null, location = null, start_time, end_time, rrule = null } = input;
 
-        console.log(name, description, location, start_time, end_time, recurring);
-
-        try{
-            if (recurring){
-                const { repeat_type, repeat_interval = null, repeat_on = null } = recurring;
-                let repeat_on_str = null;
-                if(repeat_on){
-                    repeat_on_str = repeat_on.join(',');
-                    console.log(repeat_on);
-                } 
-                new_recurring = await Recursion.create({
-                    start: recurring.start,
-                    end: recurring.end,
-                    repeat_type: repeat_type,
-                    repeat_interval: repeat_interval,
-                    repeat_on: repeat_on_str,
-                });
-            }
-        } catch (error){
-            console.log(error);
-        }
-
+        console.log(name, description, location, start_time, end_time, rrule);
         try{
             const event = await Event.create({
                 uid: uid,
@@ -57,17 +29,14 @@ export const eventRouter = trpc.router({
                 location: location,
                 start_time: start_time,
                 end_time: end_time,
-                ...(new_recurring ? { recurring_id: new_recurring.id, recurring: true } : { recurring: false })
+                ...(rrule ? { rrule: rrule } : {})
             });
-            
-
             return {
                 event: event,
                 temp: "temp"
             };
         }
         catch (error){
-            await Recursion.destroy({ where: { id: new_recurring.id } });
             console.log(error);
         }
     }),
@@ -124,18 +93,6 @@ export const eventRouter = trpc.router({
             event.location = location || event.location;
             event.start_time = start_time || event.start_time;
             event.end_time = end_time || event.end_time;
-            const recurring_id = event.recurring_id;
-            if (recurring){
-                const update_recurring = await Recursion.findOne({ where: { id: recurring_id } }) as any;
-                if (!update_recurring) throw new TRPCError({ code: 'NOT_FOUND', message: 'Recurring event not found' });
-                const { start = null, end = null, repeat_type = null, repeat_interval = null, repeat_on = null } = recurring;
-                update_recurring.start = start || update_recurring.start;
-                update_recurring.end = end || update_recurring.end;
-                update_recurring.repeat_type = repeat_type || update_recurring.repeat_type;
-                update_recurring.repeat_interval = repeat_interval || update_recurring.repeat_interval;
-                update_recurring.repeat_on = repeat_on || update_recurring.repeat_on;
-                await update_recurring.save();
-            }
             await event.save();
             return {
                 event: event,

@@ -53,22 +53,11 @@ export const Event = sequelize.define("Event", {
         allowNull: true,
     },
 
-    recurring:{
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    },
-    
-    recurring_id:{
-        type: DataTypes.UUID,
+    rrule:{
+        type: DataTypes.STRING,
         allowNull: true,
-        references: {
-            model: Recursion,
-            key: "id",
-        },
     },
 })
 
 User.hasMany(Event, {foreignKey: 'uid'});
 Event.belongsTo(User, {foreignKey: 'uid'});
-Event.hasOne(Recursion, {foreignKey: 'recurring_id'});

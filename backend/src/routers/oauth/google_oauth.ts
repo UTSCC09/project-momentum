@@ -101,7 +101,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
         sameSite: 'lax',
       });
 
-      res.redirect(`http://localhost:5173/`);
+      res.redirect(`http://localhost:5173/?success=true&email=${(googleOauth.User as any).email}`);
       return;
     }
   } catch (error) {
@@ -138,7 +138,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
       sameSite: 'lax',
     });
 
-    res.redirect(`http://localhost:5173/`);
+    res.redirect(`http://localhost:5173/?success=true&email=${user.email}`);
   } catch (error) {
     console.log(error);
   }

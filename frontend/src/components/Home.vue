@@ -29,8 +29,21 @@ import Dialog from 'primevue/dialog';
 
 import { ref } from "vue";
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth.store.ts';
 
 const router = useRouter();
+const authStore = useAuthStore();
+
+const urlParams = new URLSearchParams(window.location.search);
+const success = urlParams.get('success');
+const email = urlParams.get('email');
+if (success == 'true') {
+  authStore.login(email);
+  window.location.href = location.protocol + '//' + location.host + location.pathname;
+}
+else {
+  // TODO handle error
+}
 
 const visibleLogin = ref(false);
 const visibleSignup = ref(false);

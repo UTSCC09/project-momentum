@@ -61,16 +61,16 @@
         </FormField>
         <FormField v-slot="$field" name="interval">
           <IftaLabel>
-            <InputNumber v-if="frequency=='daily'" inputId="interval" :min="1" suffix=" days" showButtons fluid />
-            <InputNumber v-if="frequency=='weekly'" inputId="interval" :min="1" suffix=" weeks" showButtons fluid />
-            <InputNumber v-if="frequency=='monthly'" inputId="interval" :min="1" suffix=" months" showButtons fluid />
+            <InputNumber v-if="frequency=='DAILY'" inputId="interval" :min="1" suffix=" days" showButtons fluid />
+            <InputNumber v-if="frequency=='WEEKLY'" inputId="interval" :min="1" suffix=" weeks" showButtons fluid />
+            <InputNumber v-if="frequency=='MONTHLY'" inputId="interval" :min="1" suffix=" months" showButtons fluid />
             <InputNumber v-if="!frequency" inputId="interval" :min="1" showButtons fluid />
             <label for="interval">Every</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-if="frequency=='daily' || frequency=='weekly'" v-slot="$field" name="byday">
+        <FormField v-if="frequency=='DAILY' || frequency=='WEEKLY'" v-slot="$field" name="byday">
           <IftaLabel>
             <MultiSelect inputId="byday" :options="weeklyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
@@ -79,23 +79,19 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-if="frequency=='monthly'" v-slot="$field" name="bymonth">
+        <FormField v-if="frequency=='MONTHLY'" v-slot="$field" name="bymonthday">
           <IftaLabel>
-            <MultiSelect inputId="bymonth" :options="monthlyDates" optionLabel="name" optionValue="value"
+            <MultiSelect inputId="bymonthday" :options="monthlyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
-            <label for="bymonth">By month</label>
+            <label for="bymonthday">By month</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
         <FormField v-slot="$field" name="until">
           <InputGroup class="md:w-80">
-            <InputGroupAddon>
-              <ToggleButton v-model="countUntil" onLabel="Count" offLabel="Date" fluid />
-            </InputGroupAddon>
             <IftaLabel>
-              <InputNumber v-if="countUntil" inputId="until" />
-              <DatePicker v-else inputId="until" />
+              <DatePicker inputId="until" />
               <label for="until">Until</label>
             </IftaLabel>
           </InputGroup>
@@ -132,7 +128,6 @@ import MultiSelect from 'primevue/multiselect';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
-import ToggleButton from 'primevue/togglebutton';
 
 import { ref } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
@@ -140,9 +135,22 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime } from "../../api/utils";
+import { formatDatetime, formatFloatDate } from "../../api/utils";
 
 const emit = defineEmits(['close']);
+
+function formatRecurrence(values) {
+  if (values.repeat) {
+    let recurrence = "";
+    recurrence += `FREQ=${values.frequency};`;
+    recurrence += `INTERVAL=${values.interval.toString()};`;
+    recurrence += `UNTIL=${formatFloatDate(values.until)};`;
+    values.frequency == "DAILY" || values.frequency == "WEEKLY" ? 
+    recurrence += `BYDAY=${values.byday.toString()};` :
+    recurrence += `BYMONTHDAY=${values.bymonthday.toString()};`;
+    return recurrence;
+  }
+}
 
 // const props = defineProps({
 //   initialValues: {
@@ -175,12 +183,12 @@ const resolver = zodResolver(
     location: z.string().min(1, { message: 'Location is required.' }),
     startTime: z.date(),
     endTime: z.date(),
-    repeat: z.any(),
-    frequency: z.any(),
+    repeat: z.boolean(),
+    frequency: z.union([z.literal("DAILY"), z.literal("WEEKLY"), z.literal("MONTHLY")]).optional(),
     interval: z.any().optional(),
-    byweek: z.any().optional(),
-    bymonth: z.any().optional(),
-    until: z.union([z.date(), z.number()]).optional(),
+    byday: z.any().optional(),
+    bymonthday: z.any().optional(),
+    until: z.date().optional(),
     project_id: z.string().optional(),
   })
 );
@@ -197,7 +205,8 @@ const onFormSubmit = ({ values, valid, reset }) => {
       end_time: formatDatetime(values.endTime),
     }
     if (values.repeat) {
-      req.rrule = "";
+      req.rrule = formatRecurrence(values);
+      req.end_recurrence = formatDatetime(values.until);
     }
     console.log(req);
     client.events.createEvent.mutate(req)
@@ -219,19 +228,19 @@ const projects = ref([
 ]);
 
 const frequencies = ref([
-  { name: "daily", value: "daily" },
-  { name: "weekly", value: "weekly" },
-  { name: "monthly", value: "monthly" },
+  { name: "daily", value: "DAILY" },
+  { name: "weekly", value: "WEEKLY" },
+  { name: "monthly", value: "MONTHLY" },
 ]);
 
 const weeklyDates = ref([
-  { name: "Monday", value: 1 },
-  { name: "Tuesday", value: 2 },
-  { name: "Wednesday", value: 3 },
-  { name: "Thursday", value: 4 },
-  { name: "Friday", value: 5 },
-  { name: "Saturday", value: 6 },
-  { name: "Sunday", value: 7 },
+  { name: "Monday", value: "MO" },
+  { name: "Tuesday", value: "TU" },
+  { name: "Wednesday", value: "WE" },
+  { name: "Thursday", value: "TH" },
+  { name: "Friday", value: "FR" },
+  { name: "Saturday", value: "SA" },
+  { name: "Sunday", value: "SU" },
 ]);
 
 const monthlyDates = ref([

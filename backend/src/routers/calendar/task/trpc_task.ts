@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 
 import { userProcedure } from '../../oauth/_login';
 import { Task } from '../../../model/calendar/baseEvent/task';
-
+import { getEventAttributes } from '../../../service/openAI';
 export const taskRouter = trpc.router({
 
     createTask: userProcedure
@@ -14,10 +14,11 @@ export const taskRouter = trpc.router({
         location: z.string().optional(),
         deadline: z.string().optional(),
         project_id: z.string().optional(),
+        create_event: z.boolean().optional()
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
-        const { name, description = null, location = null, deadline = null, project_id = null } = input;
+        const { name, description = null, location = null, deadline = null, project_id = null, create_event } = input;
 
         try{
             const task = await Task.create({
@@ -28,6 +29,16 @@ export const taskRouter = trpc.router({
                 deadline: deadline,
                 pid: project_id,
             });
+
+            getEventAttributes(task);
+
+            if (create_event){
+                const eventAttributes: any = getEventAttributes(task);
+                // await Event.create({
+                //     uid: uid,
+                //     ...eventAttributes,
+                // });
+            }
 
             return {
                 task: task,

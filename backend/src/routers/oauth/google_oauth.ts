@@ -4,6 +4,7 @@ import { SignJWT } from "jose";
 
 import { User } from "../../model/user/user";
 import { Oauth } from "../../model/user/oauth";
+import { Event } from "../../model/calendar/baseEvent/event";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -148,9 +149,29 @@ oauthGoogleRouter.get("/calendar", async (req, res) => {
       timeMin: new Date().toISOString(),
       singleEvents: true,
       orderBy: 'startTime',
+      maxResults: 10,
     });
     const events = response2.data.items;
-    console.log(events);
+    if(events === undefined){
+      res.status(500).json({ error: "Failed to fetch calendar events" });
+      return;
+    }
+
+    for(const event of events as any){
+      try{
+        const newEvent = await Event.create({
+          id: event.id.split("_")[0],
+          uid: req.cookies.userId,
+          name: event.summary || "No Title",
+          description: event.description || "",
+          location: event.location || "",
+          start_time: event.start.dateTime,
+          end_time: event.end.dateTime,
+        });
+      } catch (error) {
+        console.log("Error creating event:", error);
+      }
+    }
     res.json(events);
   } catch (error) {
     console.error("Error during Google calendar:", error);

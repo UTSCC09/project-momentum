@@ -68,7 +68,13 @@ const items = [
 ];
 
 function test() {
-  console.log("test");
+  fetch("http://localhost:3000/api/oauth/google/calendar", {
+    method: "GET",
+    credentials: "include"
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
 }
 </script>
 

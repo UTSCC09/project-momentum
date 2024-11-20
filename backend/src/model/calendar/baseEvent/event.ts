@@ -1,7 +1,6 @@
 import { sequelize } from "../../../datasource";
 import { DataTypes } from "sequelize";
 import { User } from "../../user/user";
-import { Recursion } from "../utils/recursion";
 
 
 /* Event Table */

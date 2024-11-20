@@ -131,6 +131,8 @@ const customComponents = {
 // Do not use a ref here, as the calendar instance is not reactive, and doing so might cause issues
 // For updating events, use the events service plugin
 const calendarApp = createCalendar(config, plugins);
+const calendarStore = useCalendarStore();
+calendarStore.setEventsService(calendarApp.eventsService);
 
 getEvents(calendarControls.getRange());
 </script>

@@ -183,7 +183,7 @@ const resolver = zodResolver(
     location: z.string().min(1, { message: 'Location is required.' }),
     startTime: z.date(),
     endTime: z.date(),
-    repeat: z.boolean(),
+    repeat: z.union([z.boolean(), z.undefined()]),
     frequency: z.union([z.literal("DAILY"), z.literal("WEEKLY"), z.literal("MONTHLY")]).optional(),
     interval: z.any().optional(),
     byday: z.any().optional(),

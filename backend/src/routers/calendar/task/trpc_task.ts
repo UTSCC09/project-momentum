@@ -4,7 +4,6 @@ import { TRPCError } from '@trpc/server';
 
 import { userProcedure } from '../../oauth/_login';
 import { Task } from '../../../model/calendar/baseEvent/task';
-import { getEventAttributes } from '../../../service/openAI';
 export const taskRouter = trpc.router({
 
     createTask: userProcedure
@@ -30,10 +29,8 @@ export const taskRouter = trpc.router({
                 pid: project_id,
             });
 
-            getEventAttributes(task);
 
             if (create_event){
-                const eventAttributes: any = getEventAttributes(task);
                 // await Event.create({
                 //     uid: uid,
                 //     ...eventAttributes,

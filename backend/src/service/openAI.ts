@@ -2,6 +2,9 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
+import { Router } from "express";
+
+import { getCalendar } from "../routers/calendar/calendar";
 
 dotenv.config()
 const openai = new OpenAI({
@@ -13,59 +16,32 @@ const systemTemplate =
  The task is provided with name, description, location and deadline, your job is find the
  1. duration of the task
  2. the best time slot to place the task in the calendar, should between current time and deadline
+ The start time and end time of the task should between starttime and endtime and after the current time
  These assumptions must take consider of what the event is, where is it happening, and the deadline of the task`;
 
- // test dara
- const calendar = JSON.stringify([{
-    "name": "name1",
-    "description": "description",
-    "location": "location",
-    "start_time": "2024-01-01T00:00:00.000Z",
-    "end_time": "2024-01-01T01:00:10.000Z",
- },
- {
-    "name": "name2",
-    "description": "description",
-    "location": "location",
-    "start_time": "2024-01-02T02:00:00.000Z",
-    "end_time": "2024-01-02T03:00:10.000Z",
- }])
+ export const AIRouter = Router();
 
- const task = JSON.stringify([{
-    "name": "name",
-    "description": "description",
-    "location": "location",
-    "deadline": "2024-01-03T04:00:10.000Z",
- }])
+AIRouter.post("/getTaskSchedual", async (req, res) => {
+    console.log(req.body);
 
- const eventSchema = z.object({
-    duration: z.number(),
-    start_time: z.string(),
-    end_time: z.string(),
-  });
-
-export async function getEventAttributes(task: any): Promise<any> {
+    const { start_time, end_time } = req.body;
+    const calendar = await getCalendar(start_time, end_time);
     
+    const { task } = req.body;
     const completion = await openai.chat.completions.create({
-        model: "gpt-4o-2024-08-06",
+        model: "gpt-4o",
         messages: [
             { role: "system", content: systemTemplate },
             {
                 role: "user",
-                content: `Calendar: ${calendar}, Task: ${task}`,
+                content: `Calendar: ${calendar}, Task: ${task}, Start Time: ${start_time}, End Time: ${end_time}, Current Time: ${new Date().toISOString()}`,
             },
         ],
-        response_format: zodResponseFormat(eventSchema, "eventSchema")
+        response_format: zodResponseFormat(z.object({
+            duration: z.number(),
+            start_time: z.string(),
+            end_time: z.string(),
+        }), "eventSchema")
     });
-    
-    console.log(completion.choices[0].message.content);
-
-
-    return {
-        name: "name",
-        description: "description",
-        location: "location",
-        start_time: "start_time",
-        end_time: "end_time",
-    };
-}
+    res.json(completion.choices[0].message.content);
+});

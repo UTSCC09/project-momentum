@@ -7,6 +7,21 @@ import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
 
+export function getCalendar( starttime: string, endtime: string, userId?: string, project_id?: string) {
+    const eventConditions: any = {}
+    eventConditions.start_time = { [Op.gte]: starttime};
+    eventConditions.end_time = { [Op.lte]: endtime };
+    if (userId) {
+        eventConditions.uid = userId;
+    }
+    if (project_id) {
+        eventConditions.project_id = project_id;
+    }
+    return Event.findAll({
+        where: eventConditions,
+    });
+}
+
 export const calendarRouter = trpc.router({
     getCalendar: userProcedure
     .input(z.object({

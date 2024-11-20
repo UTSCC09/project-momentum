@@ -68,11 +68,28 @@ const items = [
 ];
 
 function test() {
-  fetch("http://localhost:3000/api/oauth/google/calendar", {
-    method: "GET",
-    credentials: "include"
+  fetch("http://localhost:3000/api/openai/getTaskSchedual", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      start_time: "2024-11-18T00:00:00Z",
+      end_time: "2024-11-25T00:00:00Z", // Corrected year
+      task: {
+        name: "Test Task",
+        description: "Finish my homework",
+        deadline: "2024-11-25T00:00:00Z",
+      }
+    }),
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => console.log(data))
     .catch(error => console.error(error));
 }

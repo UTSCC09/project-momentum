@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { createContext } from "./trpc"; 
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
+import { AIRouter } from "./service/openAI";
 import { oauthGoogleRouter } from "./routers/oauth/google_oauth";
 import { oauthMicrosoftRouter } from "./routers/oauth/microsoft_oauth";
 
@@ -25,6 +26,7 @@ app.use(cookieParser());
 
 app.use("/api/oauth/google", oauthGoogleRouter);
 app.use("/api/oauth/microsoft", oauthMicrosoftRouter);
+app.use("/api/openai", AIRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");

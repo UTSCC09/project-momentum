@@ -31,10 +31,9 @@ function getEvents(range) {
     end_date: formatDate(range.end),
   }
   client.calendar.getCalendar.query(queryRange)
-  .then((res) => {
-    console.log(res.calendar);
-    for (let event of res.calendar.events) {
-      calendarStore.addEvent({
+    .then((res) => {
+      console.log(res.calendar);
+      const events = res.calendar.events.map((event) => ({
         id: event.id,
         title: event.name,
         description: event.description,
@@ -42,15 +41,15 @@ function getEvents(range) {
         start: formatDatetime(event.start_time).slice(0, 16),
         end: formatDatetime(event.end_time).slice(0, 16),
         rrule: event.rrule,
-      })
-    }
-    // for (let meeting of res.calendar.meetings) {
-    //   calendarApp.eventsService.add(meeting);
-    // }
-  })
-  .catch((err) => {
-    console.log(err);
-  })
+      }));
+      calendarStore.setEvents(events);
+      // for (let meeting of res.calendar.meetings) {
+      //   calendarApp.eventsService.add(meeting);
+      // }
+    })
+    .catch((err) => {
+      console.log(err);
+    })
 }
 
 const config = {

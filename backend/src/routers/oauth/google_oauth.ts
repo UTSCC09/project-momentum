@@ -26,15 +26,16 @@ const oauth2Client = new google.auth.OAuth2(
 const scopes = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
+    'https://www.googleapis.com/auth/calendar.readonly'
 ];
 
-const url = oauth2Client.generateAuthUrl({
+oauthGoogleRouter.post("/signin", (req, res) => {
+  const url = oauth2Client.generateAuthUrl({
     access_type: "offline", // use offline to get refresh token
     scope: scopes,
     prompt: "consent",
   });
-
-oauthGoogleRouter.post("/signin", (req, res) => {
+  
     console.log("signin");
     res.json({ url });
 });
@@ -83,7 +84,6 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
     });
   
     if(googleOauth) {
-      console.log(googleOauth);
       const token = await new SignJWT({ userId: (googleOauth.User as any).id })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -105,6 +105,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
       return;
     }
   } catch (error) {
+    res.redirect(`http://localhost:5173/?success=false&error=${error}`);
     console.log(error);
   }
 
@@ -140,6 +141,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
 
     res.redirect(`http://localhost:5173/?success=true&email=${user.email}`);
   } catch (error) {
+    res.redirect(`http://localhost:5173/?success=false&error=${error}`);
     console.log(error);
   }
 });
@@ -152,3 +154,18 @@ oauthGoogleRouter.get('/user', async (req, res) => {
   const token_info = await token_info_response.json();
   res.json(token_info);
 });
+
+// const temp = await oauth2Client.getToken(code as string);
+// const tokens = temp.tokens;
+// oauth2Client.setCredentials(tokens);
+
+// const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+// const response2 = await calendar.events.list({
+//   calendarId: 'primary',
+//   timeMin: new Date().toISOString(),
+//   maxResults: 10,
+//   singleEvents: true,
+//   orderBy: 'startTime',
+// });
+// const events = response2.data.items;
+// console.log(events);

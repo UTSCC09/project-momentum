@@ -6,7 +6,7 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
-import { Recursion } from '../../model/calendar/utils/recursion';
+
 export const calendarRouter = trpc.router({
     getCalendar: userProcedure
     .input(z.object({
@@ -54,8 +54,14 @@ export const calendarRouter = trpc.router({
             eventWhereConditions.end_time = { [Op.lte]: endDate };
 
             const constEvents = await Event.findAll({
-                where: {...eventWhereConditions, rrule: { [Op.ne]: null }},
+                where: {
+                    [Op.or]: [
+                        eventWhereConditions, 
+                        { rrule: { [Op.ne]: null } }
+                    ]
+                },
             });
+            
 
             return { calendar: { meetings: meetings, events: constEvents} };
         } catch (error) {

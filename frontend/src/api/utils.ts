@@ -1,3 +1,7 @@
+import moment from 'moment';
+// replace evertime you see new Date() with moment()
+console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+
 // Format: YYYY-MM-DD HH:MM:SS
 export function formatDatetime(date: Date | string) {
   if (typeof date == "string") {

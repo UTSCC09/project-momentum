@@ -30,8 +30,10 @@ import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
 
 import { ref } from 'vue';
-
 import { client } from "../../api/index";
+import { Peer } from "peerjs";
+
+import { useAuthStore } from "../../stores/auth.store.ts";
 
 const taskVisible = ref(false);
 const eventVisible = ref(false);
@@ -53,7 +55,8 @@ const items = [
   {
     label: 'Meeting',
     command: () => {
-      meetingVisible.value = true;
+      // meetingVisible.value = true;
+      webrtc();
     }
   },
   {
@@ -92,6 +95,52 @@ function test() {
     })
     .then(data => console.log(data))
     .catch(error => console.error(error));
+}
+
+function webrtc() {
+  const authStore = useAuthStore();
+  const peer = new Peer(authStore.user);
+  peer.on('open', function (id) {
+    console.log('My peer ID is: ' + id);
+    if (peer.id == "b3d9c12c-fc9f-40b1-8f4c-01cf66b76da6") {
+    console.log("connecting");
+    const conn = peer.connect('0cfa9bcb-92ed-429f-b9b4-430b83f4ea73');
+    conn.on('open', function () {
+      console.log("OPEN");
+      // Receive messages
+      conn.on('data', function (data) {
+        console.log('Received', data);
+      });
+
+      // Send messages
+      conn.send('Hello!');
+    });
+    conn.on("error", function (err) {
+      console.log(err);
+    });
+  }
+  else {
+    console.log("receiving")
+    peer.on('connection', function (conn) {
+      conn.on('open', function () {
+        console.log("OPEN");
+        // Receive messages
+        conn.on('data', function (data) {
+          console.log('Received', data);
+        });
+
+        // Send messages
+        conn.send('Hello too!');
+      });
+      conn.on("error", function (err) {
+        console.log(err);
+      })
+    });
+  }
+  });
+  peer.on("error", function (err) {
+    console.log(err);
+  });
 }
 </script>
 

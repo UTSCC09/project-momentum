@@ -40,8 +40,8 @@ const toast = useToast();
 const urlParams = new URLSearchParams(window.location.search);
 const success = urlParams.get('success');
 if (success == 'true') {
-  const email = urlParams.get('email');
-  authStore.login(email);
+  const id = urlParams.get('id');
+  authStore.login(id);
   window.location.href = location.protocol + '//' + location.host + location.pathname;
 }
 else {

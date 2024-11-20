@@ -66,7 +66,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
         emit('close');
         reset();
         console.log(res);
-        authStore.login(res.user.username);
+        authStore.login(res.user.id);
         toast.add({ severity: 'success', summary: 'Login successful.', life: 3000 });
       })
       .catch((err) => {

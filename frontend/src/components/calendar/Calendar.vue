@@ -41,6 +41,7 @@ function getEvents(range) {
         location: event.location,
         start: formatDatetime(event.start_time).slice(0, 16),
         end: formatDatetime(event.end_time).slice(0, 16),
+        rrule: event.rrule,
       })
     }
     // for (let meeting of res.calendar.meetings) {

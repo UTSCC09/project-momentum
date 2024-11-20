@@ -137,7 +137,11 @@ import { useToast } from 'primevue/usetoast';
 import { client } from "../../api/index";
 import { formatDatetime, formatFloatDate } from "../../api/utils";
 
+import { useCalendarStore } from "../../stores/calendar.store.ts";
+
 const emit = defineEmits(['close']);
+
+const calendarStore = useCalendarStore();
 
 function formatRecurrence(values) {
   if (values.repeat) {
@@ -194,9 +198,9 @@ const resolver = zodResolver(
 );
 
 const onFormSubmit = ({ values, valid, reset }) => {
+  console.log(`Received EventForm:`);
   console.log(values);
   if (valid) {
-    console.log("valid");
     const req = {
       name: values.name,
       description: values.description,
@@ -208,18 +212,32 @@ const onFormSubmit = ({ values, valid, reset }) => {
       req.rrule = formatRecurrence(values);
       req.end_recurrence = formatDatetime(values.until);
     }
+    console.log(`Sending request to createEvent:`);
     console.log(req);
     client.events.createEvent.mutate(req)
       .then((res) => {
         emit('close');
         reset();
+        console.log(`Received response from createEvent:`);
         console.log(res);
+        calendarStore.addEvent({
+          id: res.event.id,
+          title: res.event.name,
+          description: res.event.description,
+          location: res.event.location,
+          start: formatDatetime(res.event.start_time).slice(0, 16),
+          end: formatDatetime(res.event.end_time).slice(0, 16),
+          rrule: res.event.rrule,
+        })
         toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
       })
       .catch((err) => {
         console.error(err);
         toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, life: 3000 });
       });
+  }
+  else {
+    toast.add({ severity: 'error', summary: `Invalid form values.`, life: 3000 });
   }
 };
 

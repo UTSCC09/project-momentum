@@ -28,7 +28,7 @@ export const calendarRouter = trpc.router({
 
         const differenceInTime = endDate.getTime() - startDate.getTime();
         const differenceInDays = differenceInTime / (1000 * 60 * 60 * 24);
-        if (differenceInDays > 30) {
+        if (differenceInDays > 40) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Time Interval too Long" });
         }
 

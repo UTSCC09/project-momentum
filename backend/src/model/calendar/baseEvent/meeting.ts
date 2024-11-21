@@ -59,6 +59,16 @@ export const Meeting = sequelize.define("Meeting", {
         type: DataTypes.TIME,
         allowNull: true,
     },
+
+    rrule:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
+    participants:{
+        type: DataTypes.ARRAY(DataTypes.UUID),
+        allowNull: true,
+    }
 })
 
 

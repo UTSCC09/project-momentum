@@ -72,16 +72,10 @@ export const eventRouter = trpc.router({
         location: z.string().optional(),
         start_time: z.string().optional(),
         end_time: z.string().optional(),
-        recurring: z.object({
-            start: z.string().optional(),
-            end: z.string().optional(),
-            repeat_type: z.enum(['daily', 'weekly', 'monthly']).optional(),
-            repeat_interval: z.number().optional(),
-            repeat_on: z.string().optional(),
-        }).optional(),
+        rrule: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-        const { eventId, name, description, location, start_time, end_time, recurring } = input;
+        const { eventId, name, description, location, start_time, end_time, rrule } = input;
         
         try {
             const event = await Event.findOne({ where: { id: eventId } }) as any;
@@ -93,6 +87,7 @@ export const eventRouter = trpc.router({
             event.location = location || event.location;
             event.start_time = start_time || event.start_time;
             event.end_time = end_time || event.end_time;
+            event.rrule = rrule || event.rrule;
             await event.save();
             return {
                 event: event,

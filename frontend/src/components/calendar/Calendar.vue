@@ -41,6 +41,7 @@ function getEvents(range) {
         start: formatDatetime(event.start_time).slice(0, 16),
         end: formatDatetime(event.end_time).slice(0, 16),
         rrule: event.rrule,
+        type: "event",
       }));
       const meetings = res.calendar.meetings.map((meeting) => ({
         id: meeting.id,
@@ -50,6 +51,7 @@ function getEvents(range) {
         start: formatDatetime(meeting.start_time).slice(0, 16),
         end: formatDatetime(meeting.end_time).slice(0, 16),
         rrule: meeting.rrule,
+        type: "meeting",
       }));
       calendarStore.setEvents(events.concat(meetings));
     })

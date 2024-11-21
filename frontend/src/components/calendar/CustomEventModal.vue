@@ -1,10 +1,9 @@
 <template>
   <div class="custom-event-modal">
-    <!-- <input v-model="isChecked" type="checkbox" /> -->
 
     <div class="event-title-container">
       <p class="event-title">{{ calendarEvent.title }}</p>
-      <Button icon="pi pi-pencil" @click="visible = true" variant="text" />
+      <Button icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
     </div>
     <div class="event-subtitle-container">
       <p><i class="pi pi-map-marker" style="font-size: 0.75rem"></i> {{ calendarEvent.location }}</p>
@@ -13,38 +12,12 @@
     </div>
     <p class="event-description">{{ calendarEvent.description }}</p>
 
-    <Dialog v-model:visible="visible" modal header="Edit Event" :style="{ width: '50vw' }">
-      <div>
-        <IftaLabel>
-          <InputText id="title" v-model="title" variant="filled" />
-          <label for="title">Title</label>
-        </IftaLabel>
-      </div>
-      <div>
-        <IftaLabel>
-          <InputText id="location" v-model="location" />
-          <label for="location">Location</label>
-        </IftaLabel>
-      </div>
-      <div id="datetime">
-        <IftaLabel>
-          <DatePicker id="startDateTime" v-model="startDateTime" showTime hourFormat="24" fluid />
-          <label for="startDateTime">From</label>
-        </IftaLabel>
-        <IftaLabel>
-          <DatePicker id="endDateTime" v-model="endDateTime" showTime hourFormat="24" fluid />
-          <label for="endDateTime">To</label>
-        </IftaLabel>
-      </div>
-      <div>
-        <IftaLabel>
-          <Textarea id="description" v-model="description" rows="5" cols="30" style="resize: none" />
-          <label for="description">Description</label>
-        </IftaLabel>
-      </div>
-      <div id="event-edit-save-button">
-        <Button label="Save" @click="visible = false;" />
-      </div>
+    <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
+      <EventForm :initialValues="initialValues" @close="eventVisible = false;" />
+    </Dialog>
+
+    <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
+      <MeetingForm :initialValues="initialValues" @close="meetingVisible = false;" />
     </Dialog>
   </div>
 </template>
@@ -52,21 +25,20 @@
 <script lang="ts" setup>
 import { PropType, ref, watch } from 'vue'
 import { useEventsStore } from "../../stores/events.store.ts";
+import { client } from '../../api/index.ts';
 
-// components
-import IftaLabel from 'primevue/iftalabel';
-import InputText from 'primevue/inputtext';
-import DatePicker from 'primevue/datepicker';
-import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
-import Textarea from 'primevue/textarea';
+import Dialog from 'primevue/dialog';
+import EventForm from '../forms/EventForm.vue';
+import MeetingForm from '../forms/MeetingForm.vue';
+
+const eventsStore = useEventsStore();
 
 const props = defineProps({
   calendarEvent: {
     type: Object as PropType<{
-      title: string; id: number | string,
-      description: string, location: string,
-      start: string, end: string
+      title: string; id: number | string, description: string, location: string,
+      start: string, end: string, type: "event" | "meeting", rrule: string
     }>,
     required: true,
   },
@@ -75,19 +47,46 @@ const props = defineProps({
 const title = ref(props.calendarEvent.title);
 const startDateTime = ref(new Date(props.calendarEvent.start));
 const endDateTime = ref(new Date(props.calendarEvent.end));
-
-const isChecked = ref(false)
-watch(isChecked, () => {
-  eventsStore.toggleEvent(props.calendarEvent!.id)
-})
-
-const eventsStore = useEventsStore()
-
-const visible = ref(false);
-
 const description = ref(props.calendarEvent.description);
 const location = ref(props.calendarEvent.location);
 
+const eventVisible = ref(false);
+const meetingVisible = ref(false);
+
+const initialValues = ref();
+if (props.calendarEvent.type == "event") {
+  client.events.getEvent.query({ eventId: props.calendarEvent.id })
+  .then((res) => {
+    initialValues.value = {
+      name: res.event.name,
+      description: res.event.description,
+      location: res.event.location,
+      startTime: res.event.start_time,
+      endTime: res.event.end_time,
+      repeat: res.event.rrule ? true : false,
+      project_id: res.event.project_id,
+    }
+    if (initialValues.value.repeat) {
+      initialValues.value.frequency = initialValues.value.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
+      initialValues.value.until = initialValues.value.rrule.match(/UNTIL=([^;]+)/)?.[1] ?? null;
+      initialValues.value.interval = initialValues.value.rrule.match(/INTERVAL=([^;]+)/)?.[1] ?? null;
+      initialValues.value.byday = initialValues.value.rrule.match(/BYDAY=([^;]+)/)?.[1] ?? null;
+      initialValues.value.bymonthday = initialValues.value.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] ?? null;
+    }
+  })
+  .catch((err) => console.log(err))
+}
+
+function showForm(calendarEvent) {
+  if (calendarEvent.type == "meeting") {
+    meetingVisible.value = true;
+    eventVisible.value = false;
+  }
+  else {
+    meetingVisible.value = false;
+    eventVisible.value = true;
+  }
+}
 </script>
 
 <style lang="css" scoped>

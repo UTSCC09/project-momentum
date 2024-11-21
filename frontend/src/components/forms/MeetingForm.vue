@@ -107,7 +107,7 @@
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
-      <Button type="submit" severity="primary" label="Create" />
+      <Button type="submit" severity="primary" label="Submit" />
     </Form>
   </div>
 </template>
@@ -228,6 +228,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
           start: formatDatetime(res.meeting.start_time).slice(0, 16),
           end: formatDatetime(res.meeting.end_time).slice(0, 16),
           rrule: res.meeting.rrule,
+          type: "meeting",
         })
         toast.add({ severity: 'success', summary: 'Meeting created.', life: 3000 });
       })

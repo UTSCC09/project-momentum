@@ -3,7 +3,7 @@
     <Toast />
     <Form :resolver @submit="onFormSubmit">
       <div class="input-group" style="grid-template-columns: 3fr 1fr;">
-        <FormField v-slot="$field" name="name" initialValue="">
+        <FormField v-slot="$field" name="name">
           <IftaLabel>
             <InputText id="name" type="text" auto fluid />
             <label for="name">Name</label>
@@ -11,7 +11,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="project_id" initialValue="">
+        <FormField v-slot="$field" name="project_id">
           <IftaLabel>
             <Select inputId="project" :options="projects" optionLabel="name" optionValue="value" fluid />
             <label for="project">Project</label>
@@ -21,7 +21,7 @@
         </FormField>
       </div>
       <div class="input-group" style="grid-template-columns: 3fr 3fr 3fr 1fr;">
-        <FormField v-slot="$field" name="location" initialValue="">
+        <FormField v-slot="$field" name="location">
           <IftaLabel>
             <InputText type="text" id="location" fluid />
             <label for="location">Location</label>
@@ -29,7 +29,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="startTime" initialValue="">
+        <FormField v-slot="$field" name="startTime">
           <IftaLabel>
             <DatePicker inputId="startTime" showTime hourFormat="24" fluid />
             <label for="startTime">Starts</label>
@@ -37,7 +37,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="endTime" initialValue="">
+        <FormField v-slot="$field" name="endTime">
           <IftaLabel>
             <DatePicker inputId="endTime" showTime hourFormat="24" fluid />
             <label for="endTime">Ends</label>
@@ -45,48 +45,61 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="repeat" initialValue="" class="checkbox">
-          <Checkbox inputId="repeat" :binary="true" />
+        <FormField v-slot="$field" name="repeat" class="checkbox">
+          <Checkbox inputId="repeat" :binary="true" @change="toggleRecurrence" />
           <label for="repeat">Repeat</label>
         </FormField>
       </div>
-      <div class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
-        <FormField v-slot="$field" name="frequency" initialValue="">
+      <div v-if="visibleRecurrence" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+        <FormField v-slot="$field" name="frequency">
           <IftaLabel>
-            <Select inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
+            <Select v-model="frequency" inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
             <label for="frequency">Frequency</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="every" initialValue="">
+        <FormField v-slot="$field" name="interval">
           <IftaLabel>
-            <InputNumber inputId="every" :min="1" showButtons fluid />
-            <label for="every">Every</label>
+            <InputNumber v-if="frequency=='DAILY'" inputId="interval" :min="1" suffix=" days" showButtons fluid />
+            <InputNumber v-if="frequency=='WEEKLY'" inputId="interval" :min="1" suffix=" weeks" showButtons fluid />
+            <InputNumber v-if="frequency=='MONTHLY'" inputId="interval" :min="1" suffix=" months" showButtons fluid />
+            <InputNumber v-if="!frequency" inputId="interval" :min="1" showButtons fluid />
+            <label for="interval">Every</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="weekly" initialValue="">
+        <FormField v-if="frequency=='DAILY' || frequency=='WEEKLY'" v-slot="$field" name="byday">
           <IftaLabel>
-            <MultiSelect inputId="weekly" :options="weeklyDates" optionLabel="name" optionValue="value"
+            <MultiSelect inputId="byday" :options="weeklyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
-            <label for="weekly">Weekly</label>
+            <label for="byday">By day</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="monthly" initialValue="">
+        <FormField v-if="frequency=='MONTHLY'" v-slot="$field" name="bymonthday">
           <IftaLabel>
-            <MultiSelect inputId="monthly" :options="monthlyDates" optionLabel="name" optionValue="value"
+            <MultiSelect inputId="bymonthday" :options="monthlyDates" optionLabel="name" optionValue="value"
               :maxSelectedLabels="2" fluid />
-            <label for="monthly">Monthly</label>
+            <label for="bymonthday">By month</label>
           </IftaLabel>
+          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          </Message>
+        </FormField>
+        <FormField v-slot="$field" name="until">
+          <InputGroup class="md:w-80">
+            <IftaLabel>
+              <DatePicker inputId="until" />
+              <label for="until">Until</label>
+            </IftaLabel>
+          </InputGroup>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
       </div>
-      <FormField v-slot="$field" name="description" initialValue="">
+      <FormField v-slot="$field" name="description">
         <IftaLabel>
           <Textarea id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
@@ -106,11 +119,12 @@ import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import DatePicker from 'primevue/datepicker';
 import IftaLabel from 'primevue/iftalabel';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import MultiSelect from 'primevue/multiselect';
-import Password from 'primevue/password';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
@@ -121,9 +135,48 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime } from "../../api/utils";
+import { formatDatetime, formatFloatDate } from "../../api/utils";
+
+import { useCalendarStore } from "../../stores/calendar.store.ts";
 
 const emit = defineEmits(['close']);
+
+const calendarStore = useCalendarStore();
+
+function formatRecurrence(values) {
+  if (values.repeat) {
+    let recurrence = "";
+    recurrence += `FREQ=${values.frequency};`;
+    recurrence += `INTERVAL=${values.interval.toString()};`;
+    recurrence += `UNTIL=${formatFloatDate(values.until)};`;
+    values.frequency == "DAILY" || values.frequency == "WEEKLY" ? 
+    recurrence += `BYDAY=${values.byday.toString()};` :
+    recurrence += `BYMONTHDAY=${values.bymonthday.toString()};`;
+    return recurrence;
+  }
+}
+
+// const props = defineProps({
+//   initialValues: {
+//     type: Object as PropType<{
+//       name: string,
+//       description: string,
+//       location: string,
+//       startTime: Date,
+//       endTime: Date,
+//       repeat: boolean,
+//       frequency: "daily" | "monthly" | "weekly",
+//       every: number,
+//       weekly: number[],
+//       monthly: number[],
+//       project_id?: any,
+//     }>,
+//     required: false,
+//   },
+// })
+
+const countUntil = ref(true);
+const frequency = ref();
 
 const toast = useToast();
 
@@ -134,33 +187,57 @@ const resolver = zodResolver(
     location: z.string().min(1, { message: 'Location is required.' }),
     startTime: z.date(),
     endTime: z.date(),
-    repeat: z.any(),
-    frequency: z.any(),
-    every: z.any(),
-    weekly: z.any(),
-    monthly: z.any(),
+    repeat: z.union([z.boolean(), z.undefined()]),
+    frequency: z.union([z.literal("DAILY"), z.literal("WEEKLY"), z.literal("MONTHLY")]).optional(),
+    interval: z.any().optional(),
+    byday: z.any().optional(),
+    bymonthday: z.any().optional(),
+    until: z.date().optional(),
     project_id: z.string().optional(),
   })
 );
 
 const onFormSubmit = ({ values, valid, reset }) => {
+  console.log(`Received MeetingForm:`);
   console.log(values);
   if (valid) {
-    console.log("valid");
-    // client.tasks.createTask.mutate({
-    //   ...values,
-    //   deadline: formatDate(values.deadline)
-    // })
-    //   .then((res) => {
-    //     emit('close');
-    //     reset();
-    //     console.log(res);
-    //     toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //     toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, life: 3000 });
-    //   });
+    const req = {
+      name: values.name,
+      description: values.description,
+      location: values.location,
+      start_time: formatDatetime(values.startTime),
+      end_time: formatDatetime(values.endTime),
+    }
+    if (values.repeat) {
+      req.rrule = formatRecurrence(values);
+      req.end_recurrence = formatDatetime(values.until);
+    }
+    console.log(`Sending request to createMeeting:`);
+    console.log(req);
+    client.meetings.createMeeting.mutate(req)
+      .then((res) => {
+        emit('close');
+        reset();
+        console.log(`Received response from createMeeting:`);
+        console.log(res);
+        calendarStore.addEvent({
+          id: res.meeting.id,
+          title: res.meeting.name,
+          description: res.meeting.description,
+          location: res.meeting.location,
+          start: formatDatetime(res.meeting.start_time).slice(0, 16),
+          end: formatDatetime(res.meeting.end_time).slice(0, 16),
+          rrule: res.meeting.rrule,
+        })
+        toast.add({ severity: 'success', summary: 'Meeting created.', life: 3000 });
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.add({ severity: 'error', summary: `Failed to create meeting: ${err.message}.`, life: 3000 });
+      });
+  }
+  else {
+    toast.add({ severity: 'error', summary: `Invalid form values.`, life: 3000 });
   }
 };
 
@@ -169,19 +246,19 @@ const projects = ref([
 ]);
 
 const frequencies = ref([
-  { name: "daily", value: "daily" },
-  { name: "weekly", value: "weekly" },
-  { name: "monthly", value: "monthly" },
+  { name: "daily", value: "DAILY" },
+  { name: "weekly", value: "WEEKLY" },
+  { name: "monthly", value: "MONTHLY" },
 ]);
 
 const weeklyDates = ref([
-  { name: "Monday", value: 1 },
-  { name: "Tuesday", value: 2 },
-  { name: "Wednesday", value: 3 },
-  { name: "Thursday", value: 4 },
-  { name: "Friday", value: 5 },
-  { name: "Saturday", value: 6 },
-  { name: "Sunday", value: 7 },
+  { name: "Monday", value: "MO" },
+  { name: "Tuesday", value: "TU" },
+  { name: "Wednesday", value: "WE" },
+  { name: "Thursday", value: "TH" },
+  { name: "Friday", value: "FR" },
+  { name: "Saturday", value: "SA" },
+  { name: "Sunday", value: "SU" },
 ]);
 
 const monthlyDates = ref([
@@ -197,6 +274,27 @@ const monthlyDates = ref([
   { name: "28", value: 28 }, { name: "29", value: 29 }, { name: "30", value: 30 },
   { name: "31", value: 31 },
 ]);
+
+const visibleRecurrence = ref(false);
+
+function showRecurrence() {
+  visibleRecurrence.value = true;
+}
+
+function hideRecurrence() {
+  // clear and hide
+  visibleRecurrence.value = false;
+}
+
+function toggleRecurrence(event) {
+  // console.log(event.target.checked);
+  if (event.target.checked) {
+    showRecurrence();
+  }
+  else {
+    hideRecurrence();
+  }
+} 
 </script>
 
 <style lang="css" scoped>
@@ -216,6 +314,7 @@ const monthlyDates = ref([
 .input-group {
   display: grid;
   column-gap: 1rem;
+  align-items: center;
 }
 
 .checkbox {
@@ -228,5 +327,17 @@ const monthlyDates = ref([
 .checkbox {
   color: var(--p-iftalabel-color);
   width: fit-content;
+}
+
+.p-inputgroupaddon {
+  padding: 0;
+}
+
+.p-togglebutton {
+  --p-togglebutton-content-checked-shadow: none;
+  --p-togglebutton-content-checked-background: var(--p-surface-100);
+  width: 100%;
+  height: 100%;
+  font-size: small;
 }
 </style>

@@ -42,10 +42,16 @@ function getEvents(range) {
         end: formatDatetime(event.end_time).slice(0, 16),
         rrule: event.rrule,
       }));
-      calendarStore.setEvents(events);
-      // for (let meeting of res.calendar.meetings) {
-      //   calendarApp.eventsService.add(meeting);
-      // }
+      const meetings = res.calendar.meetings.map((meeting) => ({
+        id: meeting.id,
+        title: meeting.name,
+        description: meeting.description,
+        location: meeting.location,
+        start: formatDatetime(meeting.start_time).slice(0, 16),
+        end: formatDatetime(meeting.end_time).slice(0, 16),
+        rrule: meeting.rrule,
+      }));
+      calendarStore.setEvents(events.concat(meetings));
     })
     .catch((err) => {
       console.log(err);
@@ -112,6 +118,16 @@ const config = {
     onRangeUpdate(range) {
       getEvents(range);
     },
+    onEventUpdate(updatedEvent) {
+      calendarStore.updateEvent(updatedEvent);
+      client.events.updateEvent.mutate({
+        eventId: updatedEvent.id,
+        start_time: updatedEvent.start,
+        end_time: updatedEvent.end,
+      })
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+    }
   },
 };
 

@@ -229,11 +229,11 @@ const onFormSubmit = ({ values, valid, reset }) => {
           end: formatDatetime(res.event.end_time).slice(0, 16),
           rrule: res.event.rrule,
         })
-        toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Event created.', life: 3000 });
       })
       .catch((err) => {
         console.error(err);
-        toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, life: 3000 });
+        toast.add({ severity: 'error', summary: `Failed to create event: ${err.message}.`, life: 3000 });
       });
   }
   else {

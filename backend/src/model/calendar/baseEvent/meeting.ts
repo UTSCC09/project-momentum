@@ -66,7 +66,7 @@ export const Meeting = sequelize.define("Meeting", {
     },
 
     participants:{
-        type: DataTypes.ARRAY(DataTypes.UUID),
+        type: DataTypes.JSON,
         allowNull: true,
     }
 })

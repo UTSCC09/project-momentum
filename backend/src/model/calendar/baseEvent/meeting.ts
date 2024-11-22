@@ -51,12 +51,12 @@ export const Meeting = sequelize.define("Meeting", {
     },
 
     start_time:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
     },
 
     end_time:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
     },
 

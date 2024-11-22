@@ -28,7 +28,7 @@ export const Project = sequelize.define("Project", {
 
     // further restriction on the element in the array
     participants: {
-        type: DataTypes.STRING,
+        type: DataTypes.JSON,
         allowNull: false,
         // TODO: check each element is in Users
     },

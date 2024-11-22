@@ -6,8 +6,9 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
+import { meet } from 'googleapis/build/src/apis/meet';
 
-export function getCalendar( starttime: string, endtime: string, userId?: string, project_id?: string) {
+export function getCalendarEvents( starttime: string, endtime: string, userId?: string, project_id?: string) {
     const eventConditions: any = {}
     eventConditions.start_time = { [Op.gte]: starttime};
     eventConditions.end_time = { [Op.lte]: endtime };
@@ -61,8 +62,17 @@ export const calendarRouter = trpc.router({
         }
 
         try {
+            meetingWhereConditions.start_time = { [Op.gte]: startDate};
+            meetingWhereConditions.end_time = { [Op.lte]: endDate };
+
+
             const meetings = await Meeting.findAll({
-                where: meetingWhereConditions,
+                where: {
+                    [Op.or]: [
+                        meetingWhereConditions, 
+                        { rrule: { [Op.ne]: null } }
+                    ]
+                }
             });
             
             eventWhereConditions.start_time = { [Op.gte]: startDate};

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { Router } from "express";
 
-import { getCalendar } from "../routers/calendar/calendar";
+import { getCalendarEvents } from "../routers/calendar/calendar";
 
 dotenv.config()
 const openai = new OpenAI({
@@ -25,7 +25,7 @@ AIRouter.post("/getTaskSchedual", async (req, res) => {
     console.log(req.body);
 
     const { start_time, end_time } = req.body;
-    const calendar = await getCalendar(start_time, end_time);
+    const calendar = await getCalendarEvents(start_time, end_time);
     
     const { task } = req.body;
     const completion = await openai.chat.completions.create({

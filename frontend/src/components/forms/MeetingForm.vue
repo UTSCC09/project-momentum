@@ -135,7 +135,7 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime, formatFloatDate } from "../../api/utils";
+import moment from 'moment-timezone';
 
 import { useCalendarStore } from "../../stores/calendar.store.ts";
 
@@ -148,7 +148,7 @@ function formatRecurrence(values) {
     let recurrence = "";
     recurrence += `FREQ=${values.frequency};`;
     recurrence += `INTERVAL=${values.interval.toString()};`;
-    recurrence += `UNTIL=${formatFloatDate(values.until)};`;
+    recurrence += `UNTIL=${moment(values.until).local().format("YYYYMMDD")};`;
     values.frequency == "DAILY" || values.frequency == "WEEKLY" ? 
     recurrence += `BYDAY=${values.byday.toString()};` :
     recurrence += `BYMONTHDAY=${values.bymonthday.toString()};`;
@@ -205,12 +205,12 @@ const onFormSubmit = ({ values, valid, reset }) => {
       name: values.name,
       description: values.description,
       location: values.location,
-      start_time: formatDatetime(values.startTime),
-      end_time: formatDatetime(values.endTime),
+      start_time: moment(values.startTime).local().utc().toISOString(),
+      end_time: moment(values.endTime).local().utc().toISOString(),
     }
     if (values.repeat) {
       req.rrule = formatRecurrence(values);
-      req.end_recurrence = formatDatetime(values.until);
+      req.end_recurrence = moment(values.until).local().utc().toISOString();
     }
     console.log(`Sending request to createMeeting:`);
     console.log(req);
@@ -225,8 +225,8 @@ const onFormSubmit = ({ values, valid, reset }) => {
           title: res.meeting.name,
           description: res.meeting.description,
           location: res.meeting.location,
-          start: formatDatetime(res.meeting.start_time).slice(0, 16),
-          end: formatDatetime(res.meeting.end_time).slice(0, 16),
+          start: moment.utc(res.meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(res.meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
           rrule: res.meeting.rrule,
           type: "meeting",
         })

@@ -32,6 +32,8 @@ import Dialog from 'primevue/dialog';
 import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
 
+import momemnt from 'moment-timezone';
+
 const eventsStore = useEventsStore();
 
 const props = defineProps({
@@ -44,12 +46,6 @@ const props = defineProps({
   },
 })
 
-const title = ref(props.calendarEvent.title);
-const startDateTime = ref(new Date(props.calendarEvent.start));
-const endDateTime = ref(new Date(props.calendarEvent.end));
-const description = ref(props.calendarEvent.description);
-const location = ref(props.calendarEvent.location);
-
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
 
@@ -61,8 +57,8 @@ if (props.calendarEvent.type == "event") {
       name: res.event.name,
       description: res.event.description,
       location: res.event.location,
-      startTime: res.event.start_time,
-      endTime: res.event.end_time,
+      startTime: moment.utc(res.event.start_time).local().toDate(),
+      endTime: moment.utc(res.event.end_time).local().toDate(),
       repeat: res.event.rrule ? true : false,
       project_id: res.event.project_id,
     }

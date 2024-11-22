@@ -27,8 +27,8 @@ export const calendarRouter = trpc.router({
     .input(z.object({
         userId: z.string().optional(),
         project_id: z.string().optional(),
-        start_date: z.string().date(),
-        end_date: z.string().date(),
+        start_date: z.string(),
+        end_date: z.string(),
     }))
     .query(async ({ input, ctx }) => {
         const uid = input.userId || ctx.userId;

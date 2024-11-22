@@ -70,7 +70,7 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime } from "../../api/utils";
+import moment from 'moment-timezone';
 
 const emit = defineEmits(['close']);
 
@@ -92,7 +92,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
       name: values.name,
       description: values.description,
       location: values.location,
-      deadline: formatDatetime(values.deadline),
+      deadline: moment(values.deadline).local().utc().toISOString(),
     }
     if (values.project_id) {
       req.project_id = values.project_id;

@@ -135,7 +135,7 @@ import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime, formatFloatDate } from "../../api/utils";
+import moment from 'moment-timezone';
 
 import { useCalendarStore } from "../../stores/calendar.store.ts";
 
@@ -148,7 +148,7 @@ function formatRecurrence(values) {
     let recurrence = "";
     recurrence += `FREQ=${values.frequency};`;
     recurrence += `INTERVAL=${values.interval.toString()};`;
-    recurrence += `UNTIL=${formatFloatDate(values.until)};`;
+    recurrence += `UNTIL=${moment(values.until).local().format("YYYYMMDD")};`;
     values.frequency == "DAILY" || values.frequency == "WEEKLY" ? 
     recurrence += `BYDAY=${values.byday.toString()};` :
     recurrence += `BYMONTHDAY=${values.bymonthday.toString()};`;
@@ -177,14 +177,14 @@ const props = defineProps({
       name: '',
       description: '',
       location: '',
-      startTime: new Date(),
-      endTime: new Date(),
+      startTime: null,
+      endTime: null,
       repeat: false,
       frequency: 'DAILY',
       interval: 1,
       byday: [],
       bymonthday: [],
-      until: new Date(),
+      until: null,
       project_id: '',
     })
   }
@@ -193,8 +193,8 @@ const props = defineProps({
 const name = ref(props.initialValues.name);
 const description = ref(props.initialValues.description);
 const location = ref(props.initialValues.location);
-const startTime = ref(new Date(props.initialValues.startTime));
-const endTime = ref(new Date(props.initialValues.endTime));
+const startTime = ref(props.initialValues.startTime);
+const endTime = ref(props.initialValues.endTime);
 const repeat = ref(props.initialValues.repeat);
 const frequency = ref(props.initialValues.frequency);
 const interval = ref(props.initialValues.interval);
@@ -232,12 +232,12 @@ const onFormSubmit = ({ values, valid, reset }) => {
       name: values.name,
       description: values.description,
       location: values.location,
-      start_time: formatDatetime(values.startTime),
-      end_time: formatDatetime(values.endTime),
+      start_time: moment(values.startTime).local().utc().toISOString(),
+      end_time: moment(values.endTime).local().utc().toISOString(),
     }
     if (values.repeat) {
       req.rrule = formatRecurrence(values);
-      req.end_recurrence = formatDatetime(values.until);
+      req.end_recurrence = moment(values.until).local().utc().toISOString();
     }
     console.log(`Sending request to createEvent:`);
     console.log(req);
@@ -252,8 +252,8 @@ const onFormSubmit = ({ values, valid, reset }) => {
           title: res.event.name,
           description: res.event.description,
           location: res.event.location,
-          start: formatDatetime(res.event.start_time).slice(0, 16),
-          end: formatDatetime(res.event.end_time).slice(0, 16),
+          start: moment.utc(res.event.start_time).local().format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(res.event.end_time).local().format("YYYY-MM-DD HH:mm"),
           rrule: res.event.rrule,
           type: "event",
         })

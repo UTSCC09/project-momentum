@@ -23,12 +23,12 @@ import UserMenu from './UserMenu.vue'
 import CalendarDrawerButton from './CalendarDrawerButton.vue'
 
 import { client } from "../../api/index";
-import { formatDate, formatDatetime } from "../../api/utils";
+import moment from 'moment-timezone';
 
 function getEvents(range) {
   const queryRange = {
-    start_date: formatDate(range.start),
-    end_date: formatDate(range.end),
+    start_date: moment(range.start).local().utc().toISOString(),
+    end_date: moment(range.end).local().utc().toISOString(),
   }
   client.calendar.getCalendar.query(queryRange)
     .then((res) => {
@@ -38,8 +38,8 @@ function getEvents(range) {
         title: event.name,
         description: event.description,
         location: event.location,
-        start: formatDatetime(event.start_time).slice(0, 16),
-        end: formatDatetime(event.end_time).slice(0, 16),
+        start: moment.utc(event.start_time).local().format("YYYY-MM-DD HH:mm"),
+        end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
         rrule: event.rrule,
         type: "event",
       }));
@@ -48,8 +48,8 @@ function getEvents(range) {
         title: meeting.name,
         description: meeting.description,
         location: meeting.location,
-        start: formatDatetime(meeting.start_time).slice(0, 16),
-        end: formatDatetime(meeting.end_time).slice(0, 16),
+        start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
+        end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
         rrule: meeting.rrule,
         type: "meeting",
       }));

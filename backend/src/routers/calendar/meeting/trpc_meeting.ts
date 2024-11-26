@@ -20,7 +20,6 @@ export const meetingRouter = trpc.router({
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
-        let new_recurring: any = null;
         const { name, description = null, location = null , start_time,
              end_time, project_id = null, rrule= null, participants=null } = input;
 

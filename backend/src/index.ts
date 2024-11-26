@@ -14,7 +14,7 @@ import { oauthMicrosoftRouter } from "./routers/oauth/microsoft_oauth";
 import { trpcRouter } from "./routers/trpc";
 
 import {connectDB} from "./datasource"
-connectDB()
+connectDB();
 
 dotenv.config();
 

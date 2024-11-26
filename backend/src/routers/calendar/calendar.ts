@@ -6,7 +6,8 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
-import { meet } from 'googleapis/build/src/apis/meet';
+import { Redisclient } from '../../service/redis';
+
 
 export function getCalendarEvents( starttime: string, endtime: string, userId?: string, project_id?: string) {
     const eventConditions: any = {}
@@ -48,6 +49,13 @@ export const calendarRouter = trpc.router({
             throw new TRPCError({ code: "BAD_REQUEST", message: "Time Interval too Long" });
         }
 
+        // if result in cache
+        const cachedResult = await Redisclient.get(`${uid}[${startDate}-${endDate}]`);
+        if(cachedResult) {
+            console.log("Cache hit");
+            return JSON.parse(cachedResult);
+        }
+
         // Build where conditions dynamically based on available parameters
         const meetingWhereConditions : any = {}
         const eventWhereConditions: any = {};
@@ -87,7 +95,7 @@ export const calendarRouter = trpc.router({
                 },
             });
             
-
+            Redisclient.set(`${uid}[${startDate}-${endDate}]`, JSON.stringify({ calendar: { meetings: meetings, events: constEvents} }));
             return { calendar: { meetings: meetings, events: constEvents} };
         } catch (error) {
             console.log(error);

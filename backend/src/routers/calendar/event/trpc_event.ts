@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Event } from '../../../model/calendar/baseEvent/event';
+import { clearUserCalendarCache } from '../../../service/redis';
 
 export const eventRouter = trpc.router({
 
@@ -31,6 +32,9 @@ export const eventRouter = trpc.router({
                 end_time: end_time,
                 ...(rrule ? { rrule: rrule } : {})
             });
+
+            await clearUserCalendarCache(uid || "");
+
             return {
                 event: event,
                 temp: "temp"

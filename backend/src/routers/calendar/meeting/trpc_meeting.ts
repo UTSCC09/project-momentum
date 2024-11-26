@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Meeting } from '../../../model/calendar/baseEvent/meeting';
 import { User } from '../../../model/user/user';
-
+import { clearUserCalendarCache } from '../../../service/redis';
 export const meetingRouter = trpc.router({
 
     createMeeting: userProcedure
@@ -47,6 +47,8 @@ export const meetingRouter = trpc.router({
                 ...(rrule ? { rrule: rrule } : {}),
                 participants: participantUsers
             });
+
+            await clearUserCalendarCache(uid || "");
 
             return {
                 meeting: meeting,

@@ -121,6 +121,8 @@ export const meetingRouter = trpc.router({
             meeting.rrule = rrule || meeting.rrule;
             await meeting.save();
 
+            await clearUserCalendarCache(meeting.uid || "");
+
             return {
                 meeting: meeting,
                 temp: "temp"
@@ -141,6 +143,8 @@ export const meetingRouter = trpc.router({
             if (meeting.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
             await meeting.destroy();
+            await clearUserCalendarCache(meeting.uid || "");
+
             return {
                 meeting: meeting,
                 temp: "temp"

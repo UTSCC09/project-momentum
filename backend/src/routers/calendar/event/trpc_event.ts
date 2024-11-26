@@ -93,6 +93,9 @@ export const eventRouter = trpc.router({
             event.end_time = end_time || event.end_time;
             event.rrule = rrule || event.rrule;
             await event.save();
+
+            await clearUserCalendarCache(event.uid || "");
+
             return {
                 event: event,
                 temp: "temp"
@@ -112,6 +115,8 @@ export const eventRouter = trpc.router({
         if (event.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         await event.destroy();
+        await clearUserCalendarCache(event.uid || "");
+
         return {
             event: event,
             temp: "temp"

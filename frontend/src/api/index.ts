@@ -1,16 +1,6 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { AppRouter } from "../../../backend/src/index";
 
-// Token and UID variables to store the latest values
-let token: string | null = null;
-let uid: string | null = null;
-
-// Function to update token and uid dynamically
-export function setAuthCredentials(newToken: string | null, newUid: string | null) {
-  token = newToken;
-  uid = newUid;
-}
-
 const host = import.meta.env.VITE_BACKEND_HOST || "localhost";
 const port = import.meta.env.VITE_BACKEND_PORT || "3000";
 

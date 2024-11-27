@@ -45,3 +45,24 @@ AIRouter.post("/getTaskSchedual", async (req, res) => {
     });
     res.json(completion.choices[0].message.content);
 });
+
+const NPLSystemInstruction = `
+You are a helpful assistant that can help me parse the input and extract the name, description, location, start time and end time of the event`;
+
+export async function eventNPL(input: string) {
+    const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+            { role: "system", content: "some system instruction" },
+            { role: "user", content: input },
+        ],
+        response_format: zodResponseFormat(z.object({
+            name: z.string().optional(),
+            description: z.string().optional(),
+            location: z.string().optional(),
+            start_time: z.string().optional(),
+            end_time: z.string().optional(),
+        }), "eventSchema")
+    });
+    return completion.choices[0].message.content;
+}

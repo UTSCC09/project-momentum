@@ -15,6 +15,10 @@
         <MeetingForm @close="meetingVisible = false;" />
       </Dialog>
 
+      <Dialog v-model:visible="projectVisible" modal header="Create Project" :style="{ width: '50vw' }">
+        <ProjectForm @close="projectVisible = false;" />
+      </Dialog>
+
       <Button label="Test" @click="test" style="margin-top: 1rem;"></Button>
     </div>
   </div>
@@ -28,6 +32,7 @@ import Dialog from 'primevue/dialog';
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
+import ProjectForm from '../forms/ProjectForm.vue';
 
 import { ref } from 'vue';
 import { client } from "../../api/index";
@@ -38,6 +43,7 @@ import { useAuthStore } from "../../stores/auth.store.ts";
 const taskVisible = ref(false);
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
+const projectVisible = ref(false);
 
 const items = [
   {
@@ -65,7 +71,7 @@ const items = [
   {
     label: 'Project',
     command: () => {
-      console.log("Project");
+      projectVisible.value = true;
     }
   }
 ];

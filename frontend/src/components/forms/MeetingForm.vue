@@ -57,7 +57,7 @@
           <label for="repeat">Repeat</label>
         </FormField>
       </div>
-      <div v-if="visibleRecurrence" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <div v-if="repeat" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
         <FormField v-slot="$field" name="frequency">
           <IftaLabel>
             <Select v-model="frequency" inputId="frequency" :options="frequencies" optionLabel="name"
@@ -158,11 +158,10 @@ function formatRecurrence(values) {
   if (values.repeat) {
     let recurrence = "";
     recurrence += `FREQ=${values.frequency};`;
-    recurrence += `INTERVAL=${values.interval.toString()};`;
+    recurrence += `INTERVAL=${values.interval ? values.interval.toString() : '1'};`;
     recurrence += `UNTIL=${moment(values.until).local().format("YYYYMMDD")};`;
-    values.frequency == "DAILY" || values.frequency == "WEEKLY" ?
-      recurrence += `BYDAY=${values.byday.toString()};` :
-      recurrence += `BYMONTHDAY=${values.bymonthday.toString()};`;
+    recurrence += values.byday ? `BYDAY=${values.byday.toString()};` : '';
+    recurrence += values.bymonthday ? `BYMONTHDAY=${values.bymonthday.toString()};` : '';
     return recurrence;
   }
 }
@@ -318,17 +317,6 @@ const monthlyDates = ref([
   { name: "28", value: 28 }, { name: "29", value: 29 }, { name: "30", value: 30 },
   { name: "31", value: 31 },
 ]);
-
-const visibleRecurrence = ref(false);
-
-function showRecurrence() {
-  visibleRecurrence.value = true;
-}
-
-function hideRecurrence() {
-  // clear and hide
-  visibleRecurrence.value = false;
-}
 
 function toggleRecurrence(event) {
   // console.log(event.target.checked);

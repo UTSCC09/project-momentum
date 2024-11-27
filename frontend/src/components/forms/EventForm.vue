@@ -203,8 +203,6 @@ const bymonthday = ref(props.initialValues.bymonthday);
 const until = ref(props.initialValues.until);
 const project_id = ref(props.initialValues.project_id);
 
-console.log(props.initialValues.name);
-
 const toast = useToast();
 
 const resolver = zodResolver(

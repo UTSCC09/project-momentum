@@ -7,6 +7,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
 // components
 import Calendar from './components/calendar/Calendar.vue';
@@ -92,4 +93,5 @@ app.use(PrimeVue, {
   },
   ripple: true,
 });
+app.directive('tooltip', Tooltip);
 app.mount('#app');

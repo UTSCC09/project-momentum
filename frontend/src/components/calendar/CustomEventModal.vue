@@ -32,7 +32,7 @@ import Dialog from 'primevue/dialog';
 import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
 
-import momemnt from 'moment-timezone';
+import moment from 'moment-timezone';
 
 const eventsStore = useEventsStore();
 
@@ -63,14 +63,33 @@ if (props.calendarEvent.type == "event") {
       project_id: res.event.project_id,
     }
     if (initialValues.value.repeat) {
-      initialValues.value.frequency = initialValues.value.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
-      initialValues.value.until = initialValues.value.rrule.match(/UNTIL=([^;]+)/)?.[1] ?? null;
-      initialValues.value.interval = initialValues.value.rrule.match(/INTERVAL=([^;]+)/)?.[1] ?? null;
-      initialValues.value.byday = initialValues.value.rrule.match(/BYDAY=([^;]+)/)?.[1] ?? null;
-      initialValues.value.bymonthday = initialValues.value.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] ?? null;
+      initialValues.value.frequency = res.event.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
     }
   })
   .catch((err) => console.log(err))
+}
+else if (props.calendarEvent.type == "meeting") {
+  client.meetings.getMeeting.query({ meetingId: props.calendarEvent.id })
+  .then((res) => {
+    initialValues.value = {
+      name: res.meeting.name,
+      description: res.meeting.description,
+      location: res.meeting.location,
+      startTime: moment.utc(res.meeting.start_time).local().toDate(),
+      endTime: moment.utc(res.meeting.end_time).local().toDate(),
+      repeat: res.meeting.rrule ? true : false,
+      project_id: res.meeting.project_id,
+    }
+    if (initialValues.value.repeat) {
+      initialValues.value.frequency = res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
+    }
+    console.log("meeting init");
+    console.log(initialValues);
+  })
+  .catch((err) => console.log(err))
+}
+else {
+  console.log("Unrecognized event type.");
 }
 
 function showForm(calendarEvent) {
@@ -78,9 +97,14 @@ function showForm(calendarEvent) {
     meetingVisible.value = true;
     eventVisible.value = false;
   }
-  else {
+  else if (calendarEvent.type == "meeting") {
     meetingVisible.value = false;
     eventVisible.value = true;
+  }
+  else {
+    console.log("Unrecognized event type.");
+    meetingVisible.value = false;
+    eventVisible.value = false;
   }
 }
 </script>

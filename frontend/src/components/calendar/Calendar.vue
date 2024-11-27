@@ -122,13 +122,24 @@ const config = {
     },
     onEventUpdate(updatedEvent) {
       calendarStore.updateEvent(updatedEvent);
-      client.events.updateEvent.mutate({
-        eventId: updatedEvent.id,
-        start_time: updatedEvent.start,
-        end_time: updatedEvent.end,
-      })
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err));
+      if (updatedEvent.type == "event") {
+        client.events.updateEvent.mutate({
+          eventId: updatedEvent.id,
+          start_time: moment(updatedEvent.start).local().utc().toISOString(),
+          end_time: moment(updatedEvent.end).local().utc().toISOString(),
+        })
+          .then((res) => console.log(res))
+          .catch((err) => console.log(err));
+      }
+      if (updatedEvent.type == "meeting") {
+        client.meetings.updateMeeting.mutate({
+          meetingId: updatedEvent.id,
+          start_time: moment(updatedEvent.start).local().utc().toISOString(),
+          end_time: moment(updatedEvent.end).local().utc().toISOString(),
+        })
+          .then((res) => console.log(res))
+          .catch((err) => console.log(err));
+      }
     }
   },
 };

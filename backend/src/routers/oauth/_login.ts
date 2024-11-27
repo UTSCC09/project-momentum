@@ -1,9 +1,10 @@
 import { trpc } from '../../trpc';
 import { z } from 'zod';
 import { Op } from 'sequelize';
-import cookie from 'cookie';
 import { SignJWT, jwtVerify } from 'jose';
 import { TRPCError } from '@trpc/server';
+
+import { Redisclient } from '../../service/redis';
 import { User } from '../../model/user/user';
 
 import argon2 from 'argon2';
@@ -12,6 +13,11 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-256-
 
 export const userProcedure = trpc.procedure.use(trpc.middleware(async ({ ctx, next }) => {
     const authHeader = ctx.authorization;
+
+    const userStatus = await Redisclient.get(`${ctx.userId}*`);
+    if (userStatus === "loggedOut") {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'User logged out' });
+    }
 
     if (!authHeader) {
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token missing or malformed' });
@@ -95,9 +101,17 @@ export const userRouter = trpc.router({
       }
     }),
 
-    loginGoogleUser: trpc.procedure
-    .input(z.object({  google_token: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    logoutUser: trpc.procedure
+    .mutation(async ({ ctx }) => {
+        ctx.res.setHeader('Set-Cookie', [
+            `token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`,
+            `userId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`
+        ]);
+
+        await Redisclient.set(`${ctx.userId}*`, "loggedOut");
+        // set expire time to be 30 days
+        await Redisclient.expire(`${ctx.userId}*`, 30 * 24 * 60 * 60);
         
-    }),
+        return { success: true };
+    })
 })

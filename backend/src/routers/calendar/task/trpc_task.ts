@@ -4,6 +4,8 @@ import { TRPCError } from '@trpc/server';
 
 import { userProcedure } from '../../oauth/_login';
 import { Task } from '../../../model/calendar/baseEvent/task';
+import { Event } from '../../../model/calendar/baseEvent/event';
+import { getTaskSchedual } from '../../../service/openAI';
 export const taskRouter = trpc.router({
 
     createTask: userProcedure
@@ -20,7 +22,7 @@ export const taskRouter = trpc.router({
         const { name, description = null, location = null, deadline = null, project_id = null, create_event } = input;
 
         try{
-            const task = await Task.create({
+            const task: any = await Task.create({
                 uid: uid,
                 name: name,
                 description: description,
@@ -29,12 +31,20 @@ export const taskRouter = trpc.router({
                 pid: project_id,
             });
 
-
+            let created_event = true;
             if (create_event){
-                // await Event.create({
-                //     uid: uid,
-                //     ...eventAttributes,
-                // });
+                const start_time = new Date().toISOString();
+                const end_time = new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toISOString();
+                const event:any = await getTaskSchedual(name, description || "", location || "", deadline || "", start_time, end_time);
+                const createdEvent: any = await Event.create({
+                    uid: uid,
+                    name: "finished "+name,
+                    description: description || "",
+                    location: location || "",
+                    start_time: event.start_time,
+                    end_time: event.end_time,
+                    task: task.id,
+                });
             }
 
             return {

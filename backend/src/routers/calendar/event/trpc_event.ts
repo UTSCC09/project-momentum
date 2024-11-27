@@ -15,13 +15,14 @@ export const eventRouter = trpc.router({
         start_time: z.string(),
         end_time: z.string(),
         rrule: z.string().optional(),
+        pid: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
 
-        const { name, description = null, location = null, start_time, end_time, rrule = null } = input;
+        const { name, description = null, location = null, start_time, end_time, rrule = null, pid = null } = input;
 
-        console.log(name, description, location, start_time, end_time, rrule);
+        console.log(name, description, location, start_time, end_time, rrule, pid);
         try{
             const event = await Event.create({
                 uid: uid,
@@ -30,7 +31,8 @@ export const eventRouter = trpc.router({
                 location: location,
                 start_time: start_time,
                 end_time: end_time,
-                ...(rrule ? { rrule: rrule } : {})
+                ...(rrule ? { rrule: rrule } : {}),
+                ...(pid ? { pid: pid } : {})
             });
 
             await clearUserCalendarCache(uid || "");

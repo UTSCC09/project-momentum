@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Event } from '../../../model/calendar/baseEvent/event';
 import { clearUserCalendarCache } from '../../../service/redis';
+import { eventNPL } from '../../../service/openAI';
 
 export const eventRouter = trpc.router({
 
@@ -45,6 +46,17 @@ export const eventRouter = trpc.router({
         catch (error){
             console.log(error);
         }
+    }),
+
+    createEventNPL: userProcedure
+    .input(z.object({humanInput: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { humanInput } = input;
+        const event = await eventNPL(humanInput);
+        return {
+            event: event,
+            temp: "temp"
+        };
     }),
 
     getEvent: userProcedure

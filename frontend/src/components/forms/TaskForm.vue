@@ -46,6 +46,12 @@
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
+      <FormField v-slot="$field" name="create_event" initialValue="">
+        <div class="checkbox-container">
+          <Checkbox inputId="create_event" :binary="true" />
+          <label for="create_event">Automatically create an event for your task</label>
+        </div>
+      </FormField>
       <Button type="submit" severity="primary" label="Create" />
     </Form>
   </div>
@@ -55,6 +61,7 @@
 import { Form } from '@primevue/forms';
 import { FormField } from '@primevue/forms';
 import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
 import DatePicker from 'primevue/datepicker';
 import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
@@ -83,6 +90,7 @@ const resolver = zodResolver(
     location: z.string().min(1, { message: 'Location is required.' }),
     deadline: z.date(),
     project_id: z.string().optional(),
+    create_event: z.boolean().optional(),
   })
 );
 
@@ -93,6 +101,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
       description: values.description,
       location: values.location,
       deadline: moment(values.deadline).local().utc().toISOString(),
+      create_event: values.create_event ? true : false,
     }
     if (values.project_id) {
       req.project_id = values.project_id;
@@ -140,5 +149,11 @@ const projects = ref([
 
 .input-group .p-formfield {
   flex: 1 0 auto;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

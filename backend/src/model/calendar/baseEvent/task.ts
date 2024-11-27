@@ -51,7 +51,7 @@ export const Task = sequelize.define("Task", {
     },
 
     deadline:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
     },
     

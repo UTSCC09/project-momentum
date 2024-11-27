@@ -93,11 +93,12 @@ else {
 }
 
 function showForm(calendarEvent) {
+  console.log(calendarEvent);
   if (calendarEvent.type == "meeting") {
     meetingVisible.value = true;
     eventVisible.value = false;
   }
-  else if (calendarEvent.type == "meeting") {
+  else if (calendarEvent.type == "event") {
     meetingVisible.value = false;
     eventVisible.value = true;
   }

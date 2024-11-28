@@ -5,7 +5,7 @@ import { userProcedure } from '../../oauth/_login';
 import { Event } from '../../../model/calendar/baseEvent/event';
 import { clearUserCalendarCache } from '../../../service/redis';
 import { eventNPL } from '../../../service/openAI';
-
+import { updateUserEvents } from '../../../service/redis';
 export const eventRouter = trpc.router({
 
     createEvent: userProcedure
@@ -23,7 +23,6 @@ export const eventRouter = trpc.router({
 
         const { name, description = null, location = null, start_time, end_time, rrule = null, pid = null } = input;
 
-        console.log(name, description, location, start_time, end_time, rrule, pid);
         try{
             const event = await Event.create({
                 uid: uid,
@@ -36,6 +35,8 @@ export const eventRouter = trpc.router({
                 ...(pid ? { pid: pid } : {})
             });
 
+            // Update user cache
+            await updateUserEvents(uid || "", event);
             await clearUserCalendarCache(uid || "");
 
             return {
@@ -108,6 +109,8 @@ export const eventRouter = trpc.router({
             event.rrule = rrule || event.rrule;
             await event.save();
 
+            // Update user cache
+            await updateUserEvents(event.uid || "", event);
             await clearUserCalendarCache(event.uid || "");
 
             return {

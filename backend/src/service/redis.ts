@@ -6,6 +6,7 @@ const Redisclient = createClient();
 async function initializeRedis() {
     try {
         await Redisclient.connect();
+        await Redisclient.flushAll();
         console.log("Redis client connected successfully.");
     } catch (error) {
         console.error("Error connecting to Redis:", error);
@@ -23,34 +24,19 @@ export async function clearUserCalendarCache(uid: string) {
     }
 }
 
+export async function updateUserEvents(uid: string, newEvent: any) {
+    try {
+        const eventKey = `[Events]${uid}`;
+        // Fetch existing events
+        const existingEventsString = await Redisclient.get(eventKey);
+        const existingEvents = existingEventsString ? JSON.parse(existingEventsString) : [];
 
-// export async function nodeRedisDemo() {
-//   try {
-//     const client = createClient();
-//     await client.connect();
-
-//     await client.set('mykey', 'Hello from node redis');
-//     const myKeyValue = await client.get('mykey');
-//     console.log(myKeyValue);
-
-//     // const numAdded = await client.zAdd('vehicles', [
-//     //   {
-//     //     score: 4,
-//     //     value: 'car',
-//     //   },
-//     //   {
-//     //     score: 2,
-//     //     value: 'bike',
-//     //   },
-//     // ]);
-//     // console.log(`Added ${numAdded} items.`);
-
-//     // for await (const { score, value } of client.zScanIterator('vehicles')) {
-//     //   console.log(`${value} -> ${score}`);
-//     // }
-
-//     await client.quit();
-//   } catch (e) {
-//     console.error(e);
-//   }
-// }
+        // Add the new event at the start of the list
+        existingEvents.unshift(newEvent);
+        const latestEvents = existingEvents.slice(0, 50);
+        await Redisclient.set(eventKey, JSON.stringify(latestEvents));
+    } catch (error) {
+        console.error(`Failed to update events for user ${uid}:`, error);
+        throw error; // Rethrow the error to handle it in the calling function
+    }
+}

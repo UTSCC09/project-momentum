@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { Router } from "express";
 
-import { getCalendarEvents } from "../routers/calendar/calendar";
+import { getCalendarEvents, getCalendarEventsFromCache } from "../routers/calendar/calendar";
 
 dotenv.config()
 const openai = new OpenAI({
@@ -12,19 +12,29 @@ const openai = new OpenAI({
 });
 
 const systemTemplate = 
-`Provide list of events in the calendar {calendar} and the task {task}, find the best time slot to place this task.
- The task is provided with name, description, location and deadline, your job is find the
- 1. duration of the task
- 2. the best time slot to place the task in the calendar, should between current time and deadline
- The start time and end time of the task should between starttime and endtime and after the current time
- These assumptions must take consider of what the event is, where is it happening, and the deadline of the task
- Note: the start time and end time of the task returned should be in Toronto time`;
+`You are tasked with scheduling a new task within a user's calendar. Here is the information you need:
+1. Calendar Events: {calendar}
+2. Task Details: {task}
+3. Previous User Events: {previousEvents}
 
- export const AIRouter = Router();
+Your objectives are:
+- Identify the optimal time slot for the task, ensuring it fits between the current time and the task's deadline.
+- If the task is related to any previous events (based on name or description), aim to schedule it at the same time and duration as those events.
 
-export async function getTaskSchedual(name: string, description: string, location: string, deadline: string, start_time: string, end_time: string) {
+Considerations:
+- Ensure the task's start and end times fall within the provided start_time and end_time, and are after the current time.
+- Take into account the nature of the event, its location, task description, and deadline.
+
+Note: All times should be in Toronto time, including the task's start and end times, as well as the input start_time and end_time.`;
+
+export const AIRouter = Router();
+
+export async function getTaskSchedual(name: string, description: string, location: string, deadline: string, start_time: string, end_time: string, uid: string) {
     const calendar = await getCalendarEvents(start_time, end_time);
+    const previousEvents = await getCalendarEventsFromCache(uid);
     const task = `${name}, ${description}, ${location}, ${deadline}`;
+
+    console.log("Previous Events:", previousEvents);
 
     const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -32,11 +42,10 @@ export async function getTaskSchedual(name: string, description: string, locatio
             { role: "system", content: systemTemplate },
             {
                 role: "user",
-                content: `Calendar: ${calendar}, Task: ${task}, Start Time: ${start_time}, End Time: ${end_time}, Current Time: ${new Date().toISOString()}`,
+                content: `Calendar: ${calendar}, Task: ${task}, Previous Events: ${previousEvents}, Start Time: ${start_time}, End Time: ${end_time}, Current Time: ${new Date().toISOString()}`,
             },
         ],
         response_format: zodResponseFormat(z.object({
-            duration: z.number(),
             start_time: z.string(),
             end_time: z.string(),
         }), "eventSchema")

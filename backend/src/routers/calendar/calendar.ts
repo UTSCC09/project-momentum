@@ -24,6 +24,11 @@ export function getCalendarEvents( starttime: string, endtime: string, userId?: 
     });
 }
 
+export async function getCalendarEventsFromCache(uid: string) {
+    const cachedResult = await Redisclient.get(`[Events]${uid}`);
+    return cachedResult ? JSON.parse(cachedResult) : null;
+}
+
 export const calendarRouter = trpc.router({
     getCalendar: userProcedure
     .input(z.object({

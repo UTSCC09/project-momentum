@@ -6,7 +6,7 @@ import { userProcedure } from '../../oauth/_login';
 import { Task } from '../../../model/calendar/baseEvent/task';
 import { Event } from '../../../model/calendar/baseEvent/event';
 import { getTaskSchedual } from '../../../service/openAI';
-import { clearUserCalendarCache } from '../../../service/redis';
+import { clearUserCalendarCache, updateUserEvents } from '../../../service/redis';
 export const taskRouter = trpc.router({
 
     createTask: userProcedure
@@ -21,6 +21,7 @@ export const taskRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         const { name, description = null, location = null, deadline = null, project_id = null, create_event } = input;
+        let createdEvent: any = null;
 
         try{
             const task: any = await Task.create({
@@ -36,17 +37,9 @@ export const taskRouter = trpc.router({
                 const start_time = new Date().toISOString();
                 const end_time = new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toISOString();
                 
-                console.log("Getting event from AI...");
-                let event: any = await getTaskSchedual(name, description || "", location || "", deadline || "", start_time, end_time);
+                let event: any = await getTaskSchedual(name, description || "", location || "", deadline || "", start_time, end_time, uid || "");
                 event = JSON.parse(event);
-                
-                console.log("AI Response:", event, typeof event);
-                console.log("Event.start_time:", event.start_time);
-                console.log("Event.end_time:", event.end_time);
-
-                
-                console.log("Creating event...");
-                const createdEvent: any = await Event.create({
+                createdEvent = await Event.create({
                     uid: uid,
                     name: "finished " + name,
                     description: description || "",
@@ -58,11 +51,13 @@ export const taskRouter = trpc.router({
                 
                 // Remove cache
                 await clearUserCalendarCache(uid || "");
-                console.log("Event created successfully:", createdEvent);                
+                // Update user cache
+                await updateUserEvents(uid || "", createdEvent);         
             }
 
             return {
                 task: task,
+                event: createdEvent,
                 temp: "temp"
             };
         } catch (error){

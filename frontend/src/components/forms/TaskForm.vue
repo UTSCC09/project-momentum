@@ -71,7 +71,7 @@ import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
@@ -79,7 +79,13 @@ import { useToast } from 'primevue/usetoast';
 import { client } from "../../api/index";
 import moment from 'moment-timezone';
 
+import { useCalendarStore } from "../../stores/calendar.store.ts";
+import { useAuthStore } from '../../stores/auth.store.ts';
+
 const emit = defineEmits(['close']);
+
+const authStore = useAuthStore();
+const calendarStore = useCalendarStore();
 
 const toast = useToast();
 
@@ -112,6 +118,19 @@ const onFormSubmit = ({ values, valid, reset }) => {
         emit('close');
         reset();
         console.log(res);
+
+        if (res.event) {
+          calendarStore.addEvent({
+          id: res.event.id,
+          title: res.event.name,
+          description: res.event.description,
+          location: res.event.location,
+          start: moment.utc(res.event.start_time).local().format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(res.event.end_time).local().format("YYYY-MM-DD HH:mm"),
+          rrule: res.event.rrule,
+          type: "event",
+        });
+        }
         toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
       })
       .catch((err) => {
@@ -121,9 +140,20 @@ const onFormSubmit = ({ values, valid, reset }) => {
   }
 };
 
-const projects = ref([
-  { name: "Project 1", value: "1" },
-]);
+const projects = ref([]);
+
+onBeforeMount(() => {
+  client.projects.getProjectbyLead.query({ uid: authStore.user })
+    .then((res) => {
+      console.log(res);
+      for (const project of res.projects) {
+        projects.value.push({ name: project.name, value: project.id });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+});
 </script>
 
 <style lang="css" scoped>

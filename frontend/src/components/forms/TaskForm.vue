@@ -3,7 +3,7 @@
     <Toast />
     <Form :resolver @submit="onFormSubmit">
       <div class="input-group">
-        <FormField v-slot="$field" name="name" initialValue="">
+        <FormField v-slot="$field" name="name">
           <IftaLabel>
             <InputText id="name" type="text" auto fluid />
             <label for="name">Name</label>
@@ -11,7 +11,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="project_id" initialValue="">
+        <FormField v-slot="$field" name="project_id">
           <IftaLabel>
             <Select inputId="project" :options="projects" optionLabel="name" optionValue="value" fluid />
             <label for="project">Project</label>
@@ -21,7 +21,7 @@
         </FormField>
       </div>
       <div class="input-group">
-        <FormField v-slot="$field" name="location" initialValue="">
+        <FormField v-slot="$field" name="location">
           <IftaLabel>
             <InputText type="text" id="location" fluid />
             <label for="location">Location</label>
@@ -29,7 +29,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="deadline" initialValue="">
+        <FormField v-slot="$field" name="deadline">
           <IftaLabel>
             <DatePicker inputId="deadline" showTime hourFormat="24" fluid />
             <label for="deadline">Deadline</label>
@@ -38,7 +38,7 @@
           </Message>
         </FormField>
       </div>
-      <FormField v-slot="$field" name="description" initialValue="">
+      <FormField v-slot="$field" name="description">
         <IftaLabel>
           <Textarea id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
@@ -46,9 +46,9 @@
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
-      <FormField v-slot="$field" name="create_event" initialValue="">
+      <FormField v-slot="$field" name="create_event">
         <div class="checkbox-container">
-          <Checkbox inputId="create_event" :binary="true" />
+          <Checkbox inputId="create_event" binary />
           <label for="create_event">Automatically create an event for your task</label>
         </div>
       </FormField>
@@ -96,7 +96,7 @@ const resolver = zodResolver(
     location: z.string().min(1, { message: 'Location is required.' }),
     deadline: z.date(),
     project_id: z.string().optional(),
-    create_event: z.boolean().optional(),
+    create_event: z.boolean().default(false),
   })
 );
 
@@ -119,7 +119,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
         reset();
         console.log(res);
 
-        if (res.event) {
+        if (res && res.event) {
           calendarStore.addEvent({
           id: res.event.id,
           title: res.event.name,

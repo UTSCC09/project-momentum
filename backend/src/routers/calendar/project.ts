@@ -5,7 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../oauth/_login';
 import { User } from '../../model/user/user';
 import { Project } from '../../model/calendar/project';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 export const projectRouter = trpc.router({
 
     createProject: userProcedure
@@ -19,11 +19,13 @@ export const projectRouter = trpc.router({
         const { name, description = null, participants = null } = input;
         const participantId = [];
 
-        for(const participant in participants){
-            const user: any  = await User.findOne({ where: { email: participant } });
+        if (participants !== null){
+            for(const participant of participants){
+                const user: any  = await User.findOne({ where: { email: participant } });
             // skip if user not found
             if (!user) continue;
             participantId.push(user.id);
+            }
         }
 
         try{
@@ -66,7 +68,13 @@ export const projectRouter = trpc.router({
     }))
     .query(async ({ input, ctx }) => {
         const { uid } = input;
-        const projects = await Project.findAll({ where: { participants: { [Op.contains]: [uid] } } });
+        const projects = await Project.findAll({
+            where: Sequelize.where(
+                Sequelize.fn('JSON_CONTAINS', Sequelize.col('participants'), JSON.stringify([uid])),
+                true
+            )
+        });
+        
         return {
             projects: projects,
             success: true

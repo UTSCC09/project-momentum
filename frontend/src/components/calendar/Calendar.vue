@@ -63,13 +63,13 @@ function getEvents(range) {
     })
 
     // This doesn't seem to work.
-  // client.meetings.getMeetingbyParticipant.query({userId: authStore.user})
-  //   .then((res) => {
-  //     console.log(res);
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //   })
+  client.meetings.getMeetingbyParticipant.query({userId: authStore.user})
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
 }
 
 const config = {

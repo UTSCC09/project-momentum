@@ -5,7 +5,7 @@ import { userProcedure } from '../../oauth/_login';
 import { Meeting } from '../../../model/calendar/baseEvent/meeting';
 import { User } from '../../../model/user/user';
 import { clearUserCalendarCache, updateUserEvents } from '../../../service/redis';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 export const meetingRouter = trpc.router({
 
     createMeeting: userProcedure
@@ -27,7 +27,7 @@ export const meetingRouter = trpc.router({
         try{
             const participantUsers = [];
             if(participants !== null){
-                for(const participant in participants){
+                for(const participant of participants){
                     const user: any  = await User.findOne({ where: { email: participant } });
                     // skip if user not found
                     if (!user) continue;
@@ -89,10 +89,21 @@ export const meetingRouter = trpc.router({
     //     allowNull: true,
     // }
 
+    // [Op.contains]: [input.userId]
+    // TRPCClientError: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '@> '[\"5ccbd2b2-7380-49f7-958f-625b912065e3\"]'' at line 1
+    
+    // [Op.like]: `%${input.userId}%`
+    // Not working
     getMeetingbyParticipant: userProcedure
     .input(z.object({userId: z.string()}))
     .query(async ({ input }) => {
-        const meetings = await Meeting.findAll({ where: { participants: { [Op.contains]: [input.userId] } } });
+        console.log("userId:", input.userId);
+        const meetings = await Meeting.findAll({
+            where: Sequelize.where(
+                Sequelize.fn('JSON_CONTAINS', Sequelize.col('participants'), JSON.stringify([input.userId])),
+                true
+            )
+        });
         return {
             meetings: meetings,
             temp: "temp"

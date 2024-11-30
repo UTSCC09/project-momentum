@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
 
 import { createContext } from "./trpc"; 
+import { createWebSocketServer } from "./websocket";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
 import { AIRouter } from "./service/openAI";
@@ -36,6 +37,7 @@ app.use("/trpc", createExpressMiddleware({
   router: trpcRouter,
   createContext: createContext
 }));
-app.listen(3000 , '0.0.0.0', () => console.log("Server running on http://localhost:3000"));
+const server = app.listen(3000 , '0.0.0.0', () => console.log("Server running on http://localhost:3000"));
+createWebSocketServer(server);
 
 export type AppRouter = typeof trpcRouter;

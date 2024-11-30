@@ -19,11 +19,17 @@
 </template>
 
 <script setup lang="ts">
-// import { WS_EVENTS } from '../../utils/config'
-// import { videoConfiguration } from './../../mixins/WebRTC'
 import Video from './Video.vue';
 
-import { ref } from 'vue';
+import { ref, onBeforeUnmount, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useWebSocketStore } from '../../stores/websocket.store.ts';
+import { servers } from '../../utils/ice-servers.ts'
+
+let myClientId: string;
+
+const route = useRoute();
+const meetingId = route.params.id;
 
 const props = defineProps({
   conference: {
@@ -32,103 +38,175 @@ const props = defineProps({
   },
 });
 
-const peers = ref({});
-const peersLength = ref(0);
+const peers = ref<Record<string, { peerStream: MediaStream }>>({});
+const peersLength = ref<number>(0);
+const peerConnections = ref<Map<string, RTCPeerConnection>>(new Map<string, RTCPeerConnection>());
+const localStream = ref<MediaStream | null>(null);
 
-// export default {
-//   name: "Conference",
-//   props: {
-//     conference: Object,
-//     users: Array
-//   },
-//   mixins: [videoConfiguration],
-//   components: { Video },
-//   data: () => ({
-//     peers: {},
-//     peersLength: 0
-//   }),
-//   async mounted() {
-//     this.myVideo = document.getElementById("localVideo")
-//     // Admin join the room
-//     if (this.conference.admin) {
-//       await this.getUserMedia()
-//       this.$socket.emit(WS_EVENTS.joinConference, {
-//         ...this.$store.state,
-//         to: this.username
-//       })
-//     }
-//     // Offer
-//     if (this.conference.offer) {
-//       const { offer: { from, desc } } = this.conference
-//       this.init(from, desc)
-//     }
-//   },
-//   beforeDestroy() {
-//     Object.values(this.peers).forEach(peer => peer.pc.close())
-//     this.peers = {}
-//     this.$socket.emit(WS_EVENTS.leaveConference, {
-//       ...this.$store.state,
-//       from: this.username,
-//       conferenceRoom: this.conference.room
-//     })
-//   },
-//   methods: {
-//     async init(offer, desc) {
-//       await this.getUserMedia()
-//       this.initWebRTC(offer, desc)
-//     },
-//     invitate(user) {
-//       this.$socket.emit(WS_EVENTS.conferenceInvitation, {
-//         room: this.$store.state.room,
-//         to: user,
-//         from: this.username
-//       })
-//     },
-//     initWebRTC(user, desc) {
-//       // Add user
-//       this.$set(this.peers, user, {
-//         username: user,
-//         pc: new RTCPeerConnection(this.configuration),
-//         peerStream: undefined,
-//         peerVideo: undefined
-//       })
-//       this.addLocalStream(this.peers[user].pc)
-//       this.onIceCandidates(this.peers[user].pc, user, this.conference.room, true)
-//       this.onAddStream(this.peers[user], user)
+const websocketStore = useWebSocketStore();
 
-//       // Act accordingly
-//       desc
-//         ? this.handleAnswer(desc, this.peers[user].pc, user, this.conference.room, true)
-//         : this.createOffer(this.peers[user].pc, user, this.conference.room, true)
-//     },
-//   },
-//   watch: {
-//     conference: function ({ user, answer, candidate, userLeft, offer }, oldVal) {
-//       if (userLeft && userLeft !== oldVal.userLeft) {
-//         this.peersLength--
-//         this.peers[userLeft].pc.close()
-//         delete this.peers[userLeft]
-//       }
-//       // New user
-//       if (user && user !== oldVal.user) {
-//         this.initWebRTC(user)
-//         this.peersLength++
-//       }
-//       // Handle answer
-//       if (answer && oldVal.answer !== answer)
-//         this.setRemoteDescription(answer.desc, this.peers[answer.from].pc)
-//       // Add candidate
-//       if (candidate && oldVal.candidate !== candidate)
-//         this.addCandidate(this.peers[candidate.from].pc, candidate.candidate)
-//       // New offer
-//       if (offer && offer !== oldVal.offer && oldVal.offer !== undefined) {
-//         const { from, desc } = offer
-//         this.init(from, desc)
-//       }
+function initWebSocket() {
+  websocketStore.connect('ws://localhost:3000');
 
-//     }
-//   }
-// }
+  websocketStore.socket?.addEventListener('message', (event) => {
+    const message = JSON.parse(event.data);
+    console.log('Received signaling message:', message);
+    handleMessage(message);
+  });
+}
+
+function handleMessage(message: any) {
+  const { senderId, type, payload } = message;
+
+  if (type === 'offer') {
+    console.log('Received offer from:', senderId);
+    createAnswer(message);
+  }
+  else if (type === 'answer') {
+    console.log('Received answer from:', senderId);
+    const peerConnection = peerConnections.value.get(senderId);
+    if (peerConnection) {
+      const remoteDesc = new RTCSessionDescription(payload.answer);
+      peerConnection.setRemoteDescription(payload.answer)
+        .catch((error) => {
+          console.error('Error setting remote description for answer:', error);
+        });
+    }
+  }
+  else if (type === 'ice-candidate') {
+    console.log('Received ICE candidate from:', senderId);
+    // Add ICE candidate to the corresponding peer connection
+    const peerConnection = peerConnections.value.get(senderId);
+    if (peerConnection && payload.candidate) {
+      peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate))
+        .catch((error) => {
+          console.error('Error adding ICE candidate:', error);
+        });
+    }
+  }
+  else if (type === 'client-id') {
+    myClientId = payload.clientId;
+    console.log(myClientId);
+
+    websocketStore.sendMessage({
+      type: 'active-users',
+      senderId: myClientId,
+      payload: {
+        meetingId: meetingId,
+      }
+    });
+  }
+  else if (type === 'active-users') {
+    payload.users.forEach((peerId) => createPeerConnection(peerId));
+  }
+  else {
+    console.warn('Unrecognized message type from:', senderId);
+  }
+}
+
+async function createAnswer(message: any) {
+  const { senderId, type, payload } = message;
+
+  const peerConnection = new RTCPeerConnection(configuration);
+  peerConnections.value.set(senderId, peerConnection);
+
+  peerConnection.setRemoteDescription(new RTCSessionDescription(payload.offer));
+  peerConnection.addEventListener('icecandidate', event => {
+    if (event.candidate) {
+      websocketStore.sendMessage({
+        type: 'ice-candidate', senderId: myClientId,
+        payload: { receiverId: senderId, 'ice-candidate': event.candidate }
+      });
+    }
+  });
+  const answer = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(answer);
+  websocketStore.sendMessage({
+    type: 'answer', senderId: myClientId, 
+    payload: { receiverId: senderId, answer: answer }
+  });
+}
+
+async function createOffer(peerId: string) {
+  const peerConnection = new RTCPeerConnection({
+    iceServers: servers,
+  });
+  peerConnections.value.set(peerId, peerConnection);
+
+  peerConnection.addEventListener('icecandidate', event => {
+    if (event.candidate) {
+      websocketStore.sendMessage({
+        type: 'ice-candidate', senderId: myClientId,
+        payload: { receiverId: peerId, 'ice-candidate': event.candidate }
+      });
+    }
+  });
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+  websocketStore.sendMessage({
+    type: 'offer', senderId: myClientId, 
+    payload: { receiverId: peerId, offer: offer }
+  });
+}
+
+function initMediaStream() {
+  const constraints = {
+    video: true,
+    audio: true,
+  };
+
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+      console.log('Got local stream:', stream);
+      localStream.value = stream;
+
+      // Set the local video element's stream
+      const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
+      if (localVideo) {
+        localVideo.srcObject = stream;
+      }
+    })
+    .catch((error) => {
+      console.error('Error accessing media devices:', error);
+    });
+}
+
+function handlePeerConnect(peerId: string, stream: MediaStream) {
+  peers.value[peerId] = {
+    peerStream: stream,
+  };
+}
+
+function handlePeerDisconnect(peerId: string) {
+  if (peers.value[peerId]) {
+    delete peers.value[peerId];
+  }
+}
+
+function setupPeerConnection(peerConnection: RTCPeerConnection, peerId: string) {
+  peerConnection.ontrack = (event) => {
+    const remoteStream = event.streams[0];
+    handlePeerConnect(peerId, remoteStream);
+  };
+
+  peerConnection.onconnectionstatechange = () => {
+    if (peerConnection.connectionState === 'disconnected') {
+      handlePeerDisconnect(peerId);
+    }
+  };
+}
+
+onBeforeUnmount(() => {
+  if (websocketStore.socket) {
+    websocketStore.close();
+  }
+});
+
+onMounted(() => {
+  initWebSocket();
+  initMediaStream();
+});
 </script>
 
 <style lang="css" scoped>

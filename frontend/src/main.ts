@@ -28,7 +28,7 @@ const routes = [
   { path: '/all', component: CalendarWithSidebar },
   { path: '/tasks', component: Kanban },
   { path: '/', component: Home },
-  { path: '/meeting', component: Conference },
+  { path: '/meeting/:id', component: Conference },
 ];
 
 const router = createRouter({

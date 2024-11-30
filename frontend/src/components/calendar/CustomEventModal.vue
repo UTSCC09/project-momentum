@@ -112,7 +112,7 @@ function showForm(calendarEvent) {
 }
 
 function joinMeeting() {
-  router.push("/meeting");
+  router.push(`/meeting/${props.calendarEvent.id}`);
 }
 </script>
 

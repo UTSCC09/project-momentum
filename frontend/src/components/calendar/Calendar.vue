@@ -23,7 +23,10 @@ import UserMenu from './UserMenu.vue'
 import CalendarDrawerButton from './CalendarDrawerButton.vue'
 
 import { client } from "../../api/index";
+import { useAuthStore } from "../../stores/auth.store.ts";
 import moment from 'moment-timezone';
+
+const authStore = useAuthStore();
 
 function getEvents(range) {
   const queryRange = {
@@ -58,6 +61,15 @@ function getEvents(range) {
     .catch((err) => {
       console.log(err);
     })
+
+    // This doesn't seem to work.
+  // client.meetings.getMeetingbyParticipant.query({userId: authStore.user})
+  //   .then((res) => {
+  //     console.log(res);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //   })
 }
 
 const config = {

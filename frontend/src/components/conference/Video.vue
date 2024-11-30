@@ -1,6 +1,6 @@
 <template>
   <div class="video">
-    <div class="video-spinner">
+    <div v-if="!videoStream" class="video-spinner">
       <ProgressSpinner />
     </div>
 

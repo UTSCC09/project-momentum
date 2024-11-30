@@ -5,6 +5,7 @@ import { userProcedure } from '../../oauth/_login';
 import { Meeting } from '../../../model/calendar/baseEvent/meeting';
 import { User } from '../../../model/user/user';
 import { clearUserCalendarCache, updateUserEvents } from '../../../service/redis';
+import { Op } from 'sequelize';
 export const meetingRouter = trpc.router({
 
     createMeeting: userProcedure
@@ -77,6 +78,21 @@ export const meetingRouter = trpc.router({
     .input(z.object({userId: z.string()}))
     .query(async ({ input }) => {
         const meetings = await Meeting.findAll({ where: { uid: input.userId } });
+        return {
+            meetings: meetings,
+            temp: "temp"
+        };
+    }),
+
+    // participants:{
+    //     type: DataTypes.JSON,
+    //     allowNull: true,
+    // }
+
+    getMeetingbyParticipant: userProcedure
+    .input(z.object({userId: z.string()}))
+    .query(async ({ input }) => {
+        const meetings = await Meeting.findAll({ where: { participants: { [Op.contains]: [input.userId] } } });
         return {
             meetings: meetings,
             temp: "temp"

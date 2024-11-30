@@ -56,9 +56,9 @@ export const Task = sequelize.define("Task", {
     },
     
     progress:{
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.ENUM('not started', 'in progress', 'completed'),
         allowNull: false,
-        defaultValue: false,
+        defaultValue: 'not started',
     },
 })
 

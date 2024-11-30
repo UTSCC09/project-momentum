@@ -171,6 +171,36 @@ export const taskRouter = trpc.router({
         };
     }),
 
+    resetTask: userProcedure
+    .input(z.object({taskId: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { taskId } = input;
+        const task = await Task.findByPk(taskId) as any;
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+        task.progress = 'not started';
+        await task.save();
+        return {
+            task: task,
+            temp: "temp"
+        };
+    }),
+
+    progressTask: userProcedure
+    .input(z.object({taskId: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { taskId } = input;
+        const task = await Task.findByPk(taskId) as any;
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+        task.progress = 'in progress';
+        await task.save();
+        return {
+            task: task,
+            temp: "temp"
+        };
+    }),
+
     finishTask: userProcedure
     .input(z.object({taskId: z.string()}))
     .mutation(async ({ input, ctx }) => {
@@ -178,7 +208,7 @@ export const taskRouter = trpc.router({
         const task = await Task.findByPk(taskId) as any;
         if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
         if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
-        task.progress = true;
+        task.progress = 'completed';
         await task.save();
 
         // const event = await Event.findOne({ where: { task: taskId } });

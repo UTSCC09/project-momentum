@@ -33,39 +33,50 @@ function getEvents(range) {
     start_date: moment(range.start).local().utc().toISOString(),
     end_date: moment(range.end).local().utc().toISOString(),
   }
-  client.calendar.getCalendar.query(queryRange)
-    .then((res) => {
-      console.log(res.calendar);
-      const events = res.calendar.events.map((event) => ({
-        id: event.id,
-        title: event.name,
-        description: event.description,
-        location: event.location,
-        start: moment.utc(event.start_time).local().format("YYYY-MM-DD HH:mm"),
-        end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
-        rrule: event.rrule,
-        type: "event",
-      }));
-      const meetings = res.calendar.meetings.map((meeting) => ({
-        id: meeting.id,
-        title: meeting.name,
-        description: meeting.description,
-        location: meeting.location,
-        start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
-        end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
-        rrule: meeting.rrule,
-        type: "meeting",
-      }));
-      calendarStore.setEvents(events.concat(meetings));
-    })
-    .catch((err) => {
-      console.log(err);
-    })
 
-    // This doesn't seem to work.
-  client.meetings.getMeetingbyParticipant.query({userId: authStore.user})
+  client.meetings.getMeetingbyParticipant.query({ userId: authStore.user })
     .then((res) => {
-      console.log(res);
+      console.log(res.meetings);
+      const meetingsAsParticipants = res.meetings
+        .map((meeting) => ({
+          id: meeting.id,
+          title: meeting.name,
+          description: meeting.description,
+          location: meeting.location,
+          start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
+          rrule: meeting.rrule,
+          type: "meeting",
+        }));
+
+      client.calendar.getCalendar.query(queryRange)
+        .then((res) => {
+          console.log(res.calendar);
+          const events = res.calendar.events.map((event) => ({
+            id: event.id,
+            title: event.name,
+            description: event.description,
+            location: event.location,
+            start: moment.utc(event.start_time).local().format("YYYY-MM-DD HH:mm"),
+            end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
+            rrule: event.rrule,
+            type: "event",
+          }));
+          const meetings = res.calendar.meetings.map((meeting) => ({
+            id: meeting.id,
+            title: meeting.name,
+            description: meeting.description,
+            location: meeting.location,
+            start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
+            end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
+            rrule: meeting.rrule,
+            type: "meeting",
+          }));
+          calendarStore.setEvents(events.concat(meetings).concat(meetingsAsParticipants));
+        })
+        .catch((err) => {
+          console.log(err);
+        })
     })
     .catch((err) => {
       console.log(err);

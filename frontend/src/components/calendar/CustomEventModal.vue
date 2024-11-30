@@ -1,9 +1,8 @@
 <template>
   <div class="custom-event-modal">
-
     <div class="event-title-container">
       <p class="event-title">{{ calendarEvent.title }}</p>
-      <Button icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
+      <Button id="edit-button" icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
     </div>
     <div class="event-subtitle-container">
       <p><i class="pi pi-map-marker" style="font-size: 0.75rem"></i> {{ calendarEvent.location }}</p>
@@ -11,6 +10,7 @@
       </p>
     </div>
     <p class="event-description">{{ calendarEvent.description }}</p>
+    <Button id="join-button" v-if="calendarEvent.type == 'meeting'" label="Join meeting" fluid variant="raised" @click="joinMeeting" />
 
     <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
       <EventForm :initialValues="initialValues" @close="eventVisible = false;" />
@@ -26,6 +26,7 @@
 import { PropType, ref, watch } from 'vue'
 import { useEventsStore } from "../../stores/events.store.ts";
 import { client } from '../../api/index.ts';
+import { useRouter } from 'vue-router';
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -33,6 +34,8 @@ import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
 
 import moment from 'moment-timezone';
+
+const router = useRouter();
 
 const eventsStore = useEventsStore();
 
@@ -83,7 +86,6 @@ else if (props.calendarEvent.type == "meeting") {
     if (initialValues.value.repeat) {
       initialValues.value.frequency = res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
     }
-    console.log("meeting init");
     console.log(initialValues);
   })
   .catch((err) => console.log(err))
@@ -107,6 +109,10 @@ function showForm(calendarEvent) {
     meetingVisible.value = false;
     eventVisible.value = false;
   }
+}
+
+function joinMeeting() {
+  router.push("/meeting");
 }
 </script>
 
@@ -141,11 +147,6 @@ function showForm(calendarEvent) {
   flex-grow: 1;
 }
 
-.sx__calendar-wrapper button {
-  background-color: none;
-  color: var(--sx-on-primary-container);
-}
-
 .event-title-container {
   display: flex;
   justify-content: space-between;
@@ -161,8 +162,14 @@ function showForm(calendarEvent) {
   font-size: 0.75rem;
 }
 
-#event-edit-save-button {
-  display: flex;
-  justify-content: center;
+#edit-button {
+  background: var(--p-button-text-primary-background);
+  color: var(--p-button-text-primary-color);
+  border: none;
+}
+
+#join-button {
+  background: var(--p-button-primary-background);
+  color: var(--p-button-primary-color);
 }
 </style>

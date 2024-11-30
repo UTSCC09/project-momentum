@@ -14,6 +14,7 @@ import Calendar from './components/calendar/Calendar.vue';
 import CalendarWithSidebar from './components/calendar/CalendarWithSidebar.vue';
 import Kanban from './components/kanban/Kanban.vue';
 import Home from './components/Home.vue';
+import Conference from './components/conference/Conference.vue';
 
 // stylesheet, order is important!
 import '@schedule-x/theme-default/dist/index.css';
@@ -26,7 +27,8 @@ const routes = [
   { path: '/schedule', component: Calendar },
   { path: '/all', component: CalendarWithSidebar },
   { path: '/tasks', component: Kanban },
-  { path: '/', component: Home }
+  { path: '/', component: Home },
+  { path: '/meeting', component: Conference },
 ];
 
 const router = createRouter({

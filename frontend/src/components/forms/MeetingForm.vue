@@ -53,7 +53,7 @@
           </Message>
         </FormField>
         <FormField v-slot="$field" name="repeat" class="checkbox">
-          <Checkbox inputId="repeat" :binary="true" v-model="repeat" @change="toggleRecurrence" />
+          <Checkbox inputId="repeat" :binary="true" v-model="repeat" />
           <label for="repeat">Repeat</label>
         </FormField>
       </div>
@@ -317,16 +317,6 @@ const monthlyDates = ref([
   { name: "28", value: 28 }, { name: "29", value: 29 }, { name: "30", value: 30 },
   { name: "31", value: 31 },
 ]);
-
-function toggleRecurrence(event) {
-  // console.log(event.target.checked);
-  if (event.target.checked) {
-    showRecurrence();
-  }
-  else {
-    hideRecurrence();
-  }
-} 
 </script>
 
 <style lang="css" scoped>

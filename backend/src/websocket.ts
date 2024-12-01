@@ -13,7 +13,7 @@ export function createWebSocketServer(server: any) {
     console.log(`New client connected: ${clientId}`);
   
     ws.send(JSON.stringify({
-      type: 'client-id',
+      type: 'connect',
       senderId: 'server',
       payload: {
         clientId: clientId,
@@ -26,52 +26,59 @@ export function createWebSocketServer(server: any) {
   
       console.log(`Message received from ${senderId}:`, message);
 
-      if (type === 'active-users') {
-        const users = meetings.get(payload.meetingId);
-        if (users) {
+      if (type === 'join') {
+        const participants = meetings.get(payload.meetingId);
+        if (participants) {
           ws.send(JSON.stringify({
-            type: 'active-users',
+            type: 'join',
             senderId: 'server',
             payload: {
-              users: Array.from(users),
+              participants: Array.from(participants),
             }
           }));
-          users.add(senderId);
+          participants.add(senderId);
         }
         else {
           ws.send(JSON.stringify({
-            type: 'active-users',
+            type: 'join',
             senderId: 'server',
             payload: {
-              users: new Array<string>(),
+              participants: new Array<string>(),
             }
           }));
-          const newUsers = new Set<string>();
-          newUsers.add(senderId);
-          meetings.set(payload.meetingId, newUsers);
+          const newParticipants = new Set<string>();
+          newParticipants.add(senderId);
+          meetings.set(payload.meetingId, newParticipants);
         }
       }
-      else if (type === 'disconnect') {
-        const meeting = meetings.get(payload.meetingId);
-        if (meeting)
-          meeting.delete(senderId);
-        
-        const socket = clients.get(senderId);
-        if (socket)
-          socket.close();
-        clients.delete(senderId);
-      }
-      else {
-        const socket = payload.receiverId ? clients.get(payload.receiverId) : null;
+      else if (payload.receiverId) {
+        const socket = clients.get(payload.receiverId);
         if (socket)
           socket.send(JSON.stringify(message));
         else
           console.warn(`No client found: ${payload.receiverId}`);
       }
+      else {
+        console.warn('Unrecognized message format');
+      }
     });
   
     ws.on('close', () => {
       console.log(`Client disconnected: ${clientId}`);
+      meetings.forEach((participants) => {
+        if (participants.has(clientId)) {
+          participants.delete(clientId);
+          participants.forEach((participant) => {
+            const socket = clients.get(participant);
+            if (socket)
+              socket.send(JSON.stringify({
+                type: 'disconnect', senderId: clientId, payload: {}
+              }));
+            else
+              console.warn(`No client found: ${clientId}`);
+          })
+        }
+      })
       clients.delete(clientId);
     });
   }); 

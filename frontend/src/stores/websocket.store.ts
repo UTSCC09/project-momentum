@@ -25,7 +25,9 @@ export const useWebSocketStore = defineStore('websocket', {
         console.log('WebSocket closed');
       };
     },
-    sendMessage(message: Record<string, any>) {
+    send(message: Record<string, any>) {
+      console.log('WebSocket sending');
+      console.log(message);
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         this.socket.send(JSON.stringify(message));
       } else {

@@ -10,8 +10,9 @@
           :pauseAudio="pauseAudio" :muted="true">
         </Video>
       </div>
-      <div v-for="(item, key) in peers" :key="key" class="video">
-        <Video :videoId="key" :displayControls="false" :videoStream="peers[key].peerStream" :muted="false">
+      <div v-for="[key, item] in peers" :key="key" class="video">
+        <Video :videoId="key" :displayControls="false" :videoStream="item.peerStream" :pauseVideo="pauseVideo"
+          :pauseAudio="pauseAudio" :muted="false">
         </Video>
       </div>
     </div>
@@ -21,37 +22,140 @@
 <script setup lang="ts">
 import Video from './Video.vue';
 
-import { ref, onBeforeUnmount, onMounted } from 'vue';
+import { ref, watch, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useWebSocketStore } from '../../stores/websocket.store.ts';
-import { servers } from '../../utils/ice-servers.ts'
+import { useAuthStore } from '../../stores/auth.store.ts';
+import { servers } from '../../utils/ice-servers.ts';
+
+type Peer = {
+  pc: RTCPeerConnection, peerStream: MediaStream, peerVideo: HTMLVideoElement,
+}
 
 let myClientId: string;
 
 const route = useRoute();
-const meetingId = route.params.id;
+const meetingId = ref<string>('');
 
-const props = defineProps({
-  conference: {
-    type: Object,
-    required: true,
-  },
-});
-
-const peers = ref<Record<string, { peerStream: MediaStream }>>({});
-const peerConnections = ref<Map<string, RTCPeerConnection>>(new Map<string, RTCPeerConnection>());
+const peers = ref<Map<string, Peer>>(new Map<string, Peer>());
 const localStream = ref<MediaStream | null>(null);
 
 const websocketStore = useWebSocketStore();
+const authStore = useAuthStore();
 
-function initWebSocket() {
-  websocketStore.connect('ws://localhost:3000');
-
-  websocketStore.socket?.addEventListener('message', (event) => {
-    const message = JSON.parse(event.data);
-    console.log('Received signaling message:', message);
-    handleMessage(message);
+function createPeerConnection(peerId: string, description?: RTCSessionDescription) {
+  console.log("creating peerconnection with", peerId);
+  const pc = new RTCPeerConnection({ iceServers: servers })
+  peers.value.set(peerId, {
+    pc: pc,
+    peerStream: undefined,
+    peerVideo: undefined,
   });
+
+  // send message to all participants when ice candidate is discovered
+  pc.onicecandidate = ({ candidate }) => {
+    if (!candidate) return;
+    setTimeout(() => {
+      websocketStore.send({
+        type: 'ice-candidate', senderId: myClientId,
+        payload: {
+          receiverId: peerId,
+          'ice-candidate': candidate,
+        }
+      });
+    }, 500);
+  }
+
+  // receive media stream and add to peer connection
+  pc.ontrack = (event) => {
+    console.log("receiving media stream");
+    console.log(event);
+    const peer = peers.value.get(peerId);
+    if (peer) {
+      peer.peerVideo = peer.peerVideo || document.getElementById(peerId);
+      if (!peer.peerVideo.srcObject && event.streams && event.streams[0]) {
+        peer.peerStream = event.streams[0];
+        peer.peerVideo.srcObject = peer.peerStream;
+      }
+    }
+  }
+
+  // add local stream to peer connection
+  if (localStream.value) {
+    localStream.value.getTracks().forEach(track => {
+      pc.addTrack(track, localStream.value);
+    });
+  }
+
+  if (description) {
+    // set remote description
+    pc.setRemoteDescription(description)
+      .then(() => {
+        console.log(`setRemoteDescription: finished`);
+        createAnswer(pc, peerId);
+      })
+      .catch((err) => {
+        console.error(`Error setting the RemoteDescription: ${err}`);
+      });
+  }
+  else {
+    createOffer(pc, peerId);
+  }
+}
+
+function createAnswer(pc: RTCPeerConnection, peerId: string) {
+  console.log(`${authStore.user} create an answer: start`);
+  pc.createAnswer()
+    .then((answer) => {
+      console.log(`${authStore.user} setLocalDescription: start`);
+      pc.setLocalDescription(answer)
+        .then(() => {
+          console.log(`${authStore.user} setLocalDescription: finished`);
+          websocketStore.send({
+            type: 'answer', senderId: myClientId,
+            payload: { receiverId: peerId, answer: answer, }
+          });
+
+          console.log("ICE gathering state:", pc.iceGatheringState);
+          console.log("LocalDescription:", pc.localDescription);
+          console.log("RemoteDescription:", pc.remoteDescription);
+        })
+        .catch((err) => {
+          console.error(`Error setting LocalDescription: ${err}`);
+        })
+    })
+    .catch((err) => {
+      console.error(`Error creating answer: ${err}`);
+    });
+}
+
+function createOffer(pc: RTCPeerConnection, peerId: string) {
+  console.log(`${authStore.user} wants to start a call with ${peerId}`);
+  pc.createOffer({
+    offerToReceiveAudio: true,
+    offerToReceiveVideo: true,
+  })
+    .then((offer) => {
+      console.log(`${authStore.user} setLocalDescription: start`);
+      pc.setLocalDescription(offer)
+        .then(() => {
+          console.log(`${authStore.user} setLocalDescription: finished`);
+          websocketStore.send({
+            type: 'offer', senderId: myClientId,
+            payload: { receiverId: peerId, offer: offer, }
+          });
+
+          console.log("ICE gathering state:", pc.iceGatheringState);
+          console.log("LocalDescription:", pc.localDescription);
+          console.log("RemoteDescription:", pc.remoteDescription);
+        })
+        .catch((err) => {
+          console.error(`Error setting the LocalDescription: ${err}`);
+        })
+    })
+    .catch((err) => {
+      console.error(`Error creating offer: ${err}`);
+    })
 }
 
 function handleMessage(message: any) {
@@ -59,164 +163,59 @@ function handleMessage(message: any) {
 
   if (type === 'offer') {
     console.log('Received offer from:', senderId);
-    createAnswer(message);
+    createPeerConnection(senderId, payload.offer);
   }
   else if (type === 'answer') {
     console.log('Received answer from:', senderId);
-    const peerConnection = peerConnections.value.get(senderId);
-    if (peerConnection) {
-      const remoteDesc = new RTCSessionDescription(payload.answer);
-      peerConnection.setRemoteDescription(payload.answer)
-        .catch((error) => {
-          console.error('Error setting remote description for answer:', error);
+    const peer = peers.value.get(senderId)
+    if (peer)
+      peer.pc.setRemoteDescription(payload.answer)
+        .then(() => {
+          console.log(`setRemoteDescription: finished`);
+        })
+        .catch((err) => {
+          console.error(`Error setting the RemoteDescription: ${err}`);
         });
-    }
   }
   else if (type === 'ice-candidate') {
     console.log('Received ICE candidate from:', senderId);
-    // Add ICE candidate to the corresponding peer connection
-    const peerConnection = peerConnections.value.get(senderId);
-    if (peerConnection && payload.candidate) {
-      peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate))
+    const peer = peers.value.get(senderId);
+    if (peer && payload['ice-candidate']) {
+      peer.pc.addIceCandidate(new RTCIceCandidate(payload['ice-candidate']))
         .catch((error) => {
           console.error('Error adding ICE candidate:', error);
         });
     }
   }
-  else if (type === 'client-id') {
+  else if (type === 'connect') {
     myClientId = payload.clientId;
-    console.log(myClientId);
 
-    websocketStore.sendMessage({
-      type: 'active-users',
+    websocketStore.send({
+      type: 'join',
       senderId: myClientId,
       payload: {
-        meetingId: meetingId,
+        meetingId: meetingId.value,
       }
     });
   }
-  else if (type === 'active-users') {
-    payload.users.forEach((peerId) => createOffer(peerId));
+  else if (type === 'join') {
+    for (const peerId of payload.participants) {
+      createPeerConnection(peerId);
+    }
+  }
+  else if (type === 'disconnect') {
+    const peer = peers.value.get(senderId);
+    if (peer) {
+      peer.pc.close();
+      peers.value.delete(senderId);
+    }
+    else {
+      console.warn('Cannot find user:', senderId);
+    }
   }
   else {
     console.warn('Unrecognized message type from:', senderId);
   }
-}
-
-async function createAnswer(message: any) {
-  const { senderId, type, payload } = message;
-
-  const peerConnection = new RTCPeerConnection({
-    iceServers: servers,
-  });
-  peerConnections.value.set(senderId, peerConnection);
-
-  setupPeerConnection(peerConnection, senderId);
-  peerConnection.setRemoteDescription(new RTCSessionDescription(payload.offer));
-  peerConnection.addEventListener('icecandidate', (event) => {
-    if (event.candidate) {
-      console.log('New ICE candidate:', event.candidate);
-      websocketStore.sendMessage({
-        type: 'ice-candidate', senderId: myClientId,
-        payload: { receiverId: senderId, 'ice-candidate': event.candidate }
-      });
-    }
-  });
-
-  const answer = await peerConnection.createAnswer();
-  await peerConnection.setLocalDescription(answer);
-  websocketStore.sendMessage({
-    type: 'answer', senderId: myClientId,
-    payload: { receiverId: senderId, answer: answer }
-  });
-}
-
-async function createOffer(peerId: string) {
-  const peerConnection = new RTCPeerConnection({
-    iceServers: servers,
-  });
-  peerConnections.value.set(peerId, peerConnection);
-
-  setupPeerConnection(peerConnection, peerId);
-  peerConnection.addEventListener('icecandidate', (event) => {
-    if (event.candidate) {
-      console.log('New ICE candidate:', event.candidate);
-      websocketStore.sendMessage({
-        type: 'ice-candidate', senderId: myClientId,
-        payload: { receiverId: peerId, 'ice-candidate': event.candidate }
-      });
-    }
-  });
-
-  const offer = await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
-  websocketStore.sendMessage({
-    type: 'offer', senderId: myClientId,
-    payload: { receiverId: peerId, offer: offer }
-  });
-}
-
-function initMediaStream() {
-  const constraints = {
-    video: true,
-    audio: true,
-  };
-
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then((stream) => {
-      console.log('Got local stream:', stream);
-      localStream.value = stream;
-
-      // Set the local video element's stream
-      const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
-      if (localVideo) {
-        localVideo.srcObject = stream;
-      }
-
-      peerConnections.value.forEach((peerConnection, peerId) => {
-        localStream.value.getTracks().forEach((track) => {
-          peerConnection.addTrack(track, localStream.value);
-        });
-      });
-    })
-    .catch((error) => {
-      console.error('Error accessing media devices:', error);
-    });
-}
-
-function handlePeerConnect(peerId: string, stream: MediaStream) {
-  peers.value[peerId] = {
-    peerStream: stream,
-  };
-
-  console.log("peers", peers.value);
-}
-
-function handlePeerDisconnect(peerId: string) {
-  if (peers.value[peerId]) {
-    delete peers.value[peerId];
-  }
-}
-
-function setupPeerConnection(peerConnection: RTCPeerConnection, peerId: string) {
-  // add tracks
-  if (localStream.value)
-    localStream.value.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream.value);
-    });
-
-  // receive tracks
-  peerConnection.ontrack = (event) => {
-    const remoteStream = event.streams[0];
-    handlePeerConnect(peerId, remoteStream);
-  };
-
-  peerConnection.onconnectionstatechange = () => {
-    if (peerConnection.connectionState === 'disconnected') {
-      handlePeerDisconnect(peerId);
-    }
-  };
 }
 
 function pauseAudio() {
@@ -227,20 +226,43 @@ function pauseVideo() {
   localStream.value.getVideoTracks().forEach(t => (t.enabled = !t.enabled))
 }
 
-onBeforeUnmount(() => {
-  localStream.value.getTracks().forEach(track => track.stop());
-  if (websocketStore.socket) {
-    websocket.sendMessage({
-      type: 'disconnect', senderId: myClientId,
-      payload: { meetingId: meetingId }
+onMounted(() => {
+  // get meetingId
+  meetingId.value = route.params.id;
+
+  // initialize local video
+  const constraints = {
+    video: true,
+    audio: true,
+  };
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+      console.log('Got local stream:', stream);
+      localStream.value = stream;
+
+      // set local video
+      const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
+      if (localVideo) {
+        localVideo.srcObject = stream;
+      }
+
+      // initialize websocket and wait for message
+      websocketStore.connect('ws://localhost:3000');
+      websocketStore.socket?.addEventListener('message', (event) => {
+        handleMessage(JSON.parse(event.data));
+      });
+    })
+    .catch((err) => {
+      console.error('Error accessing media devices:', err);
     });
-    websocketStore.close();
-  }
 });
 
-onMounted(() => {
-  initMediaStream();
-  initWebSocket();
+onBeforeUnmount(() => {
+  peers.value.forEach((peer) => {
+    peer.pc.close();
+  });
+  peers.clear();
 });
 </script>
 

@@ -1,5 +1,4 @@
-export const servers = {
-  iceServers: [
+export const servers = [
       { url: 'stun:stun.services.mozilla.org' },
       { url: "stun:stun01.sipphone.com" },
       { url: "stun:stun.ekiga.net" },
@@ -269,5 +268,4 @@ export const servers = {
       { url: 'stun:stun3.l.google.com:19302' },
       { url: 'stun:stun4.l.google.com:19302' },
       { url: 'stun:stunserver.org:3478' },
-  ]
-}
+];

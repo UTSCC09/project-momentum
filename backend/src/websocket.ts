@@ -54,7 +54,7 @@ export function createWebSocketServer(server: any) {
       else {
         const socket = payload.receiverId ? clients.get(payload.receiverId) : null;
         if (socket)
-          socket.send(message)
+          socket.send(JSON.stringify(message));
         else
           console.warn(`No client found: ${payload.receiverId}`);
       }

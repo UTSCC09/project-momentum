@@ -39,7 +39,6 @@ const props = defineProps({
 });
 
 const peers = ref<Record<string, { peerStream: MediaStream }>>({});
-const peersLength = ref<number>(0);
 const peerConnections = ref<Map<string, RTCPeerConnection>>(new Map<string, RTCPeerConnection>());
 const localStream = ref<MediaStream | null>(null);
 
@@ -97,7 +96,7 @@ function handleMessage(message: any) {
     });
   }
   else if (type === 'active-users') {
-    payload.users.forEach((peerId) => createPeerConnection(peerId));
+    payload.users.forEach((peerId) => createOffer(peerId));
   }
   else {
     console.warn('Unrecognized message type from:', senderId);
@@ -107,22 +106,27 @@ function handleMessage(message: any) {
 async function createAnswer(message: any) {
   const { senderId, type, payload } = message;
 
-  const peerConnection = new RTCPeerConnection(configuration);
+  const peerConnection = new RTCPeerConnection({
+    iceServers: servers,
+  });
   peerConnections.value.set(senderId, peerConnection);
 
+  setupPeerConnection(peerConnection, senderId);
   peerConnection.setRemoteDescription(new RTCSessionDescription(payload.offer));
-  peerConnection.addEventListener('icecandidate', event => {
+  peerConnection.addEventListener('icecandidate', (event) => {
     if (event.candidate) {
+      console.log('New ICE candidate:', event.candidate);
       websocketStore.sendMessage({
         type: 'ice-candidate', senderId: myClientId,
         payload: { receiverId: senderId, 'ice-candidate': event.candidate }
       });
     }
   });
+
   const answer = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answer);
   websocketStore.sendMessage({
-    type: 'answer', senderId: myClientId, 
+    type: 'answer', senderId: myClientId,
     payload: { receiverId: senderId, answer: answer }
   });
 }
@@ -133,18 +137,21 @@ async function createOffer(peerId: string) {
   });
   peerConnections.value.set(peerId, peerConnection);
 
-  peerConnection.addEventListener('icecandidate', event => {
+  setupPeerConnection(peerConnection, peerId);
+  peerConnection.addEventListener('icecandidate', (event) => {
     if (event.candidate) {
+      console.log('New ICE candidate:', event.candidate);
       websocketStore.sendMessage({
         type: 'ice-candidate', senderId: myClientId,
         payload: { receiverId: peerId, 'ice-candidate': event.candidate }
       });
     }
   });
+
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   websocketStore.sendMessage({
-    type: 'offer', senderId: myClientId, 
+    type: 'offer', senderId: myClientId,
     payload: { receiverId: peerId, offer: offer }
   });
 }
@@ -166,6 +173,12 @@ function initMediaStream() {
       if (localVideo) {
         localVideo.srcObject = stream;
       }
+
+      peerConnections.value.forEach((peerConnection, peerId) => {
+        localStream.value.getTracks().forEach((track) => {
+          peerConnection.addTrack(track, localStream.value);
+        });
+      });
     })
     .catch((error) => {
       console.error('Error accessing media devices:', error);
@@ -176,6 +189,8 @@ function handlePeerConnect(peerId: string, stream: MediaStream) {
   peers.value[peerId] = {
     peerStream: stream,
   };
+
+  console.log("peers", peers.value);
 }
 
 function handlePeerDisconnect(peerId: string) {
@@ -185,6 +200,13 @@ function handlePeerDisconnect(peerId: string) {
 }
 
 function setupPeerConnection(peerConnection: RTCPeerConnection, peerId: string) {
+  // add tracks
+  if (localStream.value)
+    localStream.value.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream.value);
+    });
+
+  // receive tracks
   peerConnection.ontrack = (event) => {
     const remoteStream = event.streams[0];
     handlePeerConnect(peerId, remoteStream);
@@ -204,8 +226,8 @@ onBeforeUnmount(() => {
 });
 
 onMounted(() => {
-  initWebSocket();
   initMediaStream();
+  initWebSocket();
 });
 </script>
 

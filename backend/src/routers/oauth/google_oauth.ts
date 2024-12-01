@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import { Router, Request, Response, NextFunction } from "express";
 import { SignJWT, jwtVerify } from "jose";
-import { authMiddleware } from "../_login";
+import { authMiddleware } from "./_login";
 
 import { User } from "../../model/user/user";
 import { Oauth } from "../../model/user/oauth";

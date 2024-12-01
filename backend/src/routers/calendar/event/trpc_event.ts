@@ -49,17 +49,6 @@ export const eventRouter = trpc.router({
         }
     }),
 
-    createEventNPL: userProcedure
-    .input(z.object({humanInput: z.string()}))
-    .mutation(async ({ input, ctx }) => {
-        const { humanInput } = input;
-        const event = await eventNPL(humanInput);
-        return {
-            event: event,
-            temp: "temp"
-        };
-    }),
-
     getEvent: userProcedure
     .input(z.object({eventId: z.string()}))
     .query(async ({ input }) => {

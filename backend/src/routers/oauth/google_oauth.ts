@@ -1,6 +1,7 @@
 import { google } from "googleapis";
-import { Router } from "express";
-import { SignJWT } from "jose";
+import { Router, Request, Response, NextFunction } from "express";
+import { SignJWT, jwtVerify } from "jose";
+import { authMiddleware } from "../_login";
 
 import { User } from "../../model/user/user";
 import { Oauth } from "../../model/user/oauth";
@@ -141,7 +142,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
   }
 });
 
-oauthGoogleRouter.get("/calendar", async (req, res) => {
+oauthGoogleRouter.get("/calendar", authMiddleware, async (req, res) => {
   try{
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     const response2 = await calendar.events.list({

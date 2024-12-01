@@ -8,13 +8,30 @@ import { Redisclient } from '../../service/redis';
 import { User } from '../../model/user/user';
 
 import argon2 from 'argon2';
+import { Request, Response, NextFunction } from "express";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-256-bit-secret'); //TODO: change to actual secrete
+
+// auth middleware
+export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  const uid = req.cookies.userId;
+  const jwt = req.cookies.token;
+  if (!uid || !jwt) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    await jwtVerify(jwt, JWT_SECRET);
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Unauthorized" });
+  }
+}
 
 export const userProcedure = trpc.procedure.use(trpc.middleware(async ({ ctx, next }) => {
     const authHeader = ctx.authorization;
 
-    const userStatus = await Redisclient.get(`${ctx.userId}*`);
+    const userStatus = await Redisclient.get(`${ctx.userId}`);
     if (userStatus === "loggedOut") {
         throw new TRPCError({ code: 'FORBIDDEN', message: 'User logged out' });
     }
@@ -108,9 +125,9 @@ export const userRouter = trpc.router({
             `userId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`
         ]);
 
-        await Redisclient.set(`${ctx.userId}*`, "loggedOut");
+        await Redisclient.set(`${ctx.userId}`, "loggedOut");
         // set expire time to be 30 days
-        await Redisclient.expire(`${ctx.userId}*`, 30 * 24 * 60 * 60);
+        await Redisclient.expire(`${ctx.userId}`, 30 * 24 * 60 * 60);
         
         return { success: true };
     })

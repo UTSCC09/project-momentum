@@ -84,16 +84,6 @@ export const meetingRouter = trpc.router({
         };
     }),
 
-    // participants:{
-    //     type: DataTypes.JSON,
-    //     allowNull: true,
-    // }
-
-    // [Op.contains]: [input.userId]
-    // TRPCClientError: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '@> '[\"5ccbd2b2-7380-49f7-958f-625b912065e3\"]'' at line 1
-    
-    // [Op.like]: `%${input.userId}%`
-    // Not working
     getMeetingbyParticipant: userProcedure
     .input(z.object({userId: z.string()}))
     .query(async ({ input }) => {

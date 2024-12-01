@@ -33,6 +33,10 @@
           </div>
         </Popover>
       </div>
+
+      <div class="project-listbox">
+        <Listbox v-model="selectedCity" :options="cities" multiple optionLabel="name" />
+    </div>
     </div>
   </div>
 </template>
@@ -43,6 +47,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Popover from 'primevue/popover';
 import InputText from 'primevue/inputtext';
+import Listbox from 'primevue/listbox';
 
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
@@ -125,11 +130,20 @@ const toggle = (event) => {
 function useNLP() {
   console.log(nlpInput.value); // remember to use .value to get the input
 }
+
+const selectedCity = ref();
+const cities = ref([
+    { name: 'New York', code: 'NY' },
+    { name: 'Rome', code: 'RM' },
+    { name: 'London', code: 'LDN' },
+    { name: 'Istanbul', code: 'IST' },
+    { name: 'Paris', code: 'PRS' }
+]);
 </script>
 
 <style lang="css" scoped>
 .calendar-drawer-container {
-  padding: var(--sx-spacing-padding6);
+  padding: var(--sx-spacing-padding6) 0;
   position: sticky;
   top: var(--sx-spacing-padding6);
   display: flex;
@@ -149,5 +163,11 @@ function useNLP() {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+}
+
+.project-listbox {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 </style>

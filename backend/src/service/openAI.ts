@@ -54,28 +54,6 @@ export async function getTaskSchedual(name: string, description: string, locatio
     return completion.choices[0].message.content;
 }
 
-const NPLSystemInstruction1 = `
-You are a helpful assistant that can help me parse the input and extract the name, description, location, start time and end time of the event
-rrule is the recurrence rule of the event, it should be in the format of "FREQ=[WEEKLY,DAILY,MONTHLY,YEARLY];INTERVAL=[integer];UNTIL=[YYYYMMDD];BYDAY=[MON,TUE,WED,THU,FRI,SAT,SUN];"`;
-
-// export async function eventNPL(input: string) {
-//     const completion = await openai.chat.completions.create({
-//         model: "gpt-4o",
-//         messages: [
-//             { role: "system", content: "some system instruction" },
-//             { role: "user", content: input },
-//         ],
-//         response_format: zodResponseFormat(z.object({
-//             name: z.string().optional(),
-//             description: z.string().optional(),
-//             location: z.string().optional(),
-//             start_time: z.string().optional(),
-//             end_time: z.string().optional(),
-//             rrule: z.string().optional(),
-//         }), "eventSchema")
-//     });
-//     return completion.choices[0].message.content;
-// }
 
 const NPLSystemInstruction = `
 You are a helpful assistant that can help me parse the input and determine the type of the event.
@@ -92,13 +70,15 @@ Note: Time should be in Toronto time.`;
 const NPLSystemInstructionMeeting = `
 You are a helpful assistant that can help me parse the input and extract the name, description, start time, end time and location of the meeting.
 If such information is not provided, please leave it null except for the name, start time and end time. The start time and end time should be after the current date.
-rrule is the recurrence rule of the event, it should be in the format of "FREQ=[WEEKLY,DAILY,MONTHLY,YEARLY];INTERVAL=[integer];UNTIL=[YYYYMMDD];BYDAY=[MON,TUE,WED,THU,FRI,SAT,SUN]; 
+rrule is the recurrence rule of the event, it should be in the format of "FREQ=[WEEKLY,DAILY,MONTHLY,YEARLY];INTERVAL=[integer];UNTIL=[YYYYMMDD];BYDAY=[MON,TUE,WED,THU,FRI,SAT,SUN]||{1,2,3...}; 
 rrule should be null if the event is not recurring.
 Note: Time should be in Toronto time.`;
 
 const NPLSystemInstructionEvent = `
 You are a helpful assistant that can help me parse the input and extract the name, description, start time, end time and location of the event.
 If such information is not provided, please leave it null except for the name, start time and end time. The start time and end time should be after the current date.
+rrule is the recurrence rule of the event, it should be in the format of "FREQ=[WEEKLY,DAILY,MONTHLY,YEARLY];INTERVAL=[integer];UNTIL=[YYYYMMDD];BYDAY=[MON,TUE,WED,THU,FRI,SAT,SUN]||{1,2,3...}; 
+rrule should be null if the event is not recurring.
 Note: Time should be in Toronto time.`;
 
 export async function eventNPL(userInput: string) {
@@ -114,13 +94,14 @@ export async function eventNPL(userInput: string) {
 
     let result = completion.choices[0].message.content || "";
     result = JSON.parse(result).eventType;
+    console.log("Event Type:", result);
 
     if (result === "task") {
         const completionTask = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
                 { role: "system", content: NPLSystemInstructionTask },
-                { role: "user", content: userInput },
+                { role: "user", content: `${userInput}, Current Time: ${new Date().toISOString()}` },
             ],
             response_format: zodResponseFormat(z.object({
                 name: z.string().optional(),
@@ -135,7 +116,7 @@ export async function eventNPL(userInput: string) {
             model: "gpt-4o",
             messages: [
                 { role: "system", content: NPLSystemInstructionMeeting },
-                { role: "user", content: userInput },
+                { role: "user", content: `${userInput}, Current Time: ${new Date().toISOString()}` },
             ],
             response_format: zodResponseFormat(z.object({
                 name: z.string().optional(),
@@ -152,7 +133,7 @@ export async function eventNPL(userInput: string) {
             model: "gpt-4o",
             messages: [
                 { role: "system", content: NPLSystemInstructionEvent },
-                { role: "user", content: userInput },
+                { role: "user", content: `${userInput}, Current Time: ${new Date().toISOString()}` },
             ],
             response_format: zodResponseFormat(z.object({
                 name: z.string().optional(),
@@ -160,6 +141,7 @@ export async function eventNPL(userInput: string) {
                 location: z.string().optional(),
                 start_time: z.string().optional(),
                 end_time: z.string().optional(),
+                rrule: z.string().optional(),
             }), "eventSchema")
         });
         return completionEvent.choices[0].message.content;

@@ -6,7 +6,7 @@
 
     <AudioVideoControls v-if="displayControls" :pauseVideo="pauseVideo" :pauseAudio="pauseAudio">
     </AudioVideoControls>
-    <video :id="videoId" autoplay="true" muted="muted" v-if="muted">
+    <video :id="videoId" autoplay="true" muted v-if="muted">
     </video>
     <video :id="videoId" autoplay="true" v-if="!muted">
     </video>
@@ -36,6 +36,10 @@ const props = defineProps({
   },
   pauseVideo: {
     type: Function,
+    required: true,
+  },
+  muted: {
+    type: Boolean,
     required: true,
   },
 });

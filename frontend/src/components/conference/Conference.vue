@@ -219,8 +219,21 @@ function setupPeerConnection(peerConnection: RTCPeerConnection, peerId: string) 
   };
 }
 
+function pauseAudio() {
+  localStream.value.getAudioTracks().forEach(t => (t.enabled = !t.enabled));
+}
+
+function pauseVideo() {
+  localStream.value.getVideoTracks().forEach(t => (t.enabled = !t.enabled))
+}
+
 onBeforeUnmount(() => {
+  localStream.value.getTracks().forEach(track => track.stop());
   if (websocketStore.socket) {
+    websocket.sendMessage({
+      type: 'disconnect', senderId: myClientId,
+      payload: { meetingId: meetingId }
+    });
     websocketStore.close();
   }
 });

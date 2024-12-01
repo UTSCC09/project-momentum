@@ -51,6 +51,16 @@ export function createWebSocketServer(server: any) {
           meetings.set(payload.meetingId, newUsers);
         }
       }
+      else if (type === 'disconnect') {
+        const meeting = meetings.get(payload.meetingId);
+        if (meeting)
+          meeting.delete(senderId);
+        
+        const socket = clients.get(senderId);
+        if (socket)
+          socket.close();
+        clients.delete(senderId);
+      }
       else {
         const socket = payload.receiverId ? clients.get(payload.receiverId) : null;
         if (socket)

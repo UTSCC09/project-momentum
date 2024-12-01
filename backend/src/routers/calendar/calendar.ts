@@ -7,6 +7,7 @@ import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
 import { Redisclient } from '../../service/redis';
+import { eventNPL } from '../../service/openAI';
 
 
 export function getCalendarEvents( starttime: string, endtime: string, userId?: string, project_id?: string) {
@@ -106,5 +107,14 @@ export const calendarRouter = trpc.router({
             console.log(error);
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "An error occurred while fetching data." });
         }
+    }),
+
+    calendarNPL: userProcedure
+    .input(z.object({userInput: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { userInput } = input;
+        const result = await eventNPL(userInput);
+        console.log(result);
+        return result;
     }),
 });

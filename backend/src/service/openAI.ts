@@ -54,25 +54,117 @@ export async function getTaskSchedual(name: string, description: string, locatio
     return completion.choices[0].message.content;
 }
 
-const NPLSystemInstruction = `
+const NPLSystemInstruction1 = `
 You are a helpful assistant that can help me parse the input and extract the name, description, location, start time and end time of the event
 rrule is the recurrence rule of the event, it should be in the format of "FREQ=[WEEKLY,DAILY,MONTHLY,YEARLY];INTERVAL=[integer];UNTIL=[YYYYMMDD];BYDAY=[MON,TUE,WED,THU,FRI,SAT,SUN];"`;
 
-export async function eventNPL(input: string) {
+// export async function eventNPL(input: string) {
+//     const completion = await openai.chat.completions.create({
+//         model: "gpt-4o",
+//         messages: [
+//             { role: "system", content: "some system instruction" },
+//             { role: "user", content: input },
+//         ],
+//         response_format: zodResponseFormat(z.object({
+//             name: z.string().optional(),
+//             description: z.string().optional(),
+//             location: z.string().optional(),
+//             start_time: z.string().optional(),
+//             end_time: z.string().optional(),
+//             rrule: z.string().optional(),
+//         }), "eventSchema")
+//     });
+//     return completion.choices[0].message.content;
+// }
+
+const NPLSystemInstruction = `
+You are a helpful assistant that can help me parse the input and determine the type of the event.
+The event type can be one of the following: "task", "meeting", "event".
+task is a task that the user needs to complete, usually come with a name, description, deadline and location.
+meeting is a meeting with other people, usually come with a name, description, start time, end time and location.
+event is a general event that the user is attending, usually come with a name, description, start time, end time and location.`;
+
+const NPLSystemInstructionTask = `
+You are a helpful assistant that can help me parse the input and extract the name, description, deadline and location of the task.
+If such information is not provided, please leave it null except for the name. The deadline should after the current date.
+Note: Time should be in Toronto time.`;
+
+const NPLSystemInstructionMeeting = `
+You are a helpful assistant that can help me parse the input and extract the name, description, start time, end time and location of the meeting.
+If such information is not provided, please leave it null except for the name, start time and end time. The start time and end time should be after the current date.
+rrule is the recurrence rule of the event, it should be in the format of "FREQ=[WEEKLY,DAILY,MONTHLY,YEARLY];INTERVAL=[integer];UNTIL=[YYYYMMDD];BYDAY=[MON,TUE,WED,THU,FRI,SAT,SUN]; 
+rrule should be null if the event is not recurring.
+Note: Time should be in Toronto time.`;
+
+const NPLSystemInstructionEvent = `
+You are a helpful assistant that can help me parse the input and extract the name, description, start time, end time and location of the event.
+If such information is not provided, please leave it null except for the name, start time and end time. The start time and end time should be after the current date.
+Note: Time should be in Toronto time.`;
+
+export async function eventNPL(userInput: string) {
     const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-            { role: "system", content: "some system instruction" },
-            { role: "user", content: input },
-        ],
+            { role: "system", content: NPLSystemInstruction },
+            { role: "user", content: userInput }],
         response_format: zodResponseFormat(z.object({
-            name: z.string().optional(),
-            description: z.string().optional(),
-            location: z.string().optional(),
-            start_time: z.string().optional(),
-            end_time: z.string().optional(),
-            rrule: z.string().optional(),
-        }), "eventSchema")
+            eventType: z.enum(["task", "meeting", "event"]),
+        }), "eventTypeSchema")
     });
-    return completion.choices[0].message.content;
+
+    let result = completion.choices[0].message.content || "";
+    result = JSON.parse(result).eventType;
+
+    if (result === "task") {
+        const completionTask = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: NPLSystemInstructionTask },
+                { role: "user", content: userInput },
+            ],
+            response_format: zodResponseFormat(z.object({
+                name: z.string().optional(),
+                description: z.string().optional(),
+                location: z.string().optional(),
+                deadline: z.string().optional(),
+            }), "eventSchema")
+        });
+        return completionTask.choices[0].message.content;
+    } else if (result === "meeting") {
+        const completionMeeting = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: NPLSystemInstructionMeeting },
+                { role: "user", content: userInput },
+            ],
+            response_format: zodResponseFormat(z.object({
+                name: z.string().optional(),
+                description: z.string().optional(),
+                location: z.string().optional(),
+                start_time: z.string().optional(),
+                end_time: z.string().optional(),
+                rrule: z.string().optional(),
+            }), "eventSchema")
+        });
+        return completionMeeting.choices[0].message.content;
+    } else if (result === "event") {
+        const completionEvent = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: NPLSystemInstructionEvent },
+                { role: "user", content: userInput },
+            ],
+            response_format: zodResponseFormat(z.object({
+                name: z.string().optional(),
+                description: z.string().optional(),
+                location: z.string().optional(),
+                start_time: z.string().optional(),
+                end_time: z.string().optional(),
+            }), "eventSchema")
+        });
+        return completionEvent.choices[0].message.content;
+    }
+    return null;
+
+    // return completion.choices[0].message.content;
 }

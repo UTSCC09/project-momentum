@@ -128,6 +128,7 @@ const toggle = (event) => {
   op.value.toggle(event);
 }
 function useNLP() {
+  client.calendar.calendarNPL.mutate({ userInput: nlpInput.value });
   console.log(nlpInput.value); // remember to use .value to get the input
 }
 

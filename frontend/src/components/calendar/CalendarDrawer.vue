@@ -20,6 +20,19 @@
       </Dialog>
 
       <Button label="Test" @click="test" style="margin-top: 1rem;"></Button>
+
+      <div style="margin-top: 1rem;">
+        <Button type="button" icon="pi pi-sparkles" label="NLP" @click="toggle" />
+        <Popover ref="op">
+          <div class="nlp-container">
+            <div class="nlp-instruction">How can I help you?</div>
+            <div class="nlp-input-container">
+              <InputText type="text" v-model="nlpInput" />
+              <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="useNLP" />
+            </div>
+          </div>
+        </Popover>
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +41,8 @@
 import SplitButton from 'primevue/splitbutton';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import Popover from 'primevue/popover';
+import InputText from 'primevue/inputtext';
 
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
@@ -62,7 +77,6 @@ const items = [
     label: 'Meeting',
     command: () => {
       meetingVisible.value = true;
-      // webrtc();
     }
   },
   {
@@ -103,50 +117,13 @@ function test() {
     .catch(error => console.error(error));
 }
 
-function webrtc() {
-  const authStore = useAuthStore();
-  const peer = new Peer(authStore.user);
-  peer.on('open', function (id) {
-    console.log('My peer ID is: ' + id);
-    if (peer.id == "b3d9c12c-fc9f-40b1-8f4c-01cf66b76da6") {
-    console.log("connecting");
-    const conn = peer.connect('0cfa9bcb-92ed-429f-b9b4-430b83f4ea73');
-    conn.on('open', function () {
-      console.log("OPEN");
-      // Receive messages
-      conn.on('data', function (data) {
-        console.log('Received', data);
-      });
-
-      // Send messages
-      conn.send('Hello!');
-    });
-    conn.on("error", function (err) {
-      console.log(err);
-    });
-  }
-  else {
-    console.log("receiving")
-    peer.on('connection', function (conn) {
-      conn.on('open', function () {
-        console.log("OPEN");
-        // Receive messages
-        conn.on('data', function (data) {
-          console.log('Received', data);
-        });
-
-        // Send messages
-        conn.send('Hello too!');
-      });
-      conn.on("error", function (err) {
-        console.log(err);
-      })
-    });
-  }
-  });
-  peer.on("error", function (err) {
-    console.log(err);
-  });
+const nlpInput = ref("");
+const op = ref();
+const toggle = (event) => {
+  op.value.toggle(event);
+}
+function useNLP() {
+  console.log(nlpInput.value); // remember to use .value to get the input
 }
 </script>
 
@@ -158,5 +135,19 @@ function webrtc() {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.nlp-instruction {
+  margin-bottom: 1rem;
+}
+
+.nlp-container {
+  padding: 0.5rem;
+}
+
+.nlp-input-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
 }
 </style>

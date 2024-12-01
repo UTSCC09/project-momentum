@@ -14,8 +14,8 @@
     </div>
 
     <div class="conference-footer">
-      <AudioVideoControls :pauseVideo="pauseVideo" :pauseAudio="pauseAudio" :numParticipants="numParticipants"
-        :meetingName="meetingName">
+      <AudioVideoControls :pauseVideo="pauseVideo" :pauseAudio="pauseAudio" :disconnect="disconnect"
+        :numParticipants="numParticipants" :meetingName="meetingName">
       </AudioVideoControls>
     </div>
   </div>
@@ -26,7 +26,7 @@ import Video from './Video.vue';
 import AudioVideoControls from "./AudioVideoControls.vue";
 
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useWebSocketStore } from '../../stores/websocket.store.ts';
 import { useAuthStore } from '../../stores/auth.store.ts';
 import { servers } from '../../utils/ice-servers.ts';
@@ -40,11 +40,12 @@ type Peer = {
 let myClientId: string;
 
 const route = useRoute();
-const meetingId = ref<string>('');
+const router = useRouter();
 
+const meetingId = ref<string>('');
 const peers = ref<Map<string, Peer>>(new Map<string, Peer>());
 const localStream = ref<MediaStream | null>(null);
-const numParticipants = ref<Number>(0);
+const numParticipants = ref<Number>(1);
 const meetingName = ref<String>("");
 
 const websocketStore = useWebSocketStore();
@@ -235,6 +236,26 @@ function pauseVideo() {
   localStream.value.getVideoTracks().forEach(t => (t.enabled = !t.enabled))
 }
 
+function disconnect() {
+  if (localStream.value) {
+    localStream.value.getTracks().forEach(track => {
+      track.stop();  
+    });
+  }
+
+  peers.value.forEach((peer) => {
+    peer.pc.close();
+  });
+
+  peers.value.clear();
+  numParticipants.value = 0;
+  meetingName.value = "";
+
+  websocketStore.socket?.close();
+
+  router.push("/all");
+}
+
 onMounted(() => {
   // get meetingId
   meetingId.value = route.params.id;
@@ -275,11 +296,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  peers.value.forEach((peer) => {
-    peer.pc.close();
-  });
-  peers.clear();
-  numParticipants.value = peers.value.size + 1;
+  disconnect();
 });
 </script>
 

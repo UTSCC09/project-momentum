@@ -9,7 +9,7 @@
       <Button v-else @click="swapAudio()" severity="secondary" icon="pi pi-microphone" aria-label="microphone" />
       <Button v-if="!videoOn" @click="swapVideo()" icon="pi pi-video" aria-label="video" />
       <Button v-else @click="swapVideo()" severity="secondary" icon="pi pi-video" aria-label="video" />
-      <Button label="Leave" severity="danger" />
+      <Button label="Leave" severity="danger" @click="disconnect()" />
     </div>
   </div>
 </template>
@@ -27,6 +27,10 @@ const props = defineProps({
     required: true,
   },
   pauseAudio: {
+    type: Function,
+    required: true,
+  },
+  disconnect: {
     type: Function,
     required: true,
   },

@@ -1,9 +1,5 @@
 <template>
   <div class="conference-container">
-    <div class="conference-container-header">
-      <h3>Private conference (up to 3)</h3>
-    </div>
-
     <div class="conference-container-videos">
       <div class="video">
         <Video videoId="localVideo" :displayControls="true" :videoStream="localStream" :pauseVideo="pauseVideo"
@@ -16,17 +12,26 @@
         </Video>
       </div>
     </div>
+
+    <div class="conference-footer">
+      <AudioVideoControls :pauseVideo="pauseVideo" :pauseAudio="pauseAudio" :numParticipants="numParticipants"
+        :meetingName="meetingName">
+      </AudioVideoControls>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import Video from './Video.vue';
+import AudioVideoControls from "./AudioVideoControls.vue";
 
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useWebSocketStore } from '../../stores/websocket.store.ts';
 import { useAuthStore } from '../../stores/auth.store.ts';
 import { servers } from '../../utils/ice-servers.ts';
+
+import { client } from '../../api/index';
 
 type Peer = {
   pc: RTCPeerConnection, peerStream: MediaStream, peerVideo: HTMLVideoElement,
@@ -39,6 +44,8 @@ const meetingId = ref<string>('');
 
 const peers = ref<Map<string, Peer>>(new Map<string, Peer>());
 const localStream = ref<MediaStream | null>(null);
+const numParticipants = ref<Number>(0);
+const meetingName = ref<String>("");
 
 const websocketStore = useWebSocketStore();
 const authStore = useAuthStore();
@@ -51,6 +58,7 @@ function createPeerConnection(peerId: string, description?: RTCSessionDescriptio
     peerStream: undefined,
     peerVideo: undefined,
   });
+  numParticipants.value = peers.value.size + 1;
 
   // send message to all participants when ice candidate is discovered
   pc.onicecandidate = ({ candidate }) => {
@@ -208,6 +216,7 @@ function handleMessage(message: any) {
     if (peer) {
       peer.pc.close();
       peers.value.delete(senderId);
+      numParticipants.value = peers.value.size + 1;
     }
     else {
       console.warn('Cannot find user:', senderId);
@@ -229,6 +238,13 @@ function pauseVideo() {
 onMounted(() => {
   // get meetingId
   meetingId.value = route.params.id;
+
+  // get meeting name
+  client.meetings.getMeeting.query({ meetingId: meetingId.value })
+    .then((res) => {
+      meetingName.value = res.meeting.name;
+    })
+    .catch((err) => console.error(err));
 
   // initialize local video
   const constraints = {
@@ -263,35 +279,47 @@ onBeforeUnmount(() => {
     peer.pc.close();
   });
   peers.clear();
+  numParticipants.value = peers.value.size + 1;
 });
 </script>
 
 <style lang="css" scoped>
 .conference-container {
-  background-color: black;
+  background-color: var(--p-primary-950);
   height: 100%;
-  width: 400px;
-}
-
-.conference-container-header {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
-  height: 50px;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .conference-container-videos {
-  position: relative;
-  border: solid 1px #ffffff78;
-}
-
-h3 {
-  padding-left: 1rem;
-  color: white;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 2rem 2rem 0 2rem;
+  align-items: center;
+  flex-grow: 1;
 }
 
 .video {
+  flex: 0 0 calc((100% - 2rem)/3);
+  /* 10px = 2 * gap */
+  margin: none;
+  border-radius: var(--p-border-radius-md);
+}
+
+/* the case with 2 elements */
+.video:first-child:nth-last-child(2),
+.video:first-child:nth-last-child(2)~* {
+  flex: 0 0 calc((100% - 1rem)/2);
+}
+
+.video:first-child:nth-last-child(1),
+.video:first-child:nth-last-child(1)~* {
+  flex: 0 0 100%;
+}
+
+.conference-footer {
   width: 100%;
-  height: 250px;
 }
 </style>

@@ -10,8 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import CalendarDrawer from './CalendarDrawer.vue';
-import Calendar from './Calendar.vue';
+import CalendarDrawer from "./CalendarDrawer.vue";
+import Calendar from "./Calendar.vue";
 </script>
 
 <style lang="css" scoped>

@@ -6,10 +6,21 @@
   <div class="kanban-board">
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">To do</div>
-      <draggable class="kanban-task-group" :list="todoTasks" group="tasks" @change="updateTodo" itemKey="id"
-        draggable=".item">
+      <draggable
+        class="kanban-task-group"
+        :list="todoTasks"
+        group="tasks"
+        @change="updateTodo"
+        itemKey="id"
+        draggable=".item"
+      >
         <template #item="{ element, index }">
-          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteTodoTask" />
+          <KanbanTaskCard
+            v-if="element.uid == user"
+            class="item"
+            :task="element"
+            @delete="deleteTodoTask"
+          />
           <KanbanTaskCard v-else :task="element" @delete="deleteTodoTask" />
         </template>
       </draggable>
@@ -17,21 +28,47 @@
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">In progress</div>
-      <draggable class="kanban-task-group" :list="inProgressTasks" group="tasks" @change="udpateInProgress" itemKey="id"
-        draggable=".item">
+      <draggable
+        class="kanban-task-group"
+        :list="inProgressTasks"
+        group="tasks"
+        @change="udpateInProgress"
+        itemKey="id"
+        draggable=".item"
+      >
         <template #item="{ element, index }">
-          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteInProgressTask" />
-          <KanbanTaskCard v-else :task="element" @delete="deleteInProgressTask" />
+          <KanbanTaskCard
+            v-if="element.uid == user"
+            class="item"
+            :task="element"
+            @delete="deleteInProgressTask"
+          />
+          <KanbanTaskCard
+            v-else
+            :task="element"
+            @delete="deleteInProgressTask"
+          />
         </template>
       </draggable>
     </div>
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">Done</div>
-      <draggable class="kanban-task-group" :list="doneTasks" group="tasks" @change="updateDone" itemKey="id"
-        draggable=".item">
+      <draggable
+        class="kanban-task-group"
+        :list="doneTasks"
+        group="tasks"
+        @change="updateDone"
+        itemKey="id"
+        draggable=".item"
+      >
         <template #item="{ element, index }">
-          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteDoneTask" />
+          <KanbanTaskCard
+            v-if="element.uid == user"
+            class="item"
+            :task="element"
+            @delete="deleteDoneTask"
+          />
           <KanbanTaskCard v-else :task="element" @delete="deleteDoneTask" />
         </template>
       </draggable>
@@ -40,12 +77,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount } from 'vue';
-import { client } from '../../api/index';
-import { useAuthStore } from '../../stores/auth.store.ts';
-import moment from 'moment-timezone';
+import { ref, onBeforeMount } from "vue";
+import { client } from "../../api/index";
+import { useAuthStore } from "../../stores/auth.store.ts";
+import moment from "moment-timezone";
 import draggable from "vuedraggable";
-import ProgressBar from 'primevue/progressbar';
+import ProgressBar from "primevue/progressbar";
 import KanbanTaskCard from "./KanbanTaskCard.vue";
 
 const authStore = useAuthStore();
@@ -64,43 +101,67 @@ const doneTasks = ref([]);
 const progress = ref<number>(0);
 
 onBeforeMount(() => {
-  client.tasks.getTaskbyProject.query({ projectId: props.projectId })
+  client.tasks.getTaskbyProject
+    .query({ projectId: props.projectId })
     .then((res) => {
       let total = 0;
       let done = 0;
 
       for (const task of res.task) {
         total += 1;
-        if (task.progress == 'not started') {
-          todoTasks.value.push(Object.assign(task,
-            task.deadline && { deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm") }
-          ));
-        }
-        else if (task.progress == 'in progress') {
-          inProgressTasks.value.push(Object.assign(task,
-            task.deadline && { deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm") }
-          ));
-        }
-        else {
+        if (task.progress == "not started") {
+          todoTasks.value.push(
+            Object.assign(
+              task,
+              task.deadline && {
+                deadline: moment
+                  .utc(task.deadline)
+                  .local()
+                  .format("YYYY-MM-DD HH:mm"),
+              },
+            ),
+          );
+        } else if (task.progress == "in progress") {
+          inProgressTasks.value.push(
+            Object.assign(
+              task,
+              task.deadline && {
+                deadline: moment
+                  .utc(task.deadline)
+                  .local()
+                  .format("YYYY-MM-DD HH:mm"),
+              },
+            ),
+          );
+        } else {
           done += 1;
-          doneTasks.value.push(Object.assign(task,
-            task.deadline && { deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm") }
-          ));
+          doneTasks.value.push(
+            Object.assign(
+              task,
+              task.deadline && {
+                deadline: moment
+                  .utc(task.deadline)
+                  .local()
+                  .format("YYYY-MM-DD HH:mm"),
+              },
+            ),
+          );
         }
       }
-      progress.value = total > 0 ? Math.round(done / total * 100) : 0;
+      progress.value = total > 0 ? Math.round((done / total) * 100) : 0;
     })
     .catch((err) => {
       console.error(err);
     });
-})
+});
 
 function updateTodo(event) {
   if (event.added) {
-    client.tasks.updateTask.mutate({
-      taskId: event.added.element.id,
-      progress: 'not started',
-    })
+    client.tasks.updateTask
+      .mutate({
+        taskId: event.added.element.id,
+        progress: "not started",
+      })
       .then((res) => {
         updateProgress();
       })
@@ -112,10 +173,11 @@ function updateTodo(event) {
 
 function udpateInProgress(event) {
   if (event.added) {
-    client.tasks.updateTask.mutate({
-      taskId: event.added.element.id,
-      progress: 'in progress',
-    })
+    client.tasks.updateTask
+      .mutate({
+        taskId: event.added.element.id,
+        progress: "in progress",
+      })
       .then((res) => {
         updateProgress();
       })
@@ -127,10 +189,11 @@ function udpateInProgress(event) {
 
 function updateDone(event) {
   if (event.added) {
-    client.tasks.updateTask.mutate({
-      taskId: event.added.element.id,
-      progress: 'completed',
-    })
+    client.tasks.updateTask
+      .mutate({
+        taskId: event.added.element.id,
+        progress: "completed",
+      })
       .then((res) => {
         updateProgress();
       })
@@ -141,8 +204,12 @@ function updateDone(event) {
 }
 
 function updateProgress() {
-  const total = todoTasks.value.length + inProgressTasks.value.length + doneTasks.value.length;
-  progress.value = total > 0 ? Math.round(doneTasks.value.length / total * 100) : 0;
+  const total =
+    todoTasks.value.length +
+    inProgressTasks.value.length +
+    doneTasks.value.length;
+  progress.value =
+    total > 0 ? Math.round((doneTasks.value.length / total) * 100) : 0;
 }
 
 function deleteTodoTask(taskId) {
@@ -150,7 +217,9 @@ function deleteTodoTask(taskId) {
 }
 
 function deleteInProgressTask(taskId) {
-  inProgressTasks.value = inProgressTasks.value.filter((task) => task.id != taskId);
+  inProgressTasks.value = inProgressTasks.value.filter(
+    (task) => task.id != taskId,
+  );
 }
 
 function deleteDoneTask(taskId) {

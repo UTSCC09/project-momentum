@@ -5,21 +5,43 @@
       <Badge :value="numParticipants" severity="secondary"></Badge>
     </div>
     <div class="controls">
-      <Button v-if="!audioOn" @click="swapAudio()" icon="pi pi-microphone" aria-label="microphone" />
-      <Button v-else @click="swapAudio()" severity="secondary" icon="pi pi-microphone" aria-label="microphone" />
-      <Button v-if="!videoOn" @click="swapVideo()" icon="pi pi-video" aria-label="video" />
-      <Button v-else @click="swapVideo()" severity="secondary" icon="pi pi-video" aria-label="video" />
+      <Button
+        v-if="!audioOn"
+        @click="swapAudio()"
+        icon="pi pi-microphone"
+        aria-label="microphone"
+      />
+      <Button
+        v-else
+        @click="swapAudio()"
+        severity="secondary"
+        icon="pi pi-microphone"
+        aria-label="microphone"
+      />
+      <Button
+        v-if="!videoOn"
+        @click="swapVideo()"
+        icon="pi pi-video"
+        aria-label="video"
+      />
+      <Button
+        v-else
+        @click="swapVideo()"
+        severity="secondary"
+        icon="pi pi-video"
+        aria-label="video"
+      />
       <Button label="Leave" severity="danger" @click="disconnect()" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from 'primevue/button';
-import Badge from 'primevue/badge';
-import OverlayBadge from 'primevue/overlaybadge';
+import Button from "primevue/button";
+import Badge from "primevue/badge";
+import OverlayBadge from "primevue/overlaybadge";
 
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const props = defineProps({
   pauseVideo: {

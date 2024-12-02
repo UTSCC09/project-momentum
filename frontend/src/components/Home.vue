@@ -5,48 +5,72 @@
     </div>
     <div>
       <p>build your</p>
-      <p><span style="color: white; font-size: 6rem;">momentum</span></p>
-      <Button label="Get started" severity="secondary" @click="visibleSignup = true;" />
-      <Button label="I already have an account" severity="primary" variant="text" class="custom" @click="visibleLogin = true;" />
+      <p><span style="color: white; font-size: 6rem">momentum</span></p>
+      <Button
+        label="Get started"
+        severity="secondary"
+        @click="visibleSignup = true"
+      />
+      <Button
+        label="I already have an account"
+        severity="primary"
+        variant="text"
+        class="custom"
+        @click="visibleLogin = true"
+      />
     </div>
   </div>
 
-  <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
+  <Dialog
+    v-model:visible="visibleLogin"
+    modal
+    header="Log in"
+    :style="{ width: '25rem' }"
+  >
     <LoginForm @close="redirect" />
   </Dialog>
 
-  <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
-    <SignupForm @close="visibleSignup = false;" />
+  <Dialog
+    v-model:visible="visibleSignup"
+    modal
+    header="Sign up"
+    :style="{ width: '25rem' }"
+  >
+    <SignupForm @close="visibleSignup = false" />
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import SignupForm from "./forms/SignupForm.vue"
+import SignupForm from "./forms/SignupForm.vue";
 import LoginForm from "./forms/LoginForm.vue";
 import Sphere from "./Sphere.vue";
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 
 import { ref } from "vue";
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
 
-import { useAuthStore } from '../stores/auth.store.ts';
+import { useAuthStore } from "../stores/auth.store.ts";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
 
 const urlParams = new URLSearchParams(window.location.search);
-const success = urlParams.get('success');
-if (success == 'true') {
-  const id = urlParams.get('id');
+const success = urlParams.get("success");
+if (success == "true") {
+  const id = urlParams.get("id");
   authStore.login(id);
-  window.location.href = location.protocol + '//' + location.host + location.pathname;
-}
-else {
-  const message = urlParams.get('error');
-  toast.add({ severity: 'error', summary: `Failed to log in with Google: ${message}.`, life: 3000 });
+  window.location.href =
+    location.protocol + "//" + location.host + location.pathname;
+} else {
+  const message = urlParams.get("error");
+  toast.add({
+    severity: "error",
+    summary: `Failed to log in with Google: ${message}.`,
+    life: 3000,
+  });
 }
 
 const visibleLogin = ref(false);

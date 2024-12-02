@@ -4,15 +4,13 @@
       <ProgressSpinner />
     </div>
 
-    <video :id="videoId" autoplay="true" muted v-if="muted">
-    </video>
-    <video :id="videoId" autoplay="true" v-else>
-    </video>
+    <video :id="videoId" autoplay="true" muted v-if="muted"></video>
+    <video :id="videoId" autoplay="true" v-else></video>
   </div>
 </template>
 
 <script setup lang="ts">
-import ProgressSpinner from 'primevue/progressspinner';
+import ProgressSpinner from "primevue/progressspinner";
 
 const props = defineProps({
   videoId: {

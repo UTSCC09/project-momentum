@@ -1,22 +1,21 @@
 <template>
-  <Button icon="pi pi-bars" @click="toggle"/>
+  <Button icon="pi pi-bars" @click="toggle" />
 </template>
 
 <script setup lang="ts">
 import Button from "primevue/button";
 
-import { useRouter, useRoute } from 'vue-router';
-import { ref } from 'vue';
+import { useRouter, useRoute } from "vue-router";
+import { ref } from "vue";
 
 const router = useRouter();
 const route = useRoute();
 
 function toggle() {
-  if (route.fullPath == '/all') {
-    router.push('/schedule');
-  }
-  else {
-    router.push('/all');
+  if (route.fullPath == "/all") {
+    router.push("/schedule");
+  } else {
+    router.push("/all");
   }
 }
 </script>

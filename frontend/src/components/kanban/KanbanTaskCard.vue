@@ -1,5 +1,5 @@
 <template>
-  <Card style="margin: 0.5rem 0;">
+  <Card style="margin: 0.5rem 0">
     <template #title>{{ task.name }}</template>
     <template #subtitle>{{ task.deadline }}</template>
     <template #content>
@@ -7,11 +7,31 @@
     </template>
     <template #footer>
       <div class="task-controls">
-        <Button v-if="editable" label="Edit" severity="secondary" outlined class="button" @click="editTask(task)" />
-        <Button v-if="deletable" label="Delete" class="button" @click="deleteTask(task.id)" />
+        <Button
+          v-if="editable"
+          label="Edit"
+          severity="secondary"
+          outlined
+          class="button"
+          @click="editTask(task)"
+        />
+        <Button
+          v-if="deletable"
+          label="Delete"
+          class="button"
+          @click="deleteTask(task.id)"
+        />
 
-        <Dialog v-model:visible="taskVisible" modal header="Edit Task" :style="{ width: '50vw' }">
-          <TaskForm :initialValues="taskInitialValues" @close="taskVisible = false;" />
+        <Dialog
+          v-model:visible="taskVisible"
+          modal
+          header="Edit Task"
+          :style="{ width: '50vw' }"
+        >
+          <TaskForm
+            :initialValues="taskInitialValues"
+            @close="taskVisible = false"
+          />
         </Dialog>
       </div>
     </template>
@@ -19,20 +39,20 @@
 </template>
 
 <script setup lang="ts">
-import Card from 'primevue/card';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import { client } from '../../api/index';
-import TaskForm from '../forms/TaskForm.vue';
-import { ref, onBeforeMount } from 'vue';
-import moment from 'moment-timezone';
-import { useAuthStore } from '../../stores/auth.store.ts';
+import Card from "primevue/card";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
+import { client } from "../../api/index";
+import TaskForm from "../forms/TaskForm.vue";
+import { ref, onBeforeMount } from "vue";
+import moment from "moment-timezone";
+import { useAuthStore } from "../../stores/auth.store.ts";
 
 const props = defineProps({
   task: {
     type: Object,
-    default: () => { },
-  }
+    default: () => {},
+  },
 });
 
 const authStore = useAuthStore();
@@ -40,7 +60,7 @@ const authStore = useAuthStore();
 let editable = false;
 let deletable = false;
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(["delete"]);
 
 const taskVisible = ref(false);
 const taskInitialValues = ref({});
@@ -54,13 +74,14 @@ function editTask(task) {
 }
 
 function deleteTask(taskId) {
-  client.tasks.deleteTask.mutate({ taskId: taskId })
+  client.tasks.deleteTask
+    .mutate({ taskId: taskId })
     .then((res) => {
-      emit('delete', taskId);
+      emit("delete", taskId);
     })
     .catch((err) => {
       console.error(err);
-    })
+    });
 }
 
 onBeforeMount(() => {

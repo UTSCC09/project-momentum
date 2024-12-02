@@ -105,39 +105,23 @@ function nlp() {
     .then((res) => {
       console.log(res);
       if (res.type == 'meeting') {
-        meetingInitialValues.value = {
-          name: res.name,
-          description: res.description,
-          location: res.location,
-        };
-        if (res.start_time) {
-          meetingInitialValues.value.startTime = moment(res.start_time).local().toDate();
-        }
-        if (res.end_time) {
-          meetingInitialValues.value.endTime = moment(res.end_time).local().toDate();
-        }
-        if (res.rrule) {
-          meetingInitialValues.value.repeat = true;
-          meetingInitialValues.value.frequency = res.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
-          meetingInitialValues.value.interval =
-            res.rrule.match(/INTERVAL=([^;]+)/)?.[1]
-              ? parseInt(res.rrule.match(/INTERVAL=([^;]+)/)?.[1])
-              : null;
-          meetingInitialValues.value.byday =
-            res.rrule.match(/BYDAY=([^;]+)/)?.[1]
-              ? res.rrule.match(/BYDAY=([^;]+)/)?.[1].split(',')
-              : null;
-          meetingInitialValues.value.bymonthday =
-            res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
-              ? res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
-                .split(',')
-                .map((monthday) => parseInt(monthday))
-              : null;
-          meetingInitialValues.value.until =
-            res.rrule.match(/UNTIL=([^;]+)/)?.[1]
-              ? moment(res.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate()
-              : null;
-        }
+        meetingInitialValues.value = Object.assign({},
+          res.name && { name: res.name },
+          res.description && { description: res.description },
+          res.location && { location: res.location },
+          res.start_time && { start_time: moment(res.start_time).local().toDate() },
+          res.end_time && { end_time: moment(res.end_time).local().toDate() },
+          res.rrule && { repeat: true },
+          res.rrule && res.rrule.match(/FREQ=([^;]+)/)?.[1] && { frequency: res.rrule.match(/FREQ=([^;]+)/)?.[1] },
+          res.rrule && res.rrule.match(/INTERVAL=([^;]+)/)?.[1] && { interval: parseInt(res.rrule.match(/INTERVAL=([^;]+)/)?.[1]) },
+          res.rrule && res.rrule.match(/BYDAY=([^;]+)/)?.[1] && { byday: res.rrule.match(/BYDAY=([^;]+)/)?.[1].split(',') },
+          res.rrule && res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
+            bymonthday: res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
+              .split(',')
+              .map((monthday) => parseInt(monthday))
+          },
+          res.rrule && res.rrule.match(/UNTIL=([^;]+)/)?.[1] && { until: moment(res.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate() },
+        );
         meetingVisible.value = true;
       }
       else if (res.type == 'event') {

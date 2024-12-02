@@ -78,6 +78,12 @@ function onClose(task) {
     .utc(task.deadline)
     .local()
     .format("YYYY-MM-DD HH:mm");
+  taskInitialValues.value = Object.assign({},
+    task.name && { name: task.name },
+    task.description && { description: task.description },
+    task.location && { location: task.location },
+    task.deadline && { deadline: moment(task.deadline).local().toDate() },
+  );
 }
 
 onBeforeMount(() => {

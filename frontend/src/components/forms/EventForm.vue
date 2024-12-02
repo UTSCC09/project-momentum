@@ -317,6 +317,10 @@ const props = defineProps({
     }>,
     required: false,
   },
+  id: {
+    type: String,
+    required: false,
+  },
 });
 
 const initialValues = reactive(props.initialValues || {});

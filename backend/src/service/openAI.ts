@@ -110,7 +110,9 @@ export async function eventNPL(userInput: string) {
                 deadline: z.string().optional(),
             }), "eventSchema")
         });
-        return completionTask.choices[0].message.content;
+        return completionTask.choices[0].message.content 
+        ? {type: result, ...JSON.parse(completionTask.choices[0].message.content)}
+        : {};
     } else if (result === "meeting") {
         const completionMeeting = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -127,7 +129,9 @@ export async function eventNPL(userInput: string) {
                 rrule: z.string().optional(),
             }), "eventSchema")
         });
-        return completionMeeting.choices[0].message.content;
+        return completionMeeting.choices[0].message.content
+        ? {type: result, ...JSON.parse(completionMeeting.choices[0].message.content)}
+        : {};
     } else if (result === "event") {
         const completionEvent = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -144,7 +148,9 @@ export async function eventNPL(userInput: string) {
                 rrule: z.string().optional(),
             }), "eventSchema")
         });
-        return completionEvent.choices[0].message.content;
+        return completionEvent.choices[0].message.content
+        ? {type: result, ...JSON.parse(completionEvent.choices[0].message.content)}
+        : {};
     }
     return null;
 

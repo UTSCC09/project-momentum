@@ -4,25 +4,25 @@
       <SplitButton label="Create" icon="pi pi-sparkles" :model="items" @click="toggle" />
 
       <Popover ref="op">
-          <div class="nlp-container">
-            <div class="nlp-instruction">How can I help you?</div>
-            <div class="nlp-input-container">
-              <InputText type="text" v-model="nlpInput" />
-              <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="nlp" />
-            </div>
+        <div class="nlp-container">
+          <div class="nlp-instruction">How can I help you?</div>
+          <div class="nlp-input-container">
+            <InputText type="text" v-model="nlpInput" />
+            <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="nlp" />
           </div>
-        </Popover>
+        </div>
+      </Popover>
 
       <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
-        <TaskForm @close="taskVisible = false;" />
+        <TaskForm :initialValues="taskInitialValues" @close="taskVisible = false;" />
       </Dialog>
 
       <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
-        <EventForm @close="eventVisible = false;" />
+        <EventForm :initialValues="eventInitialValues" @close="eventVisible = false;" />
       </Dialog>
 
       <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
-        <MeetingForm @close="meetingVisible = false;" />
+        <MeetingForm :initialValues="meetingInitialValues" @close="meetingVisible = false;" />
       </Dialog>
 
       <Dialog v-model:visible="projectVisible" modal header="Create Project" :style="{ width: '50vw' }">
@@ -31,7 +31,7 @@
 
       <div class="project-listbox">
         <Listbox v-model="selectedCity" :options="cities" multiple optionLabel="name" />
-    </div>
+      </div>
     </div>
   </div>
 </template>
@@ -55,10 +55,15 @@ import { Peer } from "peerjs";
 
 import { useAuthStore } from "../../stores/auth.store.ts";
 
+import moment from 'moment-timezone';
+
 const taskVisible = ref(false);
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
 const projectVisible = ref(false);
+const taskInitialValues = ref({});
+const eventInitialValues = ref({});
+const meetingInitialValues = ref({});
 
 const items = [
   {
@@ -97,21 +102,107 @@ const toggle = (event) => {
 }
 function nlp() {
   client.calendar.calendarNPL.mutate({ userInput: nlpInput.value })
-  .then((res) => {
-    console.log(res);
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+    .then((res) => {
+      console.log(res);
+      if (res.type == 'meeting') {
+        meetingInitialValues.value = {
+          name: res.name,
+          description: res.description,
+          location: res.location,
+        };
+        if (res.start_time) {
+          meetingInitialValues.value.startTime = moment(res.start_time).local().toDate();
+        }
+        if (res.end_time) {
+          meetingInitialValues.value.endTime = moment(res.end_time).local().toDate();
+        }
+        if (res.rrule) {
+          meetingInitialValues.value.repeat = true;
+          meetingInitialValues.value.frequency = res.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
+          meetingInitialValues.value.interval =
+            res.rrule.match(/INTERVAL=([^;]+)/)?.[1]
+              ? parseInt(res.rrule.match(/INTERVAL=([^;]+)/)?.[1])
+              : null;
+          meetingInitialValues.value.byday =
+            res.rrule.match(/BYDAY=([^;]+)/)?.[1]
+              ? res.rrule.match(/BYDAY=([^;]+)/)?.[1].split(',')
+              : null;
+          meetingInitialValues.value.bymonthday =
+            res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
+              ? res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
+                .split(',')
+                .map((monthday) => parseInt(monthday))
+              : null;
+          meetingInitialValues.value.until =
+            res.rrule.match(/UNTIL=([^;]+)/)?.[1]
+              ? moment(res.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate()
+              : null;
+        }
+        meetingVisible.value = true;
+      }
+      else if (res.type == 'event') {
+        eventInitialValues.value = {
+          name: res.name,
+          description: res.description,
+          location: res.location,
+        };
+        if (res.start_time) {
+          eventInitialValues.value.startTime = moment(res.start_time).local().toDate();
+        }
+        if (res.end_time) {
+          eventInitialValues.value.endTime = moment(res.end_time).local().toDate();
+        }
+        if (res.rrule) {
+          eventInitialValues.value.repeat = true;
+          eventInitialValues.value.frequency = res.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
+          eventInitialValues.value.interval =
+            res.rrule.match(/INTERVAL=([^;]+)/)?.[1]
+              ? parseInt(res.rrule.match(/INTERVAL=([^;]+)/)?.[1])
+              : null;
+          eventInitialValues.value.byday =
+            res.rrule.match(/BYDAY=([^;]+)/)?.[1]
+              ? res.rrule.match(/BYDAY=([^;]+)/)?.[1].split(',')
+              : null;
+          eventInitialValues.value.bymonthday =
+            res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
+              ? res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
+                .split(',')
+                .map((monthday) => parseInt(monthday))
+              : null;
+          eventInitialValues.value.until =
+            res.rrule.match(/UNTIL=([^;]+)/)?.[1]
+              ? moment(res.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate()
+              : null;
+        }
+        eventVisible.value = true;
+      }
+      else if (res.type == 'task') {
+        taskInitialValues.value = {
+          name: res.name,
+          description: res.description,
+          location: res.location,
+        };
+        if (res.deadline) {
+          taskInitialValues.value.deadline = moment(res.deadline).local().toDate();
+        }
+        taskVisible.value = true;
+      }
+      else {
+        console.error("Unrecognized type");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 }
 
 const selectedCity = ref();
 const cities = ref([
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-    { name: 'London', code: 'LDN' },
-    { name: 'Istanbul', code: 'IST' },
-    { name: 'Paris', code: 'PRS' }
+  { name: 'New York', code: 'NY' },
+  { name: 'Rome', code: 'RM' },
+  { name: 'London', code: 'LDN' },
+  { name: 'Istanbul', code: 'IST' },
+  { name: 'Paris', code: 'PRS' }
 ]);
 </script>
 

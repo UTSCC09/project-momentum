@@ -9,32 +9,18 @@
             <InputText name="name" id="name" type="text" auto fluid />
             <label for="name">Name</label>
           </IftaLabel>
-          <Message
-            v-if="$form.name?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.name.error?.message }}
+          <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
+            $form.name.error?.message }}
           </Message>
         </div>
         <div>
           <IftaLabel>
-            <Select
-              name="project_id"
-              inputId="project"
-              :options="projects"
-              optionLabel="name"
-              optionValue="value"
-              fluid
-            />
+            <Select name="project_id" inputId="project" :options="projects" optionLabel="name" optionValue="value"
+              fluid />
             <label for="project">Project</label>
           </IftaLabel>
-          <Message
-            v-if="$form.project_id?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.project_id.error?.message }}
+          <Message v-if="$form.project_id?.invalid" severity="error" size="small" variant="simple">{{
+            $form.project_id.error?.message }}
           </Message>
         </div>
       </div>
@@ -44,65 +30,34 @@
             <InputText name="location" type="text" id="location" fluid />
             <label for="location">Location</label>
           </IftaLabel>
-          <Message
-            v-if="$form.location?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.location.error?.message }}
+          <Message v-if="$form.location?.invalid" severity="error" size="small" variant="simple">{{
+            $form.location.error?.message }}
           </Message>
         </div>
         <div>
           <IftaLabel>
-            <DatePicker
-              name="deadline"
-              inputId="deadline"
-              showTime
-              hourFormat="24"
-              fluid
-            />
+            <DatePicker name="deadline" inputId="deadline" showTime hourFormat="24" fluid />
             <label for="deadline">Deadline</label>
           </IftaLabel>
-          <Message
-            v-if="$form.deadline?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.deadline.error?.message }}
+          <Message v-if="$form.deadline?.invalid" severity="error" size="small" variant="simple">{{
+            $form.deadline.error?.message }}
           </Message>
         </div>
       </div>
       <div>
         <IftaLabel>
-          <Textarea
-            name="description"
-            id="description"
-            rows="5"
-            cols="30"
-            style="resize: none"
-            fluid
-          />
+          <Textarea name="description" id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
         </IftaLabel>
-        <Message
-          v-if="$form.description?.invalid"
-          severity="error"
-          size="small"
-          variant="simple"
-          >{{ $form.description.error?.message }}
+        <Message v-if="$form.description?.invalid" severity="error" size="small" variant="simple">{{
+          $form.description.error?.message }}
         </Message>
       </div>
       <div class="checkbox-container">
         <Checkbox name="create_event" inputId="create_event" binary />
-        <label for="create_event"
-          >Automatically create an event for your task</label
-        >
-        <Message
-          v-if="$form.create_event?.invalid"
-          severity="error"
-          size="small"
-          variant="simple"
-          >{{ $form.create_event.error?.message }}
+        <label for="create_event">Automatically create an event for your task</label>
+        <Message v-if="$form.create_event?.invalid" severity="error" size="small" variant="simple">{{
+          $form.create_event.error?.message }}
         </Message>
       </div>
       <Button type="submit" severity="primary" label="Submit" />
@@ -150,6 +105,10 @@ const props = defineProps({
     }>,
     required: false,
   },
+  id: {
+    type: String,
+    required: false,
+  },
 });
 
 const initialValues = reactive(props.initialValues || {});
@@ -180,43 +139,55 @@ const onFormSubmit = ({ values, valid, reset }) => {
       values.create_event && { create_event: values.create_event },
       values.project_id && { project_id: values.project_id },
     );
-    client.tasks.createTask
-      .mutate(req)
-      .then((res) => {
-        // send event to parent to close the dialog
-        emit("close");
+    if (props.id) {
+      client.tasks.updateTask.mutate({ taskId: props.id, ...req })
+        .then((res) => {
+          // send event to parent to close the dialog and update view
+          emit("close", res.task);
 
-        // clear all input from form
-        initialValues.values = {};
-
-        // if an event is created for this task, display the event
-        if (res && res.event) {
-          calendarStore.addEvent({
-            id: res.event.id,
-            title: res.event.name,
-            description: res.event.description,
-            location: res.event.location,
-            start: moment
-              .utc(res.event.start_time)
-              .local()
-              .format("YYYY-MM-DD HH:mm"),
-            end: moment
-              .utc(res.event.end_time)
-              .local()
-              .format("YYYY-MM-DD HH:mm"),
-            rrule: res.event.rrule,
-            type: "event",
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.add({
-          severity: "error",
-          summary: `Failed to create task: ${err.message}.`,
-          life: 3000,
+          // clear all input from form
+          initialValues.values = {};
         });
-      });
+    }
+    else {
+      client.tasks.createTask
+        .mutate(req)
+        .then((res) => {
+          // send event to parent to close the dialog
+          emit("close");
+
+          // clear all input from form
+          initialValues.values = {};
+
+          // if an event is created for this task, display the event
+          if (res && res.event) {
+            calendarStore.addEvent({
+              id: res.event.id,
+              title: res.event.name,
+              description: res.event.description,
+              location: res.event.location,
+              start: moment
+                .utc(res.event.start_time)
+                .local()
+                .format("YYYY-MM-DD HH:mm"),
+              end: moment
+                .utc(res.event.end_time)
+                .local()
+                .format("YYYY-MM-DD HH:mm"),
+              rrule: res.event.rrule,
+              type: "event",
+            });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.add({
+            severity: "error",
+            summary: `Failed to create task: ${err.message}.`,
+            life: 3000,
+          });
+        });
+    }
   } else {
     toast.add({
       severity: "error",

@@ -9,10 +9,6 @@
       <template #header>
         <span class="project-header">Uncategorized</span>
       </template>
-      <template #icons>
-        <Button icon="pi pi-cog" severity="secondary" rounded text @click="toggle" />
-        <Menu id="config_menu" :model="items" popup />
-      </template>
       <div class="project-tasks">
         <KanbanTaskGroup :projectId="'NONE'" />
       </div>
@@ -50,32 +46,23 @@ const authStore = useAuthStore();
 
 const toast = useToast();
 
+const menu = ref(null);
 const projects = ref([]);
 const items = ref([
   {
-    label: 'Refresh',
-    icon: 'pi pi-refresh',
+    label: 'Edit',
+    icon: 'pi pi-pencil',
     command: () => {
       toast.add({ severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000 });
     }
-  },
-  {
-    label: 'Search',
-    icon: 'pi pi-search',
-    command: () => {
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000 });
-    }
-  },
-  {
-    separator: true
   },
   {
     label: 'Delete',
-    icon: 'pi pi-times',
+    icon: 'pi pi-trash',
     command: () => {
       toast.add({ severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000 });
     }
-  }
+  },
 ]);
 
 const toggle = (event) => {
@@ -85,13 +72,17 @@ const toggle = (event) => {
 onBeforeMount(() => {
   client.projects.getProjectbyLead.query({ uid: authStore.user })
     .then((res) => {
-      for (const project of res.projects) {
-        projects.value.push(project);
-      }
+      const projectsLead = res.projects;
+      client.projects.getProjectbyParticipant.query({ uid: authStore.user })
+      .then((res) => {
+        const projectsParticipate = res.projects;
+        projects.value = projectsLead.concat(projectsParticipate);
+      })
     })
     .catch((err) => {
       console.error(err);
-    })
+      toast.add({ severity: 'error', summary: 'Failed to retrieve projects.', life: 3000 });
+    });
 })
 </script>
 

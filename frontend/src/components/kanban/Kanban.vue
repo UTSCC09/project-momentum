@@ -18,10 +18,6 @@
       <template #header>
         <span class="project-header">{{ project.name }}</span>
       </template>
-      <template #icons>
-        <Button icon="pi pi-cog" severity="secondary" rounded text @click="toggle" />
-        <Menu id="config_menu" :model="items" popup />
-      </template>
       <div class="project-tasks">
         <KanbanTaskGroup :projectId="project.id" />
       </div>
@@ -46,28 +42,7 @@ const authStore = useAuthStore();
 
 const toast = useToast();
 
-const menu = ref(null);
 const projects = ref([]);
-const items = ref([
-  {
-    label: 'Edit',
-    icon: 'pi pi-pencil',
-    command: () => {
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000 });
-    }
-  },
-  {
-    label: 'Delete',
-    icon: 'pi pi-trash',
-    command: () => {
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000 });
-    }
-  },
-]);
-
-const toggle = (event) => {
-  menu.value.toggle(event);
-};
 
 onBeforeMount(() => {
   client.projects.getProjectbyLead.query({ uid: authStore.user })

@@ -6,28 +6,33 @@
   <div class="kanban-board">
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">To do</div>
-      <draggable class="kanban-task-group" :list="todoTasks" group="tasks" @change="updateTodo" itemKey="id">
+      <draggable class="kanban-task-group" :list="todoTasks" group="tasks" @change="updateTodo" itemKey="id"
+        draggable=".item">
         <template #item="{ element, index }">
-          <KanbanTaskCard :task="element" @delete="deleteTodoTask" />
+          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteTodoTask" />
+          <KanbanTaskCard v-else :task="element" @delete="deleteTodoTask" />
         </template>
       </draggable>
     </div>
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">In progress</div>
-      <draggable class="kanban-task-group" :list="inProgressTasks" group="tasks" @change="udpateInProgress"
-        itemKey="id">
+      <draggable class="kanban-task-group" :list="inProgressTasks" group="tasks" @change="udpateInProgress" itemKey="id"
+        draggable=".item">
         <template #item="{ element, index }">
-          <KanbanTaskCard :task="element" @delete="deleteInProgressTask" />
+          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteInProgressTask" />
+          <KanbanTaskCard v-else :task="element" @delete="deleteInProgressTask" />
         </template>
       </draggable>
     </div>
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">Done</div>
-      <draggable class="kanban-task-group" :list="doneTasks" group="tasks" @change="updateDone" itemKey="id">
+      <draggable class="kanban-task-group" :list="doneTasks" group="tasks" @change="updateDone" itemKey="id"
+        draggable=".item">
         <template #item="{ element, index }">
-          <KanbanTaskCard :task="element" @delete="deleteDoneTask" />
+          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteDoneTask" />
+          <KanbanTaskCard v-else :task="element" @delete="deleteDoneTask" />
         </template>
       </draggable>
     </div>
@@ -37,10 +42,14 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from 'vue';
 import { client } from '../../api/index';
+import { useAuthStore } from '../../stores/auth.store.ts';
 import moment from 'moment-timezone';
 import draggable from "vuedraggable";
 import ProgressBar from 'primevue/progressbar';
 import KanbanTaskCard from "./KanbanTaskCard.vue";
+
+const authStore = useAuthStore();
+const user = authStore.user;
 
 const props = defineProps({
   projectId: {
@@ -63,23 +72,20 @@ onBeforeMount(() => {
       for (const task of res.task) {
         total += 1;
         if (task.progress == 'not started') {
-          todoTasks.value.push({
-            ...task,
-            deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
-          });
+          todoTasks.value.push(Object.assign(task,
+            task.deadline && { deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm") }
+          ));
         }
         else if (task.progress == 'in progress') {
-          inProgressTasks.value.push({
-            ...task,
-            deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
-          });
+          inProgressTasks.value.push(Object.assign(task,
+            task.deadline && { deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm") }
+          ));
         }
         else {
           done += 1;
-          doneTasks.value.push({
-            ...task,
-            deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
-          });
+          doneTasks.value.push(Object.assign(task,
+            task.deadline && { deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm") }
+          ));
         }
       }
       progress.value = total > 0 ? Math.round(done / total * 100) : 0;
@@ -102,7 +108,6 @@ function updateTodo(event) {
         console.error(err);
       });
   }
-
 }
 
 function udpateInProgress(event) {

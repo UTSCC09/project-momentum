@@ -8,11 +8,11 @@
       </div>
     </div>
     <div class="event-subtitle-container">
-      <p>
+      <p v-if="location">
         <i class="pi pi-map-marker" style="font-size: 0.75rem"></i>
         {{ location }}
       </p>
-      <p>
+      <p v-if="start && end">
         <i class="pi pi-clock" style="font-size: 0.75rem"></i>
         {{ `${start} - ${end}` }}
       </p>
@@ -26,7 +26,7 @@
     </Dialog>
 
     <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
-      <MeetingForm :initialValues="initialValues" @close="meetingVisible = false" />
+      <MeetingForm :id="calendarEvent.id" :initialValues="initialValues" @close="onMeetingClose" />
     </Dialog>
   </div>
 </template>
@@ -122,7 +122,7 @@ if (props.calendarEvent.type == "event") {
       initialValues.value = Object.assign({},
         res.meeting.name && { name: res.meeting.name },
         res.meeting.location && { location: res.meeting.location },
-        res.meeting.participants && { participants: res.meeting.participants },
+        res.meeting.participants && { participants: res.meeting.participants.join(',') },
         res.meeting.project_id && { project_id: res.meeting.project_id },
         res.meeting.description && { description: res.meeting.description },
         res.meeting.start_time && { start_time: moment.utc(res.meeting.start_time).local().toDate() },
@@ -217,6 +217,21 @@ function onEventClose(newEvent) {
     .format("YYYY-MM-DD HH:mm");
   end.value = moment
     .utc(newEvent.end)
+    .local()
+    .format("YYYY-MM-DD HH:mm");
+}
+
+function onMeetingClose(newMeeting) {
+  meetingVisible.value = false;
+  title.value = newMeeting.name;
+  location.value = newMeeting.location;
+  description.value = newMeeting.description;
+  start.value = moment
+    .utc(newMeeting.start)
+    .local()
+    .format("YYYY-MM-DD HH:mm");
+  end.value = moment
+    .utc(newMeeting.end)
     .local()
     .format("YYYY-MM-DD HH:mm");
 }

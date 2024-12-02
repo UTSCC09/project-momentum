@@ -9,52 +9,29 @@
             <InputText name="name" id="name" type="text" auto fluid />
             <label for="name">Name</label>
           </IftaLabel>
-          <Message
-            v-if="$form.name?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.name.error?.message }}
+          <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
+            $form.name.error?.message }}
           </Message>
         </div>
         <div>
           <IftaLabel>
-            <Select
-              name="project_id"
-              inputId="project"
-              :options="projects"
-              optionLabel="name"
-              optionValue="value"
-              fluid
-            />
+            <Select name="project_id" inputId="project" :options="projects" optionLabel="name" optionValue="value"
+              fluid />
             <label for="project">Project</label>
           </IftaLabel>
-          <Message
-            v-if="$form.project_id?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.project_id.error?.message }}
+          <Message v-if="$form.project_id?.invalid" severity="error" size="small" variant="simple">{{
+            $form.project_id.error?.message }}
           </Message>
         </div>
       </div>
       <div>
         <IftaLabel>
-          <InputText
-            name="participants"
-            v-tooltip="'Enter a comma-separated list of emails'"
-            type="text"
-            id="participants"
-            fluid
-          />
+          <InputText name="participants" v-tooltip="'Enter a comma-separated list of emails'" type="text"
+            id="participants" fluid />
           <label for="participants">Participants</label>
         </IftaLabel>
-        <Message
-          v-if="$form.participants?.invalid"
-          severity="error"
-          size="small"
-          variant="simple"
-          >{{ $form.participants.error?.message }}
+        <Message v-if="$form.participants?.invalid" severity="error" size="small" variant="simple">{{
+          $form.participants.error?.message }}
         </Message>
       </div>
       <div class="input-group" style="grid-template-columns: 3fr 3fr 3fr 1fr">
@@ -63,50 +40,26 @@
             <InputText name="location" type="text" id="location" fluid />
             <label for="location">Location</label>
           </IftaLabel>
-          <Message
-            v-if="$form.location?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.location.error?.message }}
+          <Message v-if="$form.location?.invalid" severity="error" size="small" variant="simple">{{
+            $form.location.error?.message }}
           </Message>
         </div>
         <div>
           <IftaLabel>
-            <DatePicker
-              name="start_time"
-              inputId="start_time"
-              showTime
-              hourFormat="24"
-              fluid
-            />
+            <DatePicker name="start_time" inputId="start_time" showTime hourFormat="24" fluid />
             <label for="start_time">Starts</label>
           </IftaLabel>
-          <Message
-            v-if="$form.start_time?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.start_time.error?.message }}
+          <Message v-if="$form.start_time?.invalid" severity="error" size="small" variant="simple">{{
+            $form.start_time.error?.message }}
           </Message>
         </div>
         <div>
           <IftaLabel>
-            <DatePicker
-              name="end_time"
-              inputId="end_time"
-              showTime
-              hourFormat="24"
-              fluid
-            />
+            <DatePicker name="end_time" inputId="end_time" showTime hourFormat="24" fluid />
             <label for="end_time">Ends</label>
           </IftaLabel>
-          <Message
-            v-if="$form.end_time?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.end_time.error?.message }}
+          <Message v-if="$form.end_time?.invalid" severity="error" size="small" variant="simple">{{
+            $form.end_time.error?.message }}
           </Message>
         </div>
         <div class="checkbox">
@@ -114,115 +67,52 @@
           <label for="repeat">Repeat</label>
         </div>
       </div>
-      <div
-        v-if="$form.repeat?.value"
-        class="input-group"
-        style="grid-template-columns: 1fr 1fr 1fr 1fr"
-      >
+      <div v-if="$form.repeat?.value" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr">
         <div>
           <IftaLabel>
-            <Select
-              name="frequency"
-              inputId="frequency"
-              :options="frequencies"
-              optionLabel="name"
-              optionValue="value"
-              fluid
-            />
+            <Select name="frequency" inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value"
+              fluid />
             <label for="frequency">Frequency</label>
           </IftaLabel>
-          <Message
-            v-if="$form.frequency?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.frequency.error?.message }}
+          <Message v-if="$form.frequency?.invalid" severity="error" size="small" variant="simple">{{
+            $form.frequency.error?.message }}
           </Message>
         </div>
         <div>
           <IftaLabel>
-            <InputNumber
-              name="interval"
-              v-if="$form.frequency?.value == 'DAILY'"
-              inputId="interval"
-              :min="1"
-              suffix=" days"
-              showButtons
-              fluid
-            />
-            <InputNumber
-              name="interval"
-              v-if="$form.frequency?.value == 'WEEKLY'"
-              inputId="interval"
-              :min="1"
-              suffix=" weeks"
-              showButtons
-              fluid
-            />
-            <InputNumber
-              name="interval"
-              v-if="$form.frequency?.value == 'MONTHLY'"
-              inputId="interval"
-              :min="1"
-              suffix=" months"
-              showButtons
-              fluid
-            />
+            <InputNumber name="interval" v-if="$form.frequency?.value == 'DAILY'" inputId="interval" :min="1"
+              suffix=" days" showButtons fluid />
+            <InputNumber name="interval" v-if="$form.frequency?.value == 'WEEKLY'" inputId="interval" :min="1"
+              suffix=" weeks" showButtons fluid />
+            <InputNumber name="interval" v-if="$form.frequency?.value == 'MONTHLY'" inputId="interval" :min="1"
+              suffix=" months" showButtons fluid />
             <label for="interval">Every</label>
           </IftaLabel>
-          <Message
-            v-if="$form.interval?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.interval.error?.message }}
+          <Message v-if="$form.interval?.invalid" severity="error" size="small" variant="simple">{{
+            $form.interval.error?.message }}
           </Message>
         </div>
-        <div
-          v-if="
-            $form.frequency?.value == 'DAILY' ||
-            $form.frequency?.value == 'WEEKLY'
-          "
-        >
+        <div v-if="
+          $form.frequency?.value == 'DAILY' ||
+          $form.frequency?.value == 'WEEKLY'
+        ">
           <IftaLabel>
-            <MultiSelect
-              name="byday"
-              inputId="byday"
-              :options="weeklyDates"
-              optionLabel="name"
-              optionValue="value"
-              :maxSelectedLabels="2"
-              fluid
-            />
+            <MultiSelect name="byday" inputId="byday" :options="weeklyDates" optionLabel="name" optionValue="value"
+              :maxSelectedLabels="2" fluid />
             <label for="byday">By day</label>
           </IftaLabel>
-          <Message
-            v-if="$form.byday?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.byday.error?.message }}
+          <Message v-if="$form.byday?.invalid" severity="error" size="small" variant="simple">{{
+            $form.byday.error?.message }}
           </Message>
         </div>
         <div v-if="$form.frequency?.value == 'MONTHLY'">
           <IftaLabel>
-            <MultiSelect
-              name="bymonthday"
-              inputId="bymonthday"
-              :options="monthlyDates"
-              optionLabel="name"
-              optionValue="value"
-              :maxSelectedLabels="2"
-              fluid
-            />
+            <MultiSelect name="bymonthday" inputId="bymonthday" :options="monthlyDates" optionLabel="name"
+              optionValue="value" :maxSelectedLabels="2" fluid />
             <label for="bymonthday">By month</label>
           </IftaLabel>
-          <Message
-            v-if="$form.bymonthday?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.bymonthday.error?.message }}
+          <Message v-if="$form.bymonthday?.invalid" severity="error" size="small" variant="simple">{{
+            $form.bymonthday.error?.message }}
           </Message>
         </div>
         <div>
@@ -232,33 +122,18 @@
               <label for="until">Until</label>
             </IftaLabel>
           </InputGroup>
-          <Message
-            v-if="$form.until?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-            >{{ $form.until.error?.message }}
+          <Message v-if="$form.until?.invalid" severity="error" size="small" variant="simple">{{
+            $form.until.error?.message }}
           </Message>
         </div>
       </div>
       <div>
         <IftaLabel>
-          <Textarea
-            name="description"
-            id="description"
-            rows="5"
-            cols="30"
-            style="resize: none"
-            fluid
-          />
+          <Textarea name="description" id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
         </IftaLabel>
-        <Message
-          v-if="$form.description?.invalid"
-          severity="error"
-          size="small"
-          variant="simple"
-          >{{ $form.description.error?.message }}
+        <Message v-if="$form.description?.invalid" severity="error" size="small" variant="simple">{{
+          $form.description.error?.message }}
         </Message>
       </div>
       <Button type="submit" severity="primary" label="Submit" />
@@ -331,6 +206,10 @@ const props = defineProps({
     }>,
     required: false,
   },
+  id: {
+    type: String,
+    required: false,
+  },
 });
 
 const initialValues = reactive(props.initialValues || {});
@@ -371,40 +250,77 @@ const onFormSubmit = ({ values, valid, reset }) => {
       values.participants && { participants: values.participants.split(",") },
     );
 
-    client.meetings.createMeeting
-      .mutate(req)
-      .then((res) => {
-        // send event to parent to close the dialog
-        emit("close");
+    if (props.id) {
+      client.meetings.updateMeeting.mutate({ meetingId: props.id, ...req })
+        .then((res) => {
+          // send event to parent to close the dialog
+          emit("close", res.meeting);
 
-        // clear all input
-        initialValues.values = {};
+          // clear all input
+          initialValues.values = {};
 
-        calendarStore.addEvent({
-          id: res.meeting.id,
-          title: res.meeting.name,
-          description: res.meeting.description,
-          location: res.meeting.location,
-          start: moment
-            .utc(res.meeting.start_time)
-            .local()
-            .format("YYYY-MM-DD HH:mm"),
-          end: moment
-            .utc(res.meeting.end_time)
-            .local()
-            .format("YYYY-MM-DD HH:mm"),
-          rrule: res.meeting.rrule,
-          type: "meeting",
+          calendarStore.updateEvent({
+            id: res.meeting.id,
+            title: res.meeting.name,
+            description: res.meeting.description,
+            location: res.meeting.location,
+            start: moment
+              .utc(res.meeting.start_time)
+              .local()
+              .format("YYYY-MM-DD HH:mm"),
+            end: moment
+              .utc(res.meeting.end_time)
+              .local()
+              .format("YYYY-MM-DD HH:mm"),
+            rrule: res.meeting.rrule,
+            type: "meeting",
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.add({
+            severity: "error",
+            summary: `Failed to update meeting: ${err.message}.`,
+            life: 3000,
+          });
         });
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.add({
-          severity: "error",
-          summary: `Failed to create meeting: ${err.message}.`,
-          life: 3000,
+    }
+    else {
+      client.meetings.createMeeting
+        .mutate(req)
+        .then((res) => {
+          // send event to parent to close the dialog
+          emit("close");
+
+          // clear all input
+          initialValues.values = {};
+
+          calendarStore.addEvent({
+            id: res.meeting.id,
+            title: res.meeting.name,
+            description: res.meeting.description,
+            location: res.meeting.location,
+            start: moment
+              .utc(res.meeting.start_time)
+              .local()
+              .format("YYYY-MM-DD HH:mm"),
+            end: moment
+              .utc(res.meeting.end_time)
+              .local()
+              .format("YYYY-MM-DD HH:mm"),
+            rrule: res.meeting.rrule,
+            type: "meeting",
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.add({
+            severity: "error",
+            summary: `Failed to create meeting: ${err.message}.`,
+            life: 3000,
+          });
         });
-      });
+    }
   } else {
     toast.add({
       severity: "error",

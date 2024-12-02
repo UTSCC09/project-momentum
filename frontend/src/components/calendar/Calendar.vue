@@ -207,6 +207,7 @@ const customComponents = {
 const calendarApp = createCalendar(config, plugins);
 const calendarStore = useCalendarStore();
 calendarStore.setEventsService(calendarApp.eventsService);
+calendarStore.setCalendarService(calendarControls);
 
 getEvents(calendarControls.getRange());
 </script>

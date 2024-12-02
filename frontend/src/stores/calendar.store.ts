@@ -69,9 +69,14 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
   ]);
   const eventsService = ref(null);
+  const calendarService = ref(null);
 
   function setEventsService(newEventsService) {
     eventsService.value = newEventsService;
+  }
+
+  function setCalendarService(newCalendarService) {
+    calendarService.value = newCalendarService;
   }
 
   function addEvent(event) {
@@ -111,7 +116,7 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
 
   return {
-    events, eventsService, setEventsService, addEvent, setEvents, updateEvent,
-    removeEvent
+    events, eventsService, calendarService, setEventsService, setCalendarService,
+    addEvent, setEvents, updateEvent, removeEvent
   }
 })

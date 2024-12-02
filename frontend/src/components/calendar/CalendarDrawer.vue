@@ -10,14 +10,14 @@
           <div class="nlp-instruction">How can I help you?</div>
           <div class="nlp-input-container">
             <InputText type="text" v-model="nlpInput" />
-            <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem" strokeWidth="5"/>
+            <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem" strokeWidth="5" />
             <Button v-else icon="pi pi-send" severity="secondary" aria-label="Submit" @click="nlp" />
           </div>
         </div>
       </Popover>
 
       <div v-if="projects.length > 0" class="project-listbox">
-        <Listbox v-model="selectedProject" :options="projects" multiple optionLabel="name" />
+        <Listbox v-model="selectedProjects" :options="projects" multiple optionLabel="name" @change="getProject" />
       </div>
 
       <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
@@ -60,10 +60,12 @@ import { client } from "../../api/index";
 import { Peer } from "peerjs";
 
 import { useAuthStore } from "../../stores/auth.store.ts";
+import { useCalendarStore } from '../../stores/calendar.store.ts';
 
 import moment from 'moment-timezone';
 
 const authStore = useAuthStore();
+const calendarStore = useCalendarStore();
 
 const toast = useToast();
 
@@ -181,8 +183,71 @@ function nlp() {
     });
 }
 
-const selectedProject = ref();
+const selectedProjects = ref([]);
 const projects = ref([]);
+function getProject() {
+  const range = calendarStore.calendarService.getRange();
+  const queryRange = {
+    start_date: moment(range.start).local().utc().toISOString(),
+    end_date: moment(range.end).local().utc().toISOString(),
+  }
+
+  const events = [];
+  const meetings = [];
+
+  const promises = selectedProjects.value.map(project =>
+    client.calendar.getCalendar.query({
+      project_id: project.id,
+      ...queryRange,
+    })
+  );
+
+  Promise.all(promises)
+    .then((responses) => {
+      responses.forEach((res) => {
+        const projectEvents = res.calendar.events.map((event) => {
+          const calendarEvent = {
+            id: event.id,
+            title: event.name,
+            description: event.description,
+            location: event.location,
+            start: moment.utc(event.start_time).local().format("YYYY-MM-DD HH:mm"),
+            end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
+            type: "event",
+          };
+          if (event.rrule) {
+            calendarEvent.rrule = event.rrule;
+          }
+          return calendarEvent;
+        });
+
+        const projectMeetings = res.calendar.meetings.map((meeting) => {
+          const calendarMeeting = {
+            id: meeting.id,
+            title: meeting.name,
+            description: meeting.description,
+            location: meeting.location,
+            start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
+            end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
+            type: "meeting",
+          };
+          if (meeting.rrule) {
+            calendarMeeting.rrule = meeting.rrule;
+          }
+          return calendarMeeting;
+        });
+
+        events.push(...projectEvents);
+        meetings.push(...projectMeetings);
+      });
+
+      calendarStore.setEvents(events.concat(meetings));
+    })
+    .catch((err) => {
+      console.error(err);
+      toast.add({ severity: 'error', summary: 'Failed to retrieve events.', life: 3000 });
+    });
+}
 
 onBeforeMount(() => {
   client.projects.getProjectbyLead.query({ uid: authStore.user })

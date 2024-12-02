@@ -36,7 +36,6 @@ function getEvents(range) {
 
   client.meetings.getMeetingbyParticipant.query({ userId: authStore.user })
     .then((res) => {
-      console.log(res.meetings);
       const meetingsAsParticipants = res.meetings
         .map((meeting) => ({
           id: meeting.id,

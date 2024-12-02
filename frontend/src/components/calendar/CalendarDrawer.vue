@@ -96,21 +96,12 @@ const items = [
 ];
 
 function test() {
-  fetch("http://localhost:3000/api/openai/getTaskSchedual", {
-    method: "POST",
+  fetch("http://localhost:3000/api/oauth/google/calendar", {
+    method: "GET",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      start_time: "2024-11-18T00:00:00Z",
-      end_time: "2024-11-25T00:00:00Z", // Corrected year
-      task: {
-        name: "Test Task",
-        description: "Finish my homework",
-        deadline: "2024-11-25T00:00:00Z",
-      }
-    }),
   })
     .then(response => {
       if (!response.ok) {

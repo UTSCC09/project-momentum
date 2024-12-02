@@ -19,8 +19,6 @@
         <ProjectForm @close="projectVisible = false;" />
       </Dialog>
 
-      <Button label="Test" @click="test" style="margin-top: 1rem;"></Button>
-
       <div style="margin-top: 1rem;">
         <Button type="button" icon="pi pi-sparkles" label="NLP" @click="toggle" />
         <Popover ref="op">
@@ -94,24 +92,6 @@ const items = [
     }
   }
 ];
-
-function test() {
-  fetch("http://localhost:3000/api/oauth/google/calendar", {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => console.log(data))
-    .catch(error => console.error(error));
-}
 
 const nlpInput = ref("");
 const op = ref();

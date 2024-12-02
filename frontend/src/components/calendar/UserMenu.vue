@@ -81,11 +81,12 @@ const items = ref([
     ]
   },
   {
-    label: 'Connect',
+    label: 'Integrate',
     items: [
       {
         label: 'Google',
         icon: 'pi pi-google',
+        command: integrateGoogle,
       },
     ]
   }
@@ -94,6 +95,24 @@ const items = ref([
 const toggle = (event) => {
   menu.value.toggle(event);
 };
+
+function integrateGoogle() {
+  fetch("http://localhost:3000/api/oauth/google/calendar", {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
+}
 </script>
 
 <style lang="css" scoped>

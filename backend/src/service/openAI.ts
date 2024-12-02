@@ -18,31 +18,32 @@ const systemTemplate =
 3. Previous User Events: {previousEvents}
 
 Your objectives are:
-- Identify the optimal time slot for the task, ensuring it fits between the current time and the task's deadline.
-- If the task is related to any previous events (based on name or description), aim to schedule it at the same time and duration as those events.
+- Identify the optimal time slot and date for the task, ensuring it fits between the current time and the task's deadline.
+- The start time and end time should not overlap with any previous events.
+- If the task is related to any previous events (based on name or description), aim to schedule it at the similar time and duration as those events.
+- Take into account the nature of the event, its location, task description, and deadline, especially the deadline and description.
 
-Considerations:
-- Ensure the task's start and end times fall within the provided start_time and end_time, and are after the current time.
-- Take into account the nature of the event, its location, task description, and deadline.
+Example:
+A task named "Meeting with John" should be scheduled at the similar time and duration as the previous event named "Meeting with John".
 
-Note: All times should be in Toronto time, including the task's start and end times, as well as the input start_time and end_time.`;
+Note: All input times should be in Toronto time in UTC time zone`;
 
 export const AIRouter = Router();
 
 export async function getTaskSchedual(name: string, description: string, location: string, deadline: string, start_time: string, end_time: string, uid: string) {
     const calendar = await getCalendarEvents(start_time, end_time);
     const previousEvents = await getCalendarEventsFromCache(uid);
-    const task = `${name}, ${description}, ${location}, ${deadline}`;
-
+    const task = `name: ${name}, description: ${description}, location: ${location}, deadline: ${deadline}`;
+    console.log("Task:", task);
     console.log("Previous Events:", previousEvents);
 
     const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4",
         messages: [
             { role: "system", content: systemTemplate },
             {
                 role: "user",
-                content: `Calendar: ${calendar}, Task: ${task}, Previous Events: ${previousEvents}, Start Time: ${start_time}, End Time: ${end_time}, Current Time: ${new Date().toISOString()}`,
+                content: `Calendar Events: ${calendar}, Task Details: ${task}, Previous User Events: ${previousEvents}, Start Time: ${start_time}, End Time: ${end_time}, Current Time: ${new Date().toISOString()}`,
             },
         ],
         response_format: zodResponseFormat(z.object({

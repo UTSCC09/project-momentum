@@ -87,7 +87,7 @@ export const meetingRouter = trpc.router({
     getMeetingbyParticipant: userProcedure
     .input(z.object({userId: z.string()}))
     .query(async ({ input }) => {
-        console.log("userId:", input.userId);
+
         const meetings = await Meeting.findAll({
             where: Sequelize.where(
                 Sequelize.fn('JSON_CONTAINS', Sequelize.col('participants'), JSON.stringify([input.userId])),

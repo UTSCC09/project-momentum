@@ -39,13 +39,15 @@ export const taskRouter = trpc.router({
                 
                 let event: any = await getTaskSchedual(name, description || "", location || "", deadline || "", start_time, end_time, uid || "");
                 event = JSON.parse(event);
+                const event_start_time = event.start_time.endsWith("Z") ? event.start_time.slice(0, -1) : event.start_time;
+                const event_end_time = event.end_time.endsWith("Z") ? event.end_time.slice(0, -1) : event.end_time;
                 createdEvent = await Event.create({
                     uid: uid,
                     name: "finished " + name,
                     description: description || "",
                     location: location || "",
-                    start_time: event.start_time,
-                    end_time: event.end_time,
+                    start_time: event_start_time,
+                    end_time: event_end_time,
                     task: task.id,
                 });
                 

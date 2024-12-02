@@ -118,6 +118,13 @@ export const userRouter = trpc.router({
       }
     }),
 
+    getUser: trpc.procedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input, ctx }) => {
+        const user = await User.findByPk(input.userId);
+        return user;
+    }),
+
     logoutUser: trpc.procedure
     .mutation(async ({ ctx }) => {
         ctx.res.setHeader('Set-Cookie', [

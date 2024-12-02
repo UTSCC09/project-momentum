@@ -135,6 +135,7 @@ export const meetingRouter = trpc.router({
             if(participants !== null){
                 for(const participant of participants){
                     const user: any  = await User.findOne({ where: { email: participant } });
+                    if (!user) continue;
                     participantUsers.push(user.id);
                 }
             }

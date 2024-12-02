@@ -140,6 +140,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
         // clear all input from form
         initialValues.values = {};
 
+        // if an event is created for this task, display the event
         if (res && res.event) {
           calendarStore.addEvent({
             id: res.event.id,
@@ -158,6 +159,9 @@ const onFormSubmit = ({ values, valid, reset }) => {
         toast.add({ severity: 'error', summary: `Failed to create task: ${err.message}.`, life: 3000 });
       });
   }
+  else {
+    toast.add({ severity: 'error', summary: `Invalid form values.`, life: 3000 });
+  }
 };
 
 const projects = ref<{ string, string }[]>([]);
@@ -171,7 +175,7 @@ onBeforeMount(() => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     })
 });
 </script>

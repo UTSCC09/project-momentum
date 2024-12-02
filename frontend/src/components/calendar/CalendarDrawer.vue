@@ -141,50 +141,32 @@ function nlp() {
         meetingVisible.value = true;
       }
       else if (res.type == 'event') {
-        eventInitialValues.value = {
-          name: res.name,
-          description: res.description,
-          location: res.location,
-        };
-        if (res.start_time) {
-          eventInitialValues.value.startTime = moment(res.start_time).local().toDate();
-        }
-        if (res.end_time) {
-          eventInitialValues.value.endTime = moment(res.end_time).local().toDate();
-        }
-        if (res.rrule) {
-          eventInitialValues.value.repeat = true;
-          eventInitialValues.value.frequency = res.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
-          eventInitialValues.value.interval =
-            res.rrule.match(/INTERVAL=([^;]+)/)?.[1]
-              ? parseInt(res.rrule.match(/INTERVAL=([^;]+)/)?.[1])
-              : null;
-          eventInitialValues.value.byday =
-            res.rrule.match(/BYDAY=([^;]+)/)?.[1]
-              ? res.rrule.match(/BYDAY=([^;]+)/)?.[1].split(',')
-              : null;
-          eventInitialValues.value.bymonthday =
-            res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
-              ? res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
-                .split(',')
-                .map((monthday) => parseInt(monthday))
-              : null;
-          eventInitialValues.value.until =
-            res.rrule.match(/UNTIL=([^;]+)/)?.[1]
-              ? moment(res.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate()
-              : null;
-        }
+        eventInitialValues.value = Object.assign({},
+          res.name && { name: res.name },
+          res.description && { description: res.description },
+          res.location && { location: res.location },
+          res.start_time && { start_time: moment(res.start_time).local().toDate() },
+          res.end_time && { end_time: moment(res.end_time).local().toDate() },
+          res.rrule && { repeat: true },
+          res.rrule && res.rrule.match(/FREQ=([^;]+)/)?.[1] && { frequency: res.rrule.match(/FREQ=([^;]+)/)?.[1] },
+          res.rrule && res.rrule.match(/INTERVAL=([^;]+)/)?.[1] && { interval: parseInt(res.rrule.match(/INTERVAL=([^;]+)/)?.[1]) },
+          res.rrule && res.rrule.match(/BYDAY=([^;]+)/)?.[1] && { byday: res.rrule.match(/BYDAY=([^;]+)/)?.[1].split(',') },
+          res.rrule && res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
+            bymonthday: res.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1]
+              .split(',')
+              .map((monthday) => parseInt(monthday))
+          },
+          res.rrule && res.rrule.match(/UNTIL=([^;]+)/)?.[1] && { until: moment(res.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate() },
+        );
         eventVisible.value = true;
       }
       else if (res.type == 'task') {
-        taskInitialValues.value = {
-          name: res.name,
-          description: res.description,
-          location: res.location,
-        };
-        if (res.deadline) {
-          taskInitialValues.value.deadline = moment(res.deadline).local().toDate();
-        }
+        taskInitialValues.value = Object.assign({},
+          res.name && { name: res.name },
+          res.description && { description: res.description },
+          res.location && { location: res.location },
+          res.deadline && { deadline: moment(res.deadline).local().toDate() },
+        );
         taskVisible.value = true;
       }
       else {

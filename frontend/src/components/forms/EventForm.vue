@@ -1,112 +1,131 @@
 <template>
   <div>
     <Toast />
-    <Form :resolver @submit="onFormSubmit">
+
+    <Form v-slot="$form" :initialValues :resolver @submit="onFormSubmit">
       <div class="input-group" style="grid-template-columns: 3fr 1fr;">
-        <FormField v-slot="$field" name="name">
+        <div>
           <IftaLabel>
-            <InputText id="name" type="text" v-model="name" auto fluid />
+            <InputText name="name" id="name" type="text" auto fluid />
             <label for="name">Name</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
+            $form.name.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="project_id">
+        </div>
+        <div>
           <IftaLabel>
-            <Select inputId="project" :options="projects" optionLabel="name" optionValue="value" v-model="project_id" fluid />
+            <Select name="project_id" inputId="project" :options="projects" optionLabel="name" optionValue="value"
+              fluid />
             <label for="project">Project</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.project_id?.invalid" severity="error" size="small" variant="simple">{{
+            $form.project_id.error?.message }}
           </Message>
-        </FormField>
+        </div>
       </div>
       <div class="input-group" style="grid-template-columns: 3fr 3fr 3fr 1fr;">
-        <FormField v-slot="$field" name="location">
+        <div>
           <IftaLabel>
-            <InputText type="text" id="location" v-model="location" fluid />
+            <InputText name="location" type="text" id="location" fluid />
             <label for="location">Location</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.location?.invalid" severity="error" size="small" variant="simple">{{
+            $form.location.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="startTime">
+        </div>
+        <div>
           <IftaLabel>
-            <DatePicker inputId="startTime" v-model="startTime" showTime hourFormat="24" fluid />
-            <label for="startTime">Starts</label>
+            <DatePicker name="start_time" inputId="start_time" showTime hourFormat="24" fluid />
+            <label for="start_time">Starts</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.start_time?.invalid" severity="error" size="small" variant="simple">{{
+            $form.start_time.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="endTime">
+        </div>
+        <div>
           <IftaLabel>
-            <DatePicker inputId="endTime" v-model="endTime" showTime hourFormat="24" fluid />
-            <label for="endTime">Ends</label>
+            <DatePicker name="end_time" inputId="end_time" showTime hourFormat="24" fluid />
+            <label for="end_time">Ends</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.end_time?.invalid" severity="error" size="small" variant="simple">{{
+            $form.end_time.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="repeat" class="checkbox">
-          <Checkbox inputId="repeat" :binary="true" v-model="repeat" @change="toggleRecurrence" />
+        </div>
+        <div class="checkbox">
+          <Checkbox name="repeat" inputId="repeat" :binary="true" />
           <label for="repeat">Repeat</label>
-        </FormField>
+          <Message v-if="$form.repeat?.invalid" severity="error" size="small" variant="simple">{{
+            $form.repeat.error?.message }}
+          </Message>
+        </div>
       </div>
-      <div v-if="repeat" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
-        <FormField v-slot="$field" name="frequency">
+      <div v-if="$form.repeat?.value" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+        <div>
           <IftaLabel>
-            <Select v-model="frequency" inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
+            <Select name="frequency" inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value"
+              fluid />
             <label for="frequency">Frequency</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.frequency?.invalid" severity="error" size="small" variant="simple">{{
+            $form.frequency.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="interval">
+        </div>
+        <div>
           <IftaLabel>
-            <InputNumber v-if="frequency=='DAILY'" inputId="interval" :min="1" suffix=" days" v-model="interval" showButtons fluid />
-            <InputNumber v-if="frequency=='WEEKLY'" inputId="interval" :min="1" suffix=" weeks" v-model="interval" showButtons fluid />
-            <InputNumber v-if="frequency=='MONTHLY'" inputId="interval" :min="1" suffix=" months" v-model="interval" showButtons fluid />
-            <InputNumber v-if="!frequency" inputId="interval" :min="1" v-model="interval" showButtons fluid />
+            <InputNumber name="interval" v-if="$form.frequency?.value == 'DAILY'" inputId="interval" :min="1"
+              suffix=" days" showButtons fluid />
+            <InputNumber name="interval" v-if="$form.frequency?.value == 'WEEKLY'" inputId="interval" :min="1"
+              suffix=" weeks" showButtons fluid />
+            <InputNumber name="interval" v-if="$form.frequency?.value == 'MONTHLY'" inputId="interval" :min="1"
+              suffix=" months" showButtons fluid />
             <label for="interval">Every</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.interval?.invalid" severity="error" size="small" variant="simple">{{
+            $form.interval.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-if="frequency=='DAILY' || frequency=='WEEKLY'" v-slot="$field" name="byday">
+        </div>
+        <div v-if="$form.frequency?.value == 'DAILY' || $form.frequency?.value == 'WEEKLY'">
           <IftaLabel>
-            <MultiSelect inputId="byday" :options="weeklyDates" optionLabel="name" optionValue="value"
-              :maxSelectedLabels="2" v-model="byday" fluid />
+            <MultiSelect name="byday" inputId="byday" :options="weeklyDates" optionLabel="name" optionValue="value"
+              :maxSelectedLabels="2" fluid />
             <label for="byday">By day</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.byday?.invalid" severity="error" size="small" variant="simple">{{
+            $form.byday.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-if="frequency=='MONTHLY'" v-slot="$field" name="bymonthday">
+        </div>
+        <div v-if="$form.frequency?.value == 'MONTHLY'">
           <IftaLabel>
-            <MultiSelect inputId="bymonthday" :options="monthlyDates" optionLabel="name" optionValue="value"
-              :maxSelectedLabels="2" v-model="bymonthday" fluid />
+            <MultiSelect name="bymonthday" inputId="bymonthday" :options="monthlyDates" optionLabel="name"
+              optionValue="value" :maxSelectedLabels="2" fluid />
             <label for="bymonthday">By month</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.bymonthday?.invalid" severity="error" size="small" variant="simple">{{
+            $form.bymonthday.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="until">
-          <InputGroup class="md:w-80">
+        </div>
+        <div>
+          <InputGroup>
             <IftaLabel>
-              <DatePicker v-model="until" inputId="until" hourFormat="24" fluid />
+              <DatePicker name="until" inputId="until" hourFormat="24" fluid />
               <label for="until">Until</label>
             </IftaLabel>
           </InputGroup>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.until?.invalid" severity="error" size="small" variant="simple">{{
+            $form.until.error?.message }}
           </Message>
-        </FormField>
+        </div>
       </div>
-      <FormField v-slot="$field" name="description">
+      <div>
         <IftaLabel>
-          <Textarea id="description" rows="5" cols="30" style="resize: none" v-model="description" fluid />
+          <Textarea name="description" id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
         </IftaLabel>
-        <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+        <Message v-if="$form.description?.invalid" severity="error" size="small" variant="simple">{{
+          $form.description.error?.message }}
         </Message>
-      </FormField>
+      </div>
       <Button type="submit" severity="primary" label="Submit" />
     </Form>
   </div>
@@ -114,13 +133,11 @@
 
 <script setup lang="ts">
 import { Form } from '@primevue/forms';
-import { FormField } from '@primevue/forms';
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import DatePicker from 'primevue/datepicker';
 import IftaLabel from 'primevue/iftalabel';
 import InputGroup from 'primevue/inputgroup';
-import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
@@ -129,7 +146,7 @@ import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 
-import { ref, onBeforeMount } from 'vue';
+import { ref, reactive, onBeforeMount } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
@@ -163,8 +180,8 @@ const props = defineProps({
       name?: string,
       description?: string,
       location?: string,
-      startTime?: Date,
-      endTime?: Date,
+      start_time?: Date,
+      end_time?: Date,
       repeat?: boolean,
       frequency?: "DAILY" | "WEEKLY" | "MONTHLY",
       interval?: number,
@@ -174,46 +191,21 @@ const props = defineProps({
       project_id?: string,
     }>,
     required: false,
-    default: () => ({
-      name: '',
-      description: '',
-      location: '',
-      startTime: null,
-      endTime: null,
-      repeat: false,
-      frequency: 'DAILY',
-      interval: 1,
-      byday: [],
-      bymonthday: [],
-      until: null,
-      project_id: '',
-    })
   }
 });
 
-const name = ref(props.initialValues.name);
-const description = ref(props.initialValues.description);
-const location = ref(props.initialValues.location);
-const startTime = ref(props.initialValues.startTime);
-const endTime = ref(props.initialValues.endTime);
-const repeat = ref(props.initialValues.repeat);
-const frequency = ref(props.initialValues.frequency);
-const interval = ref(props.initialValues.interval);
-const byday = ref(props.initialValues.byday);
-const bymonthday = ref(props.initialValues.bymonthday);
-const until = ref(props.initialValues.until);
-const project_id = ref(props.initialValues.project_id);
+const initialValues = reactive(props.initialValues);
 
 const toast = useToast();
 
 const resolver = zodResolver(
   z.object({
     name: z.string().min(1, { message: 'Name is required.' }),
-    description: z.string().min(1, { message: 'Description is required.' }),
-    location: z.string().min(1, { message: 'Location is required.' }),
-    startTime: z.date(),
-    endTime: z.date(),
-    repeat: z.union([z.boolean(), z.undefined()]),
+    description: z.string().optional(),
+    location: z.string().optional(),
+    start_time: z.date(),
+    end_time: z.date(),
+    repeat: z.boolean().optional(),
     frequency: z.union([z.literal("DAILY"), z.literal("WEEKLY"), z.literal("MONTHLY")]).optional(),
     interval: z.number().optional(),
     byday: z.any().optional(),
@@ -224,28 +216,25 @@ const resolver = zodResolver(
 );
 
 const onFormSubmit = ({ values, valid, reset }) => {
-  console.log(`Received EventForm:`);
-  console.log(values);
   if (valid) {
-    const req = {
-      name: values.name,
-      description: values.description,
-      location: values.location,
-      start_time: moment(values.startTime).local().utc().toISOString(),
-      end_time: moment(values.endTime).local().utc().toISOString(),
-    }
-    if (values.repeat) {
-      req.rrule = formatRecurrence(values);
-      req.end_recurrence = moment(values.until).local().utc().toISOString();
-    }
-    console.log(`Sending request to createEvent:`);
-    console.log(req);
+    const req = Object.assign({},
+      values.name && {name: values.name},
+      values.description && { description: values.description },
+      values.location && { location: values.location },
+      { start_time: values.start_time },
+      { end_time: values.end_time },
+      values.project_id && { pid: values.project_id },
+      values.repeat && { rrule: formatRecurrence(values) }
+    );
+
     client.events.createEvent.mutate(req)
       .then((res) => {
+        // send event to parent to close the dialog
         emit('close');
-        reset();
-        console.log(`Received response from createEvent:`);
-        console.log(res);
+
+        // clear all input
+        initialValues.values = {};
+
         calendarStore.addEvent({
           id: res.event.id,
           title: res.event.name,
@@ -256,7 +245,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
           rrule: res.event.rrule,
           type: "event",
         });
-        toast.add({ severity: 'success', summary: 'Event created.', life: 3000 });
       })
       .catch((err) => {
         console.error(err);
@@ -268,7 +256,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
   }
 };
 
-const projects = ref([]);
+const projects = ref<{string, string}[]>([]);
 
 const frequencies = ref([
   { name: "daily", value: "DAILY" },
@@ -300,26 +288,15 @@ const monthlyDates = ref([
   { name: "31", value: 31 },
 ]);
 
-function toggleRecurrence(event) {
-  // console.log(event.target.checked);
-  if (event.target.checked) {
-    showRecurrence();
-  }
-  else {
-    hideRecurrence();
-  }
-} 
-
 onBeforeMount(() => {
   client.projects.getProjectbyLead.query({ uid: authStore.user })
     .then((res) => {
-      console.log(res);
       for (const project of res.projects) {
         projects.value.push({ name: project.name, value: project.id });
       }
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     });
 });
 </script>
@@ -330,12 +307,6 @@ onBeforeMount(() => {
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-}
-
-.p-formfield {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
 }
 
 .input-group {

@@ -3,9 +3,7 @@
     <template #title>{{ task.title }}</template>
     <template #subtitle>{{ task.date }}</template>
     <template #content>
-      <p class="m-0">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-      </p>
+      <p>{{ task.description }}</p>
     </template>
   </Card>
 </template>
@@ -20,3 +18,6 @@ defineProps({
   }
 });
 </script>
+
+<style lang="css" scoped>
+</style>

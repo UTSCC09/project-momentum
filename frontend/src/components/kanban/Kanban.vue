@@ -1,25 +1,29 @@
 <template>
   <header class="sx__calendar-header">
-    <UserMenu view="Tasks"/>
+    <UserMenu view="Tasks" />
   </header>
   <div class="card">
     <Toast />
-    <Panel toggleable>
+    <Panel v-for="project in projects" toggleable>
       <template #header>
-        <span>Project Name</span>
+        <span class="project-header">{{ project.name }}</span>
       </template>
       <template #icons>
         <Button icon="pi pi-cog" severity="secondary" rounded text @click="toggle" />
-        <Menu ref="menu" id="config_menu" :model="items" popup />
+        <Menu id="config_menu" :model="items" popup />
       </template>
-      <KanbanTaskGroup />
-      <!-- This is the kanban board. -->
+      <div class="project-tasks">
+        <KanbanTaskGroup :projectId="project.id" />
+      </div>
     </Panel>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
+import { client } from '../../api/index';
+import { useAuthStore } from '../../stores/auth.store.ts';
+
 import { useToast } from "primevue/usetoast";
 import Menu from 'primevue/menu';
 import Panel from 'primevue/panel';
@@ -28,9 +32,11 @@ import Button from 'primevue/button';
 import UserMenu from '../calendar/UserMenu.vue';
 import KanbanTaskGroup from './KanbanTaskGroup.vue';
 
-const menu = ref(null);
+const authStore = useAuthStore();
+
 const toast = useToast();
 
+const projects = ref([]);
 const items = ref([
   {
     label: 'Refresh',
@@ -61,11 +67,38 @@ const items = ref([
 const toggle = (event) => {
   menu.value.toggle(event);
 };
+
+onBeforeMount(() => {
+  client.projects.getProjectbyLead.query({ uid: authStore.user })
+    .then((res) => {
+      console.log(res);
+
+      for (const project of res.projects) {
+        projects.value.push(project);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+
+  // client.projects.getProjectbyParticipant.query({ uid: authStore.user })
+  //   .then((res) => {
+  //     console.log(res);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //   })
+})
 </script>
 
 <style lang="css" scoped>
 header {
   display: flex;
   flex-direction: row-reverse;
+}
+
+.project-header {
+  font-size: var(--sx-font-extra-large);
+  font-weight: 600;
 }
 </style>

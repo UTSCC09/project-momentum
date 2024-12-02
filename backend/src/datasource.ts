@@ -9,7 +9,8 @@ const dbHost = process.env.VM_HOST || 'localhost'
 
 export const sequelize = new Sequelize('CSCC09', dbUsername, dbPassword, {
     host: dbHost, 
-    dialect: 'mysql'
+    dialect: 'mysql',
+    logging: false
 })
 
 export async function connectDB(){

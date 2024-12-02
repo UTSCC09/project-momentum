@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Event } from '../../../model/calendar/baseEvent/event';
-
+import { clearUserCalendarCache } from '../../../service/redis';
+import { eventNPL } from '../../../service/openAI';
+import { updateUserEvents } from '../../../service/redis';
 export const eventRouter = trpc.router({
 
     createEvent: userProcedure
@@ -14,13 +16,13 @@ export const eventRouter = trpc.router({
         start_time: z.string(),
         end_time: z.string(),
         rrule: z.string().optional(),
+        pid: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
-        let new_recurring: any = null;
-        const { name, description = null, location = null, start_time, end_time, rrule = null } = input;
 
-        console.log(name, description, location, start_time, end_time, rrule);
+        const { name, description = null, location = null, start_time, end_time, rrule = null, pid = null } = input;
+
         try{
             const event = await Event.create({
                 uid: uid,
@@ -29,8 +31,14 @@ export const eventRouter = trpc.router({
                 location: location,
                 start_time: start_time,
                 end_time: end_time,
-                ...(rrule ? { rrule: rrule } : {})
+                ...(rrule ? { rrule: rrule } : {}),
+                ...(pid ? { pid: pid } : {})
             });
+
+            // Update user cache
+            await updateUserEvents(uid || "", event);
+            await clearUserCalendarCache(uid || "");
+
             return {
                 event: event,
                 temp: "temp"
@@ -89,6 +97,11 @@ export const eventRouter = trpc.router({
             event.end_time = end_time || event.end_time;
             event.rrule = rrule || event.rrule;
             await event.save();
+
+            // Update user cache
+            await updateUserEvents(event.uid || "", event);
+            await clearUserCalendarCache(event.uid || "");
+
             return {
                 event: event,
                 temp: "temp"
@@ -108,6 +121,8 @@ export const eventRouter = trpc.router({
         if (event.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         await event.destroy();
+        await clearUserCalendarCache(event.uid || "");
+
         return {
             event: event,
             temp: "temp"

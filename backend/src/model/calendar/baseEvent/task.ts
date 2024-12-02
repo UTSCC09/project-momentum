@@ -51,14 +51,14 @@ export const Task = sequelize.define("Task", {
     },
 
     deadline:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
     },
     
     progress:{
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.ENUM('not started', 'in progress', 'completed'),
         allowNull: false,
-        defaultValue: false,
+        defaultValue: 'not started',
     },
 })
 

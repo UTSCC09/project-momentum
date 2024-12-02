@@ -15,7 +15,28 @@
         <MeetingForm @close="meetingVisible = false;" />
       </Dialog>
 
+      <Dialog v-model:visible="projectVisible" modal header="Create Project" :style="{ width: '50vw' }">
+        <ProjectForm @close="projectVisible = false;" />
+      </Dialog>
+
       <Button label="Test" @click="test" style="margin-top: 1rem;"></Button>
+
+      <div style="margin-top: 1rem;">
+        <Button type="button" icon="pi pi-sparkles" label="NLP" @click="toggle" />
+        <Popover ref="op">
+          <div class="nlp-container">
+            <div class="nlp-instruction">How can I help you?</div>
+            <div class="nlp-input-container">
+              <InputText type="text" v-model="nlpInput" />
+              <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="useNLP" />
+            </div>
+          </div>
+        </Popover>
+      </div>
+
+      <div class="project-listbox">
+        <Listbox v-model="selectedCity" :options="cities" multiple optionLabel="name" />
+    </div>
     </div>
   </div>
 </template>
@@ -24,10 +45,14 @@
 import SplitButton from 'primevue/splitbutton';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import Popover from 'primevue/popover';
+import InputText from 'primevue/inputtext';
+import Listbox from 'primevue/listbox';
 
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
+import ProjectForm from '../forms/ProjectForm.vue';
 
 import { ref } from 'vue';
 import { client } from "../../api/index";
@@ -38,6 +63,7 @@ import { useAuthStore } from "../../stores/auth.store.ts";
 const taskVisible = ref(false);
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
+const projectVisible = ref(false);
 
 const items = [
   {
@@ -56,7 +82,6 @@ const items = [
     label: 'Meeting',
     command: () => {
       meetingVisible.value = true;
-      // webrtc();
     }
   },
   {
@@ -65,27 +90,18 @@ const items = [
   {
     label: 'Project',
     command: () => {
-      console.log("Project");
+      projectVisible.value = true;
     }
   }
 ];
 
 function test() {
-  fetch("http://localhost:3000/api/openai/getTaskSchedual", {
-    method: "POST",
+  fetch("http://localhost:3000/api/oauth/google/calendar", {
+    method: "GET",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      start_time: "2024-11-18T00:00:00Z",
-      end_time: "2024-11-25T00:00:00Z", // Corrected year
-      task: {
-        name: "Test Task",
-        description: "Finish my homework",
-        deadline: "2024-11-25T00:00:00Z",
-      }
-    }),
   })
     .then(response => {
       if (!response.ok) {
@@ -97,60 +113,53 @@ function test() {
     .catch(error => console.error(error));
 }
 
-function webrtc() {
-  const authStore = useAuthStore();
-  const peer = new Peer(authStore.user);
-  peer.on('open', function (id) {
-    console.log('My peer ID is: ' + id);
-    if (peer.id == "b3d9c12c-fc9f-40b1-8f4c-01cf66b76da6") {
-    console.log("connecting");
-    const conn = peer.connect('0cfa9bcb-92ed-429f-b9b4-430b83f4ea73');
-    conn.on('open', function () {
-      console.log("OPEN");
-      // Receive messages
-      conn.on('data', function (data) {
-        console.log('Received', data);
-      });
-
-      // Send messages
-      conn.send('Hello!');
-    });
-    conn.on("error", function (err) {
-      console.log(err);
-    });
-  }
-  else {
-    console.log("receiving")
-    peer.on('connection', function (conn) {
-      conn.on('open', function () {
-        console.log("OPEN");
-        // Receive messages
-        conn.on('data', function (data) {
-          console.log('Received', data);
-        });
-
-        // Send messages
-        conn.send('Hello too!');
-      });
-      conn.on("error", function (err) {
-        console.log(err);
-      })
-    });
-  }
-  });
-  peer.on("error", function (err) {
-    console.log(err);
-  });
+const nlpInput = ref("");
+const op = ref();
+const toggle = (event) => {
+  op.value.toggle(event);
 }
+function useNLP() {
+  client.calendar.calendarNPL.mutate({ userInput: nlpInput.value });
+  console.log(nlpInput.value); // remember to use .value to get the input
+}
+
+const selectedCity = ref();
+const cities = ref([
+    { name: 'New York', code: 'NY' },
+    { name: 'Rome', code: 'RM' },
+    { name: 'London', code: 'LDN' },
+    { name: 'Istanbul', code: 'IST' },
+    { name: 'Paris', code: 'PRS' }
+]);
 </script>
 
 <style lang="css" scoped>
 .calendar-drawer-container {
-  padding: var(--sx-spacing-padding6);
+  padding: var(--sx-spacing-padding6) 0;
   position: sticky;
   top: var(--sx-spacing-padding6);
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.nlp-instruction {
+  margin-bottom: 1rem;
+}
+
+.nlp-container {
+  padding: 0.5rem;
+}
+
+.nlp-input-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.project-listbox {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 </style>

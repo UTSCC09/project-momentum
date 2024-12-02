@@ -1,12 +1,14 @@
 import { google } from "googleapis";
-import { Router } from "express";
-import { SignJWT } from "jose";
+import { Router, Request, Response, NextFunction } from "express";
+import { SignJWT, jwtVerify } from "jose";
+import { authMiddleware } from "./_login";
 
 import { User } from "../../model/user/user";
 import { Oauth } from "../../model/user/oauth";
 import { Event } from "../../model/calendar/baseEvent/event";
 
 import dotenv from "dotenv";
+import { clearUserCalendarCache } from "../../service/redis";
 dotenv.config();
 
 const client_id = process.env.GOOGLE_CLIENT_ID;
@@ -65,6 +67,11 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
       audience: client_id,
     });
 
+    oauth2Client.setCredentials({
+      refresh_token: refresh_token,
+    });
+    
+
     const payload = ticket.getPayload();
     const kid = payload?.sub;
 
@@ -80,6 +87,8 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
       where: { oauthId: kid },
       include: [{ model: User, as: "User" }],
     });
+
+    console.log("Google OAuth:", googleOauth);
 
     if (googleOauth) {
       const token = await new SignJWT({ userId: googleOauth.User.id })
@@ -141,7 +150,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
   }
 });
 
-oauthGoogleRouter.get("/calendar", async (req, res) => {
+oauthGoogleRouter.get("/calendar", authMiddleware, async (req, res) => {
   try{
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     const response2 = await calendar.events.list({
@@ -160,7 +169,7 @@ oauthGoogleRouter.get("/calendar", async (req, res) => {
     for(const event of events as any){
       try{
         const newEvent = await Event.create({
-          id: event.id.split("_")[0],
+          id: event.id.slice(0, 36),
           uid: req.cookies.userId,
           name: event.summary || "No Title",
           description: event.description || "",
@@ -171,6 +180,8 @@ oauthGoogleRouter.get("/calendar", async (req, res) => {
       } catch (error) {
         console.log("Error creating event:", error);
       }
+
+      clearUserCalendarCache(req.cookies.userId);
     }
     res.json(events);
   } catch (error) {

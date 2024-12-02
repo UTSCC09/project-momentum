@@ -4,6 +4,9 @@ import { TRPCError } from '@trpc/server';
 
 import { userProcedure } from '../../oauth/_login';
 import { Task } from '../../../model/calendar/baseEvent/task';
+import { Event } from '../../../model/calendar/baseEvent/event';
+import { getTaskSchedual } from '../../../service/openAI';
+import { clearUserCalendarCache, updateUserEvents } from '../../../service/redis';
 export const taskRouter = trpc.router({
 
     createTask: userProcedure
@@ -18,9 +21,10 @@ export const taskRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
         const { name, description = null, location = null, deadline = null, project_id = null, create_event } = input;
+        let createdEvent: any = null;
 
         try{
-            const task = await Task.create({
+            const task: any = await Task.create({
                 uid: uid,
                 name: name,
                 description: description,
@@ -29,16 +33,31 @@ export const taskRouter = trpc.router({
                 pid: project_id,
             });
 
-
             if (create_event){
-                // await Event.create({
-                //     uid: uid,
-                //     ...eventAttributes,
-                // });
+                const start_time = new Date().toISOString();
+                const end_time = new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toISOString();
+                
+                let event: any = await getTaskSchedual(name, description || "", location || "", deadline || "", start_time, end_time, uid || "");
+                event = JSON.parse(event);
+                createdEvent = await Event.create({
+                    uid: uid,
+                    name: "finished " + name,
+                    description: description || "",
+                    location: location || "",
+                    start_time: event.start_time,
+                    end_time: event.end_time,
+                    task: task.id,
+                });
+                
+                // Remove cache
+                await clearUserCalendarCache(uid || "");
+                // Update user cache
+                await updateUserEvents(uid || "", createdEvent);         
             }
 
             return {
                 task: task,
+                event: createdEvent,
                 temp: "temp"
             };
         } catch (error){
@@ -141,8 +160,8 @@ export const taskRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const { taskId } = input;
         const task = await Task.findByPk(taskId) as any;
-        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
 
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
         if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
         await task.destroy();
@@ -151,5 +170,61 @@ export const taskRouter = trpc.router({
             temp: "temp"
         };
     }),
+
+    resetTask: userProcedure
+    .input(z.object({taskId: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { taskId } = input;
+        const task = await Task.findByPk(taskId) as any;
+
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+
+        task.progress = 'not started';
+        await task.save();
+        return {
+            task: task,
+            temp: "temp"
+        };
+    }),
+
+    progressTask: userProcedure
+    .input(z.object({taskId: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { taskId } = input;
+        const task = await Task.findByPk(taskId) as any;
+
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+
+        task.progress = 'in progress';
+        await task.save();
+        return {
+            task: task,
+            temp: "temp"
+        };
+    }),
+
+    finishTask: userProcedure
+    .input(z.object({taskId: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { taskId } = input;
+        const task = await Task.findByPk(taskId) as any;
+
+        if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+        if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+        
+        task.progress = 'completed';
+        await task.save();
+
+        // const event = await Event.findOne({ where: { task: taskId } });
+        // if (event) await event.destroy();
+        // await clearUserCalendarCache(ctx.userId || "");
+
+        return {
+            task: task,
+            temp: "temp"
+        };
+    })
 
 })

@@ -1,9 +1,8 @@
 <template>
   <div class="custom-event-modal">
-
     <div class="event-title-container">
       <p class="event-title">{{ calendarEvent.title }}</p>
-      <Button icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
+      <Button id="edit-button" icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
     </div>
     <div class="event-subtitle-container">
       <p><i class="pi pi-map-marker" style="font-size: 0.75rem"></i> {{ calendarEvent.location }}</p>
@@ -11,6 +10,7 @@
       </p>
     </div>
     <p class="event-description">{{ calendarEvent.description }}</p>
+    <Button id="join-button" v-if="calendarEvent.type == 'meeting'" label="Join meeting" fluid variant="raised" @click="joinMeeting" />
 
     <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
       <EventForm :initialValues="initialValues" @close="eventVisible = false;" />
@@ -26,11 +26,16 @@
 import { PropType, ref, watch } from 'vue'
 import { useEventsStore } from "../../stores/events.store.ts";
 import { client } from '../../api/index.ts';
+import { useRouter } from 'vue-router';
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
+
+import moment from 'moment-timezone';
+
+const router = useRouter();
 
 const eventsStore = useEventsStore();
 
@@ -44,12 +49,6 @@ const props = defineProps({
   },
 })
 
-const title = ref(props.calendarEvent.title);
-const startDateTime = ref(new Date(props.calendarEvent.start));
-const endDateTime = ref(new Date(props.calendarEvent.end));
-const description = ref(props.calendarEvent.description);
-const location = ref(props.calendarEvent.location);
-
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
 
@@ -61,31 +60,59 @@ if (props.calendarEvent.type == "event") {
       name: res.event.name,
       description: res.event.description,
       location: res.event.location,
-      startTime: res.event.start_time,
-      endTime: res.event.end_time,
+      startTime: moment.utc(res.event.start_time).local().toDate(),
+      endTime: moment.utc(res.event.end_time).local().toDate(),
       repeat: res.event.rrule ? true : false,
       project_id: res.event.project_id,
     }
     if (initialValues.value.repeat) {
-      initialValues.value.frequency = initialValues.value.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
-      initialValues.value.until = initialValues.value.rrule.match(/UNTIL=([^;]+)/)?.[1] ?? null;
-      initialValues.value.interval = initialValues.value.rrule.match(/INTERVAL=([^;]+)/)?.[1] ?? null;
-      initialValues.value.byday = initialValues.value.rrule.match(/BYDAY=([^;]+)/)?.[1] ?? null;
-      initialValues.value.bymonthday = initialValues.value.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] ?? null;
+      initialValues.value.frequency = res.event.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
     }
   })
   .catch((err) => console.log(err))
 }
+else if (props.calendarEvent.type == "meeting") {
+  client.meetings.getMeeting.query({ meetingId: props.calendarEvent.id })
+  .then((res) => {
+    initialValues.value = {
+      name: res.meeting.name,
+      description: res.meeting.description,
+      location: res.meeting.location,
+      startTime: moment.utc(res.meeting.start_time).local().toDate(),
+      endTime: moment.utc(res.meeting.end_time).local().toDate(),
+      repeat: res.meeting.rrule ? true : false,
+      project_id: res.meeting.project_id,
+    }
+    if (initialValues.value.repeat) {
+      initialValues.value.frequency = res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
+    }
+    console.log(initialValues);
+  })
+  .catch((err) => console.log(err))
+}
+else {
+  console.log("Unrecognized event type.");
+}
 
 function showForm(calendarEvent) {
+  console.log(calendarEvent);
   if (calendarEvent.type == "meeting") {
     meetingVisible.value = true;
     eventVisible.value = false;
   }
-  else {
+  else if (calendarEvent.type == "event") {
     meetingVisible.value = false;
     eventVisible.value = true;
   }
+  else {
+    console.log("Unrecognized event type.");
+    meetingVisible.value = false;
+    eventVisible.value = false;
+  }
+}
+
+function joinMeeting() {
+  router.push(`/meeting/${props.calendarEvent.id}`);
 }
 </script>
 
@@ -120,11 +147,6 @@ function showForm(calendarEvent) {
   flex-grow: 1;
 }
 
-.sx__calendar-wrapper button {
-  background-color: none;
-  color: var(--sx-on-primary-container);
-}
-
 .event-title-container {
   display: flex;
   justify-content: space-between;
@@ -140,8 +162,14 @@ function showForm(calendarEvent) {
   font-size: 0.75rem;
 }
 
-#event-edit-save-button {
-  display: flex;
-  justify-content: center;
+#edit-button {
+  background: var(--p-button-text-primary-background);
+  color: var(--p-button-text-primary-color);
+  border: none;
+}
+
+#join-button {
+  background: var(--p-button-primary-background);
+  color: var(--p-button-primary-color);
 }
 </style>

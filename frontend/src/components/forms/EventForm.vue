@@ -50,7 +50,7 @@
           <label for="repeat">Repeat</label>
         </FormField>
       </div>
-      <div v-if="visibleRecurrence" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <div v-if="repeat" class="input-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
         <FormField v-slot="$field" name="frequency">
           <IftaLabel>
             <Select v-model="frequency" inputId="frequency" :options="frequencies" optionLabel="name" optionValue="value" fluid />
@@ -129,29 +129,30 @@ import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime, formatFloatDate } from "../../api/utils";
+import moment from 'moment-timezone';
 
 import { useCalendarStore } from "../../stores/calendar.store.ts";
+import { useAuthStore } from "../../stores/auth.store.ts";
 
 const emit = defineEmits(['close']);
 
 const calendarStore = useCalendarStore();
+const authStore = useAuthStore();
 
 function formatRecurrence(values) {
   if (values.repeat) {
     let recurrence = "";
     recurrence += `FREQ=${values.frequency};`;
-    recurrence += `INTERVAL=${values.interval.toString()};`;
-    recurrence += `UNTIL=${formatFloatDate(values.until)};`;
-    values.frequency == "DAILY" || values.frequency == "WEEKLY" ? 
-    recurrence += `BYDAY=${values.byday.toString()};` :
-    recurrence += `BYMONTHDAY=${values.bymonthday.toString()};`;
+    recurrence += `INTERVAL=${values.interval ? values.interval.toString() : '1'};`;
+    recurrence += `UNTIL=${moment(values.until).local().format("YYYYMMDD")};`;
+    recurrence += values.byday ? `BYDAY=${values.byday.toString()};` : '';
+    recurrence += values.bymonthday ? `BYMONTHDAY=${values.bymonthday.toString()};` : '';
     return recurrence;
   }
 }
@@ -177,14 +178,14 @@ const props = defineProps({
       name: '',
       description: '',
       location: '',
-      startTime: new Date(),
-      endTime: new Date(),
+      startTime: null,
+      endTime: null,
       repeat: false,
       frequency: 'DAILY',
       interval: 1,
       byday: [],
       bymonthday: [],
-      until: new Date(),
+      until: null,
       project_id: '',
     })
   }
@@ -193,8 +194,8 @@ const props = defineProps({
 const name = ref(props.initialValues.name);
 const description = ref(props.initialValues.description);
 const location = ref(props.initialValues.location);
-const startTime = ref(new Date(props.initialValues.startTime));
-const endTime = ref(new Date(props.initialValues.endTime));
+const startTime = ref(props.initialValues.startTime);
+const endTime = ref(props.initialValues.endTime);
 const repeat = ref(props.initialValues.repeat);
 const frequency = ref(props.initialValues.frequency);
 const interval = ref(props.initialValues.interval);
@@ -202,8 +203,6 @@ const byday = ref(props.initialValues.byday);
 const bymonthday = ref(props.initialValues.bymonthday);
 const until = ref(props.initialValues.until);
 const project_id = ref(props.initialValues.project_id);
-
-console.log(props.initialValues.name);
 
 const toast = useToast();
 
@@ -216,7 +215,7 @@ const resolver = zodResolver(
     endTime: z.date(),
     repeat: z.union([z.boolean(), z.undefined()]),
     frequency: z.union([z.literal("DAILY"), z.literal("WEEKLY"), z.literal("MONTHLY")]).optional(),
-    interval: z.any().optional(),
+    interval: z.number().optional(),
     byday: z.any().optional(),
     bymonthday: z.any().optional(),
     until: z.date().optional(),
@@ -232,12 +231,12 @@ const onFormSubmit = ({ values, valid, reset }) => {
       name: values.name,
       description: values.description,
       location: values.location,
-      start_time: formatDatetime(values.startTime),
-      end_time: formatDatetime(values.endTime),
+      start_time: moment(values.startTime).local().utc().toISOString(),
+      end_time: moment(values.endTime).local().utc().toISOString(),
     }
     if (values.repeat) {
       req.rrule = formatRecurrence(values);
-      req.end_recurrence = formatDatetime(values.until);
+      req.end_recurrence = moment(values.until).local().utc().toISOString();
     }
     console.log(`Sending request to createEvent:`);
     console.log(req);
@@ -252,11 +251,11 @@ const onFormSubmit = ({ values, valid, reset }) => {
           title: res.event.name,
           description: res.event.description,
           location: res.event.location,
-          start: formatDatetime(res.event.start_time).slice(0, 16),
-          end: formatDatetime(res.event.end_time).slice(0, 16),
+          start: moment.utc(res.event.start_time).local().format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(res.event.end_time).local().format("YYYY-MM-DD HH:mm"),
           rrule: res.event.rrule,
           type: "event",
-        })
+        });
         toast.add({ severity: 'success', summary: 'Event created.', life: 3000 });
       })
       .catch((err) => {
@@ -269,9 +268,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
   }
 };
 
-const projects = ref([
-  { name: "Project 1", value: "1" },
-]);
+const projects = ref([]);
 
 const frequencies = ref([
   { name: "daily", value: "DAILY" },
@@ -303,17 +300,6 @@ const monthlyDates = ref([
   { name: "31", value: 31 },
 ]);
 
-const visibleRecurrence = ref(false);
-
-function showRecurrence() {
-  visibleRecurrence.value = true;
-}
-
-function hideRecurrence() {
-  // clear and hide
-  visibleRecurrence.value = false;
-}
-
 function toggleRecurrence(event) {
   // console.log(event.target.checked);
   if (event.target.checked) {
@@ -323,6 +309,19 @@ function toggleRecurrence(event) {
     hideRecurrence();
   }
 } 
+
+onBeforeMount(() => {
+  client.projects.getProjectbyLead.query({ uid: authStore.user })
+    .then((res) => {
+      console.log(res);
+      for (const project of res.projects) {
+        projects.value.push({ name: project.name, value: project.id });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 </script>
 
 <style lang="css" scoped>

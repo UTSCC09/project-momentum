@@ -3,7 +3,7 @@
     <Toast />
     <Form :resolver @submit="onFormSubmit">
       <div class="input-group">
-        <FormField v-slot="$field" name="name" initialValue="">
+        <FormField v-slot="$field" name="name">
           <IftaLabel>
             <InputText id="name" type="text" auto fluid />
             <label for="name">Name</label>
@@ -11,7 +11,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="project_id" initialValue="">
+        <FormField v-slot="$field" name="project_id">
           <IftaLabel>
             <Select inputId="project" :options="projects" optionLabel="name" optionValue="value" fluid />
             <label for="project">Project</label>
@@ -21,7 +21,7 @@
         </FormField>
       </div>
       <div class="input-group">
-        <FormField v-slot="$field" name="location" initialValue="">
+        <FormField v-slot="$field" name="location">
           <IftaLabel>
             <InputText type="text" id="location" fluid />
             <label for="location">Location</label>
@@ -29,7 +29,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="deadline" initialValue="">
+        <FormField v-slot="$field" name="deadline">
           <IftaLabel>
             <DatePicker inputId="deadline" showTime hourFormat="24" fluid />
             <label for="deadline">Deadline</label>
@@ -38,13 +38,19 @@
           </Message>
         </FormField>
       </div>
-      <FormField v-slot="$field" name="description" initialValue="">
+      <FormField v-slot="$field" name="description">
         <IftaLabel>
           <Textarea id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
         </IftaLabel>
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
+      </FormField>
+      <FormField v-slot="$field" name="create_event">
+        <div class="checkbox-container">
+          <Checkbox inputId="create_event" binary />
+          <label for="create_event">Automatically create an event for your task</label>
+        </div>
       </FormField>
       <Button type="submit" severity="primary" label="Create" />
     </Form>
@@ -55,6 +61,7 @@
 import { Form } from '@primevue/forms';
 import { FormField } from '@primevue/forms';
 import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
 import DatePicker from 'primevue/datepicker';
 import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
@@ -64,15 +71,21 @@ import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
 
 import { client } from "../../api/index";
-import { formatDatetime } from "../../api/utils";
+import moment from 'moment-timezone';
+
+import { useCalendarStore } from "../../stores/calendar.store.ts";
+import { useAuthStore } from '../../stores/auth.store.ts';
 
 const emit = defineEmits(['close']);
+
+const authStore = useAuthStore();
+const calendarStore = useCalendarStore();
 
 const toast = useToast();
 
@@ -83,6 +96,7 @@ const resolver = zodResolver(
     location: z.string().min(1, { message: 'Location is required.' }),
     deadline: z.date(),
     project_id: z.string().optional(),
+    create_event: z.boolean().default(false),
   })
 );
 
@@ -92,7 +106,8 @@ const onFormSubmit = ({ values, valid, reset }) => {
       name: values.name,
       description: values.description,
       location: values.location,
-      deadline: formatDatetime(values.deadline),
+      deadline: moment(values.deadline).local().utc().toISOString(),
+      create_event: values.create_event ? true : false,
     }
     if (values.project_id) {
       req.project_id = values.project_id;
@@ -103,6 +118,19 @@ const onFormSubmit = ({ values, valid, reset }) => {
         emit('close');
         reset();
         console.log(res);
+
+        if (res && res.event) {
+          calendarStore.addEvent({
+          id: res.event.id,
+          title: res.event.name,
+          description: res.event.description,
+          location: res.event.location,
+          start: moment.utc(res.event.start_time).local().format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(res.event.end_time).local().format("YYYY-MM-DD HH:mm"),
+          rrule: res.event.rrule,
+          type: "event",
+        });
+        }
         toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
       })
       .catch((err) => {
@@ -112,9 +140,20 @@ const onFormSubmit = ({ values, valid, reset }) => {
   }
 };
 
-const projects = ref([
-  { name: "Project 1", value: "1" },
-]);
+const projects = ref([]);
+
+onBeforeMount(() => {
+  client.projects.getProjectbyLead.query({ uid: authStore.user })
+    .then((res) => {
+      console.log(res);
+      for (const project of res.projects) {
+        projects.value.push({ name: project.name, value: project.id });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+});
 </script>
 
 <style lang="css" scoped>
@@ -140,5 +179,11 @@ const projects = ref([
 
 .input-group .p-formfield {
   flex: 1 0 auto;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

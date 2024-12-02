@@ -6,8 +6,11 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../oauth/_login';
 import { Event } from '../../model/calendar/baseEvent/event';
 import { Meeting } from '../../model/calendar/baseEvent/meeting';
+import { Redisclient } from '../../service/redis';
+import { eventNPL } from '../../service/openAI';
 
-export function getCalendar( starttime: string, endtime: string, userId?: string, project_id?: string) {
+
+export function getCalendarEvents( starttime: string, endtime: string, userId?: string, project_id?: string) {
     const eventConditions: any = {}
     eventConditions.start_time = { [Op.gte]: starttime};
     eventConditions.end_time = { [Op.lte]: endtime };
@@ -22,13 +25,18 @@ export function getCalendar( starttime: string, endtime: string, userId?: string
     });
 }
 
+export async function getCalendarEventsFromCache(uid: string) {
+    const cachedResult = await Redisclient.get(`[Events]${uid}`);
+    return cachedResult ? JSON.parse(cachedResult) : null;
+}
+
 export const calendarRouter = trpc.router({
     getCalendar: userProcedure
     .input(z.object({
         userId: z.string().optional(),
         project_id: z.string().optional(),
-        start_date: z.string().date(),
-        end_date: z.string().date(),
+        start_date: z.string(),
+        end_date: z.string(),
     }))
     .query(async ({ input, ctx }) => {
         const uid = input.userId || ctx.userId;
@@ -43,8 +51,15 @@ export const calendarRouter = trpc.router({
 
         const differenceInTime = endDate.getTime() - startDate.getTime();
         const differenceInDays = differenceInTime / (1000 * 60 * 60 * 24);
-        if (differenceInDays > 40) {
+        if (differenceInDays > 50) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Time Interval too Long" });
+        }
+
+        // if result in cache
+        const cachedResult = await Redisclient.get(`${uid}[${startDate}-${endDate}]`);
+        if(cachedResult) {
+            console.log("Cache hit");
+            return JSON.parse(cachedResult);
         }
 
         // Build where conditions dynamically based on available parameters
@@ -61,8 +76,17 @@ export const calendarRouter = trpc.router({
         }
 
         try {
+            meetingWhereConditions.start_time = { [Op.gte]: startDate};
+            meetingWhereConditions.end_time = { [Op.lte]: endDate };
+
+
             const meetings = await Meeting.findAll({
-                where: meetingWhereConditions,
+                where: {
+                    [Op.or]: [
+                        meetingWhereConditions, 
+                        { rrule: { [Op.ne]: null } }
+                    ]
+                }
             });
             
             eventWhereConditions.start_time = { [Op.gte]: startDate};
@@ -77,11 +101,20 @@ export const calendarRouter = trpc.router({
                 },
             });
             
-
+            Redisclient.set(`${uid}[${startDate}-${endDate}]`, JSON.stringify({ calendar: { meetings: meetings, events: constEvents} }));
             return { calendar: { meetings: meetings, events: constEvents} };
         } catch (error) {
             console.log(error);
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "An error occurred while fetching data." });
         }
+    }),
+
+    calendarNPL: userProcedure
+    .input(z.object({userInput: z.string()}))
+    .mutation(async ({ input, ctx }) => {
+        const { userInput } = input;
+        const result = await eventNPL(userInput);
+        console.log(result);
+        return result;
     }),
 });

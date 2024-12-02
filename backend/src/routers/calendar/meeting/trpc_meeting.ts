@@ -4,7 +4,8 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Meeting } from '../../../model/calendar/baseEvent/meeting';
 import { User } from '../../../model/user/user';
-
+import { clearUserCalendarCache, updateUserEvents } from '../../../service/redis';
+import { Op, Sequelize } from 'sequelize';
 export const meetingRouter = trpc.router({
 
     createMeeting: userProcedure
@@ -20,14 +21,13 @@ export const meetingRouter = trpc.router({
     }))
     .mutation(async ({ input, ctx }) => {
         const uid = ctx.userId;
-        let new_recurring: any = null;
         const { name, description = null, location = null , start_time,
              end_time, project_id = null, rrule= null, participants=null } = input;
 
         try{
             const participantUsers = [];
             if(participants !== null){
-                for(const participant in participants){
+                for(const participant of participants){
                     const user: any  = await User.findOne({ where: { email: participant } });
                     // skip if user not found
                     if (!user) continue;
@@ -47,6 +47,10 @@ export const meetingRouter = trpc.router({
                 ...(rrule ? { rrule: rrule } : {}),
                 participants: participantUsers
             });
+
+            // Update user cache
+            await updateUserEvents(uid || "", meeting);
+            await clearUserCalendarCache(uid || "");
 
             return {
                 meeting: meeting,
@@ -74,6 +78,22 @@ export const meetingRouter = trpc.router({
     .input(z.object({userId: z.string()}))
     .query(async ({ input }) => {
         const meetings = await Meeting.findAll({ where: { uid: input.userId } });
+        return {
+            meetings: meetings,
+            temp: "temp"
+        };
+    }),
+
+    getMeetingbyParticipant: userProcedure
+    .input(z.object({userId: z.string()}))
+    .query(async ({ input }) => {
+        console.log("userId:", input.userId);
+        const meetings = await Meeting.findAll({
+            where: Sequelize.where(
+                Sequelize.fn('JSON_CONTAINS', Sequelize.col('participants'), JSON.stringify([input.userId])),
+                true
+            )
+        });
         return {
             meetings: meetings,
             temp: "temp"
@@ -119,6 +139,10 @@ export const meetingRouter = trpc.router({
             meeting.rrule = rrule || meeting.rrule;
             await meeting.save();
 
+            // Update user cache
+            await updateUserEvents(meeting.uid || "", meeting);
+            await clearUserCalendarCache(meeting.uid || "");
+
             return {
                 meeting: meeting,
                 temp: "temp"
@@ -139,6 +163,8 @@ export const meetingRouter = trpc.router({
             if (meeting.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
 
             await meeting.destroy();
+            await clearUserCalendarCache(meeting.uid || "");
+
             return {
                 meeting: meeting,
                 temp: "temp"

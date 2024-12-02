@@ -1,61 +1,32 @@
 <template>
   <div class="custom-event-modal">
     <div class="event-title-container">
-      <p class="event-title">{{ calendarEvent.title }}</p>
+      <p class="event-title">{{ title }}</p>
       <div class="event-controls">
-        <Button
-          id="delete-button"
-          icon="pi pi-trash"
-          @click="deleteEvent(calendarEvent)"
-          variant="text"
-        />
-        <Button
-          id="edit-button"
-          icon="pi pi-pencil"
-          @click="showForm(calendarEvent)"
-          variant="text"
-        />
+        <Button id="delete-button" icon="pi pi-trash" @click="deleteEvent(calendarEvent)" variant="text" />
+        <Button id="edit-button" icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
       </div>
     </div>
     <div class="event-subtitle-container">
       <p>
         <i class="pi pi-map-marker" style="font-size: 0.75rem"></i>
-        {{ calendarEvent.location }}
+        {{ location }}
       </p>
       <p>
         <i class="pi pi-clock" style="font-size: 0.75rem"></i>
-        {{ `${calendarEvent.start} - ${calendarEvent.end}` }}
+        {{ `${start} - ${end}` }}
       </p>
     </div>
-    <p class="event-description">{{ calendarEvent.description }}</p>
-    <Button
-      id="join-button"
-      v-if="calendarEvent.type == 'meeting'"
-      label="Join meeting"
-      fluid
-      variant="raised"
-      @click="joinMeeting"
-    />
+    <p class="event-description">{{ description }}</p>
+    <Button id="join-button" v-if="calendarEvent.type == 'meeting'" label="Join meeting" fluid variant="raised"
+      @click="joinMeeting" />
 
-    <Dialog
-      v-model:visible="eventVisible"
-      modal
-      header="Create Event"
-      :style="{ width: '50vw' }"
-    >
-      <EventForm :initialValues="initialValues" @close="eventVisible = false" />
+    <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
+      <EventForm :initialValues="initialValues" @close="onEventClose" />
     </Dialog>
 
-    <Dialog
-      v-model:visible="meetingVisible"
-      modal
-      header="Create Meeting"
-      :style="{ width: '50vw' }"
-    >
-      <MeetingForm
-        :initialValues="initialValues"
-        @close="meetingVisible = false"
-      />
+    <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
+      <MeetingForm :initialValues="initialValues" @close="meetingVisible = false" />
     </Dialog>
   </div>
 </template>
@@ -94,6 +65,12 @@ const props = defineProps({
     required: true,
   },
 });
+
+const title = ref(props.calendarEvent.title);
+const location = ref(props.calendarEvent.location);
+const description = ref(props.calendarEvent.description);
+const start = ref(props.calendarEvent.start);
+const end = ref(props.calendarEvent.end);
 
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
@@ -187,6 +164,21 @@ function deleteEvent(calendarEvent) {
   } else {
     console.warn("Unrecognized type");
   }
+}
+
+function onEventClose(newEvent) {
+  eventVisible.value = false;
+  title.value = newEvent.name;
+  location.value = newEvent.location;
+  description.value = newEvent.description;
+  start.value = moment
+    .utc(newEvent.start)
+    .local()
+    .format("YYYY-MM-DD HH:mm");
+  end.value = moment
+    .utc(newEvent.end)
+    .local()
+    .format("YYYY-MM-DD HH:mm");
 }
 </script>
 

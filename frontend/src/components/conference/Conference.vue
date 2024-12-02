@@ -285,7 +285,7 @@ onMounted(() => {
       }
 
       // initialize websocket and wait for message
-      websocketStore.connect('ws://localhost:3000');
+      websocketStore.connect('wss://momentum-app.ca/ws/');
       websocketStore.socket?.addEventListener('message', (event) => {
         handleMessage(JSON.parse(event.data));
       });

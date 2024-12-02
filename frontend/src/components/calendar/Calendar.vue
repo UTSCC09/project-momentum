@@ -37,27 +37,27 @@ function getEvents(range) {
     end_date: moment(range.end).local().utc().toISOString(),
   };
 
-  client.meetings.getMeetingbyParticipant
-    .query({ userId: authStore.user })
-    .then((res) => {
-      const meetingsAsParticipants = res.meetings.map((meeting) => {
-        const calendarMeeting = {
-          id: meeting.id,
-          title: meeting.name,
-          description: meeting.description,
-          location: meeting.location,
-          start: moment
-            .utc(meeting.start_time)
-            .local()
-            .format("YYYY-MM-DD HH:mm"),
-          end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
-          type: "meeting",
-        };
-        if (meeting.rrule) {
-          calendarMeeting.rrule = meeting.rrule;
-        }
-        return calendarMeeting;
-      });
+  // client.meetings.getMeetingbyParticipant
+  //   .query({ userId: authStore.user })
+  //   .then((res) => {
+  //     const meetingsAsParticipants = res.meetings.map((meeting) => {
+  //       const calendarMeeting = {
+  //         id: meeting.id,
+  //         title: meeting.name,
+  //         description: meeting.description,
+  //         location: meeting.location,
+  //         start: moment
+  //           .utc(meeting.start_time)
+  //           .local()
+  //           .format("YYYY-MM-DD HH:mm"),
+  //         end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
+  //         type: "meeting",
+  //       };
+  //       if (meeting.rrule) {
+  //         calendarMeeting.rrule = meeting.rrule;
+  //       }
+  //       return calendarMeeting;
+  //     });
 
       client.calendar.getCalendar
         .query(queryRange)
@@ -108,16 +108,16 @@ function getEvents(range) {
           });
 
           calendarStore.setEvents(
-            events.concat(meetings).concat(meetingsAsParticipants),
+            events.concat(meetings),
           );
         })
         .catch((err) => {
           console.log(err);
         });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    // })
+    // .catch((err) => {
+    //   console.log(err);
+    // });
 }
 
 const config = {

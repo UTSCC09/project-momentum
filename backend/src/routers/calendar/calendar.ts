@@ -1,6 +1,6 @@
 import { trpc } from '../../trpc';
 import { z } from 'zod';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { TRPCError } from '@trpc/server';
 
 import { userProcedure } from '../oauth/_login';
@@ -56,7 +56,8 @@ export const calendarRouter = trpc.router({
         }
 
         // if result in cache
-        const cachedResult = await Redisclient.get(`${uid}[${startDate}-${endDate}]`);
+        const projectKey = project_id ? `[${project_id}]` : "";
+        const cachedResult = await Redisclient.get(`${uid}${projectKey}[${startDate}-${endDate}]`);
         if(cachedResult) {
             console.log("Cache hit");
             return JSON.parse(cachedResult);
@@ -66,13 +67,12 @@ export const calendarRouter = trpc.router({
         const meetingWhereConditions : any = {}
         const eventWhereConditions: any = {};
 
-        if (uid) {
+        if(project_id) {
+            meetingWhereConditions.pid = project_id;
+            eventWhereConditions.pid = project_id;
+        } else {
             meetingWhereConditions.uid = uid;
             eventWhereConditions.uid = uid;
-        }
-        if (project_id) {
-            meetingWhereConditions.project_id = project_id;
-            eventWhereConditions.project_id = project_id;
         }
 
         try {
@@ -88,6 +88,18 @@ export const calendarRouter = trpc.router({
                     ]
                 }
             });
+
+            const meetingsParticipants = await Meeting.findAll({
+                where: {
+                    [Op.and]: [
+                        Sequelize.where(
+                            Sequelize.fn('JSON_CONTAINS', Sequelize.col('participants'), JSON.stringify([uid])),
+                            true
+                        ),
+                        { pid: project_id || null }
+                    ]
+                }
+            });
             
             eventWhereConditions.start_time = { [Op.gte]: startDate};
             eventWhereConditions.end_time = { [Op.lte]: endDate };
@@ -100,9 +112,11 @@ export const calendarRouter = trpc.router({
                     ]
                 },
             });
+
+            const allMeetings = [...meetings, ...meetingsParticipants];
             
-            Redisclient.set(`${uid}[${startDate}-${endDate}]`, JSON.stringify({ calendar: { meetings: meetings, events: constEvents} }));
-            return { calendar: { meetings: meetings, events: constEvents} };
+            Redisclient.set(`${uid}${projectKey}[${startDate}-${endDate}]`, JSON.stringify({ calendar: { meetings: allMeetings, events: constEvents} }));
+            return { calendar: { meetings: allMeetings, events: constEvents} };
         } catch (error) {
             console.log(error);
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "An error occurred while fetching data." });

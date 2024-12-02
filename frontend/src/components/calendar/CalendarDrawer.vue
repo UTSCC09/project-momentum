@@ -10,13 +10,14 @@
           <div class="nlp-instruction">How can I help you?</div>
           <div class="nlp-input-container">
             <InputText type="text" v-model="nlpInput" />
-            <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="nlp" />
+            <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem" strokeWidth="5"/>
+            <Button v-else icon="pi pi-send" severity="secondary" aria-label="Submit" @click="nlp" />
           </div>
         </div>
       </Popover>
 
-      <div class="project-listbox">
-        <Listbox v-if="projects.length > 0" v-model="selectedProject" :options="projects" multiple optionLabel="name" />
+      <div v-if="projects.length > 0" class="project-listbox">
+        <Listbox v-model="selectedProject" :options="projects" multiple optionLabel="name" />
       </div>
 
       <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
@@ -47,6 +48,7 @@ import InputText from 'primevue/inputtext';
 import Listbox from 'primevue/listbox';
 import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
+import ProgressSpinner from 'primevue/progressspinner';
 
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
@@ -103,15 +105,24 @@ const items = [
   }
 ];
 
+const loading = ref(false);
 const nlpInput = ref("");
 const op = ref();
 const toggle = (event) => {
   op.value.toggle(event);
 }
 function nlp() {
+  loading.value = true;
   client.calendar.calendarNPL.mutate({ userInput: nlpInput.value })
     .then((res) => {
       console.log(res);
+
+      // update view
+      loading.value = false;
+      op.value.toggle();
+      nlpInput.value = "";
+
+      // process response
       if (res.type == 'meeting') {
         meetingInitialValues.value = Object.assign({},
           res.name && { name: res.name },
@@ -216,6 +227,7 @@ onBeforeMount(() => {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .project-listbox {

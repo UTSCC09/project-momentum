@@ -242,6 +242,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
     if (props.id) {
       client.events.updateEvent.mutate({ eventId: props.id, ...req })
         .then((res) => {
+          console.log(res);
           // send event to parent to close the dialog
           emit("close", res.event);
 

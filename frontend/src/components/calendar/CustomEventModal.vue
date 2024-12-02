@@ -22,7 +22,7 @@
       @click="joinMeeting" />
 
     <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
-      <EventForm :initialValues="initialValues" @close="onEventClose" />
+      <EventForm :id="calendarEvent.id" :initialValues="initialValues" @close="onEventClose" />
     </Dialog>
 
     <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
@@ -80,39 +80,74 @@ if (props.calendarEvent.type == "event") {
   client.events.getEvent
     .query({ eventId: props.calendarEvent.id })
     .then((res) => {
-      initialValues.value = {
-        name: res.event.name,
-        description: res.event.description,
-        location: res.event.location,
-        startTime: moment.utc(res.event.start_time).local().toDate(),
-        endTime: moment.utc(res.event.end_time).local().toDate(),
-        repeat: res.event.rrule ? true : false,
-        project_id: res.event.project_id,
-      };
-      if (initialValues.value.repeat) {
-        initialValues.value.frequency =
-          res.event.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
-      }
+      initialValues.value = Object.assign({},
+        res.event.name && { name: res.event.name },
+        res.event.description && { description: res.event.description },
+        res.event.start_time && { start_time: moment.utc(res.event.start_time).local().toDate() },
+        res.event.end_time && { end_time: moment.utc(res.event.end_time).local().toDate() },
+        res.event.rrule && { repeat: true },
+        res.event.project_id && { project_id: res.event.project_id },
+        res.event.rrule &&
+        res.event.rrule.match(/FREQ=([^;]+)/)?.[1] && {
+          frequency: res.event.rrule.match(/FREQ=([^;]+)/)?.[1],
+        },
+        res.event.rrule &&
+        res.event.rrule.match(/INTERVAL=([^;]+)/)?.[1] && {
+          interval: parseInt(res.event.rrule.match(/INTERVAL=([^;]+)/)?.[1]),
+        },
+        res.event.rrule &&
+        res.event.rrule.match(/BYDAY=([^;]+)/)?.[1] && {
+          byday: res.event.rrule.match(/BYDAY=([^;]+)/)?.[1].split(","),
+        },
+        res.event.rrule &&
+        res.event.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
+          bymonthday: res.event.rrule
+            .match(/BYMONTHDAY=([^;]+)/)?.[1]
+            .split(",")
+            .map((monthday) => parseInt(monthday)),
+        },
+        res.event.rrule &&
+        res.event.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
+          until: moment(res.eventrrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
+        },
+      );
     })
     .catch((err) => console.log(err));
 } else if (props.calendarEvent.type == "meeting") {
   client.meetings.getMeeting
     .query({ meetingId: props.calendarEvent.id })
     .then((res) => {
-      initialValues.value = {
-        name: res.meeting.name,
-        description: res.meeting.description,
-        location: res.meeting.location,
-        startTime: moment.utc(res.meeting.start_time).local().toDate(),
-        endTime: moment.utc(res.meeting.end_time).local().toDate(),
-        repeat: res.meeting.rrule ? true : false,
-        project_id: res.meeting.project_id,
-      };
-      if (initialValues.value.repeat) {
-        initialValues.value.frequency =
-          res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] ?? null;
-      }
-      console.log(initialValues);
+      initialValues.value = Object.assign({},
+        res.meeting.name && { name: res.meeting.name },
+        res.meeting.description && { description: res.meeting.description },
+        res.meeting.start_time && { start_time: moment.utc(res.meeting.start_time).local().toDate() },
+        res.meeting.end_time && { end_time: moment.utc(res.meeting.end_time).local().toDate() },
+        res.meeting.rrule && { repeat: true },
+        res.meeting.project_id && { project_id: res.meeting.project_id },
+        res.meeting.rrule &&
+        res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] && {
+          frequency: res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1],
+        },
+        res.meeting.rrule &&
+        res.meeting.rrule.match(/INTERVAL=([^;]+)/)?.[1] && {
+          interval: parseInt(res.meeting.rrule.match(/INTERVAL=([^;]+)/)?.[1]),
+        },
+        res.meeting.rrule &&
+        res.meeting.rrule.match(/BYDAY=([^;]+)/)?.[1] && {
+          byday: res.meeting.rrule.match(/BYDAY=([^;]+)/)?.[1].split(","),
+        },
+        res.meeting.rrule &&
+        res.meeting.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
+          bymonthday: res.meeting.rrule
+            .match(/BYMONTHDAY=([^;]+)/)?.[1]
+            .split(",")
+            .map((monthday) => parseInt(monthday)),
+        },
+        res.meeting.rrule &&
+        res.meeting.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
+          until: moment(res.meeting.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
+        },
+      );
     })
     .catch((err) => console.log(err));
 } else {
@@ -167,6 +202,7 @@ function deleteEvent(calendarEvent) {
 }
 
 function onEventClose(newEvent) {
+  console.log("newEvent", newEvent)
   eventVisible.value = false;
   title.value = newEvent.name;
   location.value = newEvent.location;
@@ -179,6 +215,7 @@ function onEventClose(newEvent) {
     .utc(newEvent.end)
     .local()
     .format("YYYY-MM-DD HH:mm");
+  console.log("updated title", title.value)
 }
 </script>
 

@@ -1,4 +1,4 @@
-# https://docs.docker.com/compose/how-tos/networking/
+
 services:
   frontend:
     build:

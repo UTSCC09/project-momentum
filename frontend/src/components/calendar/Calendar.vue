@@ -37,40 +37,57 @@ function getEvents(range) {
   client.meetings.getMeetingbyParticipant.query({ userId: authStore.user })
     .then((res) => {
       const meetingsAsParticipants = res.meetings
-        .map((meeting) => ({
-          id: meeting.id,
-          title: meeting.name,
-          description: meeting.description,
-          location: meeting.location,
-          start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
-          end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
-          rrule: meeting.rrule,
-          type: "meeting",
-        }));
-
-      client.calendar.getCalendar.query(queryRange)
-        .then((res) => {
-          console.log(res.calendar);
-          const events = res.calendar.events.map((event) => ({
-            id: event.id,
-            title: event.name,
-            description: event.description,
-            location: event.location,
-            start: moment.utc(event.start_time).local().format("YYYY-MM-DD HH:mm"),
-            end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
-            rrule: event.rrule,
-            type: "event",
-          }));
-          const meetings = res.calendar.meetings.map((meeting) => ({
+        .map((meeting) => {
+          const calendarMeeting = {
             id: meeting.id,
             title: meeting.name,
             description: meeting.description,
             location: meeting.location,
             start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
             end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
-            rrule: meeting.rrule,
             type: "meeting",
-          }));
+          };
+          if (meeting.rrule) {
+            calendarMeeting.rrule = meeting.rrule;
+          }
+          return calendarMeeting;
+        });
+
+      client.calendar.getCalendar.query(queryRange)
+        .then((res) => {
+          console.log(res.calendar);
+          const events = res.calendar.events.map((event) => {
+            const calendarEvent = {
+              id: event.id,
+              title: event.name,
+              description: event.description,
+              location: event.location,
+              start: moment.utc(event.start_time).local().format("YYYY-MM-DD HH:mm"),
+              end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
+              type: "event",
+            };
+            if (event.rrule) {
+              calendarEvent.rrule = event.rrule;
+            }
+            return calendarEvent;
+          });
+
+          const meetings = res.calendar.meetings.map((meeting) => {
+            const calendarMeeting = {
+              id: meeting.id,
+              title: meeting.name,
+              description: meeting.description,
+              location: meeting.location,
+              start: moment.utc(meeting.start_time).local().format("YYYY-MM-DD HH:mm"),
+              end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
+              type: "meeting",
+            };
+            if (meeting.rrule) {
+              calendarMeeting.rrule = meeting.rrule;
+            }
+            return calendarMeeting;
+          });
+          
           calendarStore.setEvents(events.concat(meetings).concat(meetingsAsParticipants));
         })
         .catch((err) => {
@@ -143,14 +160,17 @@ const config = {
       getEvents(range);
     },
     onEventUpdate(updatedEvent) {
-      calendarStore.updateEvent(updatedEvent);
+      console.log(updatedEvent);
       if (updatedEvent.type == "event") {
         client.events.updateEvent.mutate({
           eventId: updatedEvent.id,
           start_time: moment(updatedEvent.start).local().utc().toISOString(),
           end_time: moment(updatedEvent.end).local().utc().toISOString(),
         })
-          .then((res) => console.log(res))
+          .then((res) => {
+            console.log(res);
+            calendarStore.updateEvent(updatedEvent);
+          })
           .catch((err) => console.log(err));
       }
       if (updatedEvent.type == "meeting") {
@@ -159,7 +179,10 @@ const config = {
           start_time: moment(updatedEvent.start).local().utc().toISOString(),
           end_time: moment(updatedEvent.end).local().utc().toISOString(),
         })
-          .then((res) => console.log(res))
+          .then((res) => {
+            console.log(res);
+            calendarStore.updateEvent(updatedEvent);
+          })
           .catch((err) => console.log(err));
       }
     }

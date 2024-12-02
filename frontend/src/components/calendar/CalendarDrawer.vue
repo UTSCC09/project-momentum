@@ -1,7 +1,17 @@
 <template>
   <div class="calendar-drawer-background">
     <div class="calendar-drawer-container">
-      <SplitButton label="Create" :model="items" />
+      <SplitButton label="Create" icon="pi pi-sparkles" :model="items" @click="toggle" />
+
+      <Popover ref="op">
+          <div class="nlp-container">
+            <div class="nlp-instruction">How can I help you?</div>
+            <div class="nlp-input-container">
+              <InputText type="text" v-model="nlpInput" />
+              <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="nlp" />
+            </div>
+          </div>
+        </Popover>
 
       <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
         <TaskForm @close="taskVisible = false;" />
@@ -18,19 +28,6 @@
       <Dialog v-model:visible="projectVisible" modal header="Create Project" :style="{ width: '50vw' }">
         <ProjectForm @close="projectVisible = false;" />
       </Dialog>
-
-      <div style="margin-top: 1rem;">
-        <Button type="button" icon="pi pi-sparkles" label="NLP" @click="toggle" />
-        <Popover ref="op">
-          <div class="nlp-container">
-            <div class="nlp-instruction">How can I help you?</div>
-            <div class="nlp-input-container">
-              <InputText type="text" v-model="nlpInput" />
-              <Button icon="pi pi-send" severity="secondary" aria-label="Submit" @click="useNLP" />
-            </div>
-          </div>
-        </Popover>
-      </div>
 
       <div class="project-listbox">
         <Listbox v-model="selectedCity" :options="cities" multiple optionLabel="name" />
@@ -98,9 +95,14 @@ const op = ref();
 const toggle = (event) => {
   op.value.toggle(event);
 }
-function useNLP() {
-  client.calendar.calendarNPL.mutate({ userInput: nlpInput.value });
-  console.log(nlpInput.value); // remember to use .value to get the input
+function nlp() {
+  client.calendar.calendarNPL.mutate({ userInput: nlpInput.value })
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
 }
 
 const selectedCity = ref();

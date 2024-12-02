@@ -1,77 +1,83 @@
 <template>
   <div>
     <Toast />
-    <Form :resolver @submit="onFormSubmit">
+
+    <Form v-slot="$form" :initialValues :resolver @submit="onFormSubmit">
       <div class="input-group">
-        <FormField v-slot="$field" name="name">
+        <div>
           <IftaLabel>
-            <InputText v-model="name" id="name" type="text" auto fluid />
+            <InputText name="name" id="name" type="text" auto fluid />
             <label for="name">Name</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
+            $form.name.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="project_id">
+        </div>
+        <div>
           <IftaLabel>
-            <Select v-model="project_id" inputId="project" :options="projects" optionLabel="name" optionValue="value" fluid />
+            <Select name="project_id" inputId="project" :options="projects" optionLabel="name" optionValue="value"
+              fluid />
             <label for="project">Project</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.project_id?.invalid" severity="error" size="small" variant="simple">{{
+            $form.project_id.error?.message }}
           </Message>
-        </FormField>
+        </div>
       </div>
       <div class="input-group">
-        <FormField v-slot="$field" name="location">
+        <div>
           <IftaLabel>
-            <InputText v-model="location" type="text" id="location" fluid />
+            <InputText name="location" type="text" id="location" fluid />
             <label for="location">Location</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.location?.invalid" severity="error" size="small" variant="simple">{{
+            $form.location.error?.message }}
           </Message>
-        </FormField>
-        <FormField v-slot="$field" name="deadline">
+        </div>
+        <div>
           <IftaLabel>
-            <DatePicker v-model="deadline" inputId="deadline" showTime hourFormat="24" fluid />
+            <DatePicker name="deadline" inputId="deadline" showTime hourFormat="24" fluid />
             <label for="deadline">Deadline</label>
           </IftaLabel>
-          <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+          <Message v-if="$form.deadline?.invalid" severity="error" size="small" variant="simple">{{
+            $form.deadline.error?.message }}
           </Message>
-        </FormField>
+        </div>
       </div>
-      <FormField v-slot="$field" name="description">
+      <div>
         <IftaLabel>
-          <Textarea v-model="description" id="description" rows="5" cols="30" style="resize: none" fluid />
+          <Textarea name="description" id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
         </IftaLabel>
-        <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
+        <Message v-if="$form.description?.invalid" severity="error" size="small" variant="simple">{{
+          $form.description.error?.message }}
         </Message>
-      </FormField>
-      <FormField v-slot="$field" name="create_event">
-        <div class="checkbox-container">
-          <Checkbox inputId="create_event" binary />
-          <label for="create_event">Automatically create an event for your task</label>
-        </div>
-      </FormField>
-      <Button type="submit" severity="primary" label="Create" />
+      </div>
+      <div class="checkbox-container">
+        <Checkbox name="create_event" inputId="create_event" binary />
+        <label for="create_event">Automatically create an event for your task</label>
+        <Message v-if="$form.create_event?.invalid" severity="error" size="small" variant="simple">{{
+          $form.create_event.error?.message }}
+        </Message>
+      </div>
+      <Button type="submit" severity="primary" label="Submit" />
     </Form>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Form } from '@primevue/forms';
-import { FormField } from '@primevue/forms';
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import DatePicker from 'primevue/datepicker';
 import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
-import Password from 'primevue/password';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 
-import { ref, onBeforeMount } from 'vue';
+import { ref, reactive, onBeforeMount } from 'vue';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from 'primevue/usetoast';
@@ -95,69 +101,57 @@ const props = defineProps({
       location?: string,
       deadline?: Date,
       project_id?: string,
+      create_event?: boolean,
     }>,
     required: false,
-    default: () => ({
-      name: '',
-      description: '',
-      location: '',
-      deadline: null,
-      project_id: '',
-    })
   }
 });
 
-const name = ref<string>(props.initialValues.name);
-const description = ref<string>(props.initialValues.description);
-const location = ref<string>(props.initialValues.location);
-const deadline = ref<Date>(props.initialValues.deadline);
-const project_id = ref<string>(props.initialValues.project_id);
+const initialValues = reactive(props.initialValues);
 
 const toast = useToast();
 
 const resolver = zodResolver(
   z.object({
     name: z.string().min(1, { message: 'Name is required.' }),
-    description: z.string().min(1, { message: 'Description is required.' }),
-    location: z.string().min(1, { message: 'Location is required.' }),
-    deadline: z.date(),
+    description: z.string().optional(),
+    location: z.string().optional(),
+    deadline: z.date().optional(),
     project_id: z.string().optional(),
-    create_event: z.boolean().default(false),
+    create_event: z.boolean().optional(),
   })
 );
 
 const onFormSubmit = ({ values, valid, reset }) => {
   if (valid) {
-    const req = {
-      name: values.name,
-      description: values.description,
-      location: values.location,
-      deadline: moment(values.deadline).local().utc().toISOString(),
-      create_event: values.create_event ? true : false,
-    }
-    if (values.project_id) {
-      req.project_id = values.project_id;
-    }
-    console.log(req);
+    const req = Object.assign({},
+      values.name && { name: values.name },
+      values.description && { description: values.description },
+      values.location && { location: values.location },
+      values.deadline && { deadline: moment(values.deadline).local().utc().toISOString() },
+      values.create_event && { create_event: values.create_event },
+      values.project_id && { project_id: values.project_id },
+    );
     client.tasks.createTask.mutate(req)
       .then((res) => {
+        // send event to parent to close the dialog
         emit('close');
-        reset();
-        console.log(res);
+
+        // clear all input from form
+        initialValues.values = {};
 
         if (res && res.event) {
           calendarStore.addEvent({
-          id: res.event.id,
-          title: res.event.name,
-          description: res.event.description,
-          location: res.event.location,
-          start: moment.utc(res.event.start_time).local().format("YYYY-MM-DD HH:mm"),
-          end: moment.utc(res.event.end_time).local().format("YYYY-MM-DD HH:mm"),
-          rrule: res.event.rrule,
-          type: "event",
-        });
+            id: res.event.id,
+            title: res.event.name,
+            description: res.event.description,
+            location: res.event.location,
+            start: moment.utc(res.event.start_time).local().format("YYYY-MM-DD HH:mm"),
+            end: moment.utc(res.event.end_time).local().format("YYYY-MM-DD HH:mm"),
+            rrule: res.event.rrule,
+            type: "event",
+          });
         }
-        toast.add({ severity: 'success', summary: 'Task created.', life: 3000 });
       })
       .catch((err) => {
         console.error(err);
@@ -166,7 +160,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
   }
 };
 
-const projects = ref([]);
+const projects = ref<{ string, string }[]>([]);
 
 onBeforeMount(() => {
   client.projects.getProjectbyLead.query({ uid: authStore.user })
@@ -190,12 +184,6 @@ onBeforeMount(() => {
   width: 100%;
 }
 
-.p-formfield {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
 .input-group {
   display: flex;
   gap: 1rem;
@@ -203,7 +191,7 @@ onBeforeMount(() => {
   align-items: center;
 }
 
-.input-group .p-formfield {
+.input-group div {
   flex: 1 0 auto;
 }
 

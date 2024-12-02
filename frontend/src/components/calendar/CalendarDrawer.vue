@@ -28,10 +28,6 @@
       <Dialog v-model:visible="projectVisible" modal header="Create Project" :style="{ width: '50vw' }">
         <ProjectForm @close="projectVisible = false;" />
       </Dialog>
-
-      <div class="project-listbox">
-        <Listbox v-model="selectedCity" :options="cities" multiple optionLabel="name" />
-      </div>
     </div>
   </div>
 </template>
@@ -42,7 +38,6 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Popover from 'primevue/popover';
 import InputText from 'primevue/inputtext';
-import Listbox from 'primevue/listbox';
 
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
@@ -51,9 +46,6 @@ import ProjectForm from '../forms/ProjectForm.vue';
 
 import { ref } from 'vue';
 import { client } from "../../api/index";
-import { Peer } from "peerjs";
-
-import { useAuthStore } from "../../stores/auth.store.ts";
 
 import moment from 'moment-timezone';
 
@@ -161,15 +153,6 @@ function nlp() {
       console.error(err);
     });
 }
-
-const selectedCity = ref();
-const cities = ref([
-  { name: 'New York', code: 'NY' },
-  { name: 'Rome', code: 'RM' },
-  { name: 'London', code: 'LDN' },
-  { name: 'Istanbul', code: 'IST' },
-  { name: 'Paris', code: 'PRS' }
-]);
 </script>
 
 <style lang="css" scoped>

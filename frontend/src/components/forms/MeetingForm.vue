@@ -221,7 +221,7 @@ const resolver = zodResolver(
     bymonthday: z.number().array().optional(),
     until: z.date().optional(),
     project_id: z.string().optional(),
-    participants: z.string().array().optional(),
+    participants: z.string().optional(),
   })
 );
 

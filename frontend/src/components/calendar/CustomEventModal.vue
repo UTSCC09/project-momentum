@@ -82,7 +82,9 @@ if (props.calendarEvent.type == "event") {
     .then((res) => {
       initialValues.value = Object.assign({},
         res.event.name && { name: res.event.name },
+        res.event.location && { location: res.event.location },
         res.event.description && { description: res.event.description },
+        res.event.project_id && { project_id: res.event.project_id },
         res.event.start_time && { start_time: moment.utc(res.event.start_time).local().toDate() },
         res.event.end_time && { end_time: moment.utc(res.event.end_time).local().toDate() },
         res.event.rrule && { repeat: true },
@@ -119,6 +121,9 @@ if (props.calendarEvent.type == "event") {
     .then((res) => {
       initialValues.value = Object.assign({},
         res.meeting.name && { name: res.meeting.name },
+        res.meeting.location && { location: res.meeting.location },
+        res.meeting.participants && { participants: res.meeting.participants },
+        res.meeting.project_id && { project_id: res.meeting.project_id },
         res.meeting.description && { description: res.meeting.description },
         res.meeting.start_time && { start_time: moment.utc(res.meeting.start_time).local().toDate() },
         res.meeting.end_time && { end_time: moment.utc(res.meeting.end_time).local().toDate() },

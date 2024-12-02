@@ -141,7 +141,7 @@ export const taskRouter = trpc.router({
         location: z.string().optional(),
         deadline: z.string().optional(),
         project_id: z.string().optional(),
-        progress: z.boolean().optional(),
+        progress: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
         const { 
@@ -156,6 +156,8 @@ export const taskRouter = trpc.router({
 
         if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
         if (task.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+        if (task.progress !== "not started" && task.progress !== "in progress" && task.progress !== "completed")
+            throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid progress type' });
 
         task.name = name || task.name;
         task.description = description || task.description;

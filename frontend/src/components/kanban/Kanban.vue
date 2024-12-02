@@ -4,7 +4,21 @@
   </header>
   <div class="card">
     <Toast />
-    <Panel v-for="project in projects" toggleable>
+
+    <Panel style="margin: 1rem 0;" toggleable>
+      <template #header>
+        <span class="project-header">Uncategorized</span>
+      </template>
+      <template #icons>
+        <Button icon="pi pi-cog" severity="secondary" rounded text @click="toggle" />
+        <Menu id="config_menu" :model="items" popup />
+      </template>
+      <div class="project-tasks">
+        <KanbanTaskGroup :projectId="'NONE'" />
+      </div>
+    </Panel>
+
+    <Panel style="margin: 1rem 0;" v-for="project in projects" toggleable>
       <template #header>
         <span class="project-header">{{ project.name }}</span>
       </template>
@@ -71,23 +85,13 @@ const toggle = (event) => {
 onBeforeMount(() => {
   client.projects.getProjectbyLead.query({ uid: authStore.user })
     .then((res) => {
-      console.log(res);
-
       for (const project of res.projects) {
         projects.value.push(project);
       }
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     })
-
-  // client.projects.getProjectbyParticipant.query({ uid: authStore.user })
-  //   .then((res) => {
-  //     console.log(res);
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //   })
 })
 </script>
 

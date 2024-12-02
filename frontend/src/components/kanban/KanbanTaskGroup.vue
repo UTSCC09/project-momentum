@@ -6,27 +6,28 @@
   <div class="kanban-board">
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">To do</div>
-      <draggable class="kanban-task-group" :list="todoTasks" group="tasks" @change="log" itemKey="id">
+      <draggable class="kanban-task-group" :list="todoTasks" group="tasks" @change="updateTodo" itemKey="id">
         <template #item="{ element, index }">
-          <KanbanTaskCard :task="element" />
+          <KanbanTaskCard :task="element" @delete="deleteTodoTask" />
         </template>
       </draggable>
     </div>
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">In progress</div>
-      <draggable class="kanban-task-group" :list="inProgressTasks" group="tasks" @change="log" itemKey="id">
+      <draggable class="kanban-task-group" :list="inProgressTasks" group="tasks" @change="udpateInProgress"
+        itemKey="id">
         <template #item="{ element, index }">
-          <KanbanTaskCard :task="element" />
+          <KanbanTaskCard :task="element" @delete="deleteInProgressTask" />
         </template>
       </draggable>
     </div>
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">Done</div>
-      <draggable class="kanban-task-group" :list="doneTasks" group="tasks" @change="log" itemKey="id">
+      <draggable class="kanban-task-group" :list="doneTasks" group="tasks" @change="updateDone" itemKey="id">
         <template #item="{ element, index }">
-          <KanbanTaskCard :task="element" />
+          <KanbanTaskCard :task="element" @delete="deleteDoneTask" />
         </template>
       </draggable>
     </div>
@@ -51,87 +52,105 @@ const props = defineProps({
 const todoTasks = ref([]);
 const inProgressTasks = ref([]);
 const doneTasks = ref([]);
-const progress = ref<number>(50);
+const progress = ref<number>(0);
 
 onBeforeMount(() => {
-  let total = 0;
-  let done = 0;
-
   client.tasks.getTaskbyProject.query({ projectId: props.projectId })
     .then((res) => {
-      console.log(res);
+      let total = 0;
+      let done = 0;
 
       for (const task of res.task) {
         total += 1;
-        const taskItem = {
-          title: task.name,
-          id: task.id,
-          date: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
-          description: task.description,
-        };
-
-        if (task.progress) {
-          inProgressTasks.value.push(taskItem);
+        if (task.progress == 'not started') {
+          todoTasks.value.push({
+            ...task,
+            deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
+          });
+        }
+        else if (task.progress == 'in progress') {
+          inProgressTasks.value.push({
+            ...task,
+            deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
+          });
         }
         else {
           done += 1;
-          doneTasks.value.push(taskItem);
+          doneTasks.value.push({
+            ...task,
+            deadline: moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm"),
+          });
         }
       }
-
-      progress.value = done / total;
+      progress.value = total > 0 ? Math.round(done / total * 100) : 0;
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     });
 })
 
-function log(evt) {
-  console.log(evt);
+function updateTodo(event) {
+  if (event.added) {
+    client.tasks.updateTask.mutate({
+      taskId: event.added.element.id,
+      progress: 'not started',
+    })
+      .then((res) => {
+        updateProgress();
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
 }
 
-// export default {
-//   components: {
-//     draggable,
-//     KanbanTaskCard,
-//   },
-//   data() {
-//     return {
-//       list1: [
-//         { title: "Task 1", id: 1, date: "Sep 25" },
-//         { title: "Task 2", id: 2, date: "Sep 27" },
-//         { title: "Task 3", id: 3, date: "Oct 30" },
-//         { title: "Task 4", id: 4, date: "Oct 30" }
-//       ],
-//       list2: [
-//         { title: "Task 5", id: 5, date: "Oct 30" },
-//         { title: "Task 6", id: 6, date: "Oct 30" },
-//         { title: "Task 7", id: 7, date: "Oct 30" }
-//       ],
-//       list3: [
-//         { title: "Task 8", id: 8, date: "Oct 30" },
-//         { title: "Task 9", id: 9, date: "Oct 30" },
-//         { title: "Task 10", id: 10, date: "Oct 30" }
-//       ]
-//     };
-//   },
-//   methods: {
-//     add: function () {
-//       this.list.push({ name: "Juan" });
-//     },
-//     replace: function () {
-//       this.list = [{ name: "Edgard" }];
-//     },
-//     clone: function (el) {
-//       return {
-//         name: el.name + " cloned"
-//       };
-//     },
-//     log: function (evt) {
-//       window.console.log(evt);
-//     }
-//   }
-// };
+function udpateInProgress(event) {
+  if (event.added) {
+    client.tasks.updateTask.mutate({
+      taskId: event.added.element.id,
+      progress: 'in progress',
+    })
+      .then((res) => {
+        updateProgress();
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+}
+
+function updateDone(event) {
+  if (event.added) {
+    client.tasks.updateTask.mutate({
+      taskId: event.added.element.id,
+      progress: 'completed',
+    })
+      .then((res) => {
+        updateProgress();
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+}
+
+function updateProgress() {
+  const total = todoTasks.value.length + inProgressTasks.value.length + doneTasks.value.length;
+  progress.value = total > 0 ? Math.round(doneTasks.value.length / total * 100) : 0;
+}
+
+function deleteTodoTask(taskId) {
+  todoTasks.value = todoTasks.value.filter((task) => task.id != taskId);
+}
+
+function deleteInProgressTask(taskId) {
+  inProgressTasks.value = inProgressTasks.value.filter((task) => task.id != taskId);
+}
+
+function deleteDoneTask(taskId) {
+  doneTasks.value = doneTasks.value.filter((task) => task.id != taskId);
+}
 </script>
 
 <style lang="css" scoped>

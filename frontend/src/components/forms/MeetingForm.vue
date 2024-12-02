@@ -203,7 +203,7 @@ const props = defineProps({
   }
 });
 
-const initialValues = reactive(props.initialValues);
+const initialValues = reactive(props.initialValues || {});
 
 const toast = useToast();
 

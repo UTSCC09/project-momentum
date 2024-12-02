@@ -119,16 +119,25 @@ export const meetingRouter = trpc.router({
         start_time: z.string().optional(),
         end_time: z.string().optional(),
         project_id: z.string().optional(),
+        participants: z.array(z.string()).optional(),
         rrule: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-        const { meetingId, name, description, location, start_time, end_time, project_id, rrule } = input;
+        const { meetingId, name, description, location, start_time, end_time, project_id, rrule, participants = null } = input;
 
         try{
             const meeting = await Meeting.findOne({ where: { id: meetingId } }) as any;
 
             if (!meeting) throw new TRPCError({ code: 'NOT_FOUND', message: 'Meeting not found' });
             if (meeting.uid !== ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+
+            const participantUsers = [];
+            if(participants !== null){
+                for(const participant of participants){
+                    const user: any  = await User.findOne({ where: { email: participant } });
+                    participantUsers.push(user.id);
+                }
+            }
 
             meeting.name = name || meeting.name;
             meeting.description = description || meeting.description;
@@ -137,6 +146,7 @@ export const meetingRouter = trpc.router({
             meeting.end_time = end_time || meeting.end_time;
             meeting.pid = project_id || meeting.pid;
             meeting.rrule = rrule || meeting.rrule;
+            meeting.participants = participantUsers.length > 0 ? participantUsers : meeting.participants;
             await meeting.save();
 
             // Update user cache

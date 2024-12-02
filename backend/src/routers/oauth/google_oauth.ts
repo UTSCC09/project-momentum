@@ -45,7 +45,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
   const { code } = req.query;
 
   if (!code) {
-    res.redirect("http://localhost:5173/?success=false&error=No authorization code provided");
+    res.redirect("https://momentum-app.ca/?success=false&error=No authorization code provided");
     return;
   }
 
@@ -57,7 +57,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
     const { id_token = "", refresh_token = "", access_token = "" } = tokens;
 
     if (!id_token) {
-      res.redirect("http://localhost:5173/?success=false&error=No ID token received");
+      res.redirect("https://momentum-app.ca/?success=false&error=No ID token received");
       return;
     }
 
@@ -76,7 +76,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
     const kid = payload?.sub;
 
     if (!kid) {
-      res.redirect("http://localhost:5173/?success=false&error=Invalid token payload");
+      res.redirect("https://momentum-app.ca/?success=false&error=Invalid token payload");
       return;
     }
 
@@ -109,7 +109,7 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
         sameSite: "lax",
       });
 
-      res.redirect(`http://localhost:5173/?success=true&id=${googleOauth.User.id}`);
+      res.redirect(`https://momentum-app.ca/?success=true&id=${googleOauth.User.id}`);
       return;
     }
 
@@ -143,10 +143,10 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
       sameSite: "lax",
     });
 
-    res.redirect(`http://localhost:5173/?success=true&id=${user.id}`);
+    res.redirect(`https://momentum-app.ca/?success=true&id=${user.id}`);
   } catch (error) {
     console.error("Error during Google callback:", error);
-    res.redirect(`http://localhost:5173/?success=false&error=${encodeURIComponent(error as string)}`);
+    res.redirect(`https://momentum-app.ca/?success=false&error=${encodeURIComponent(error as string)}`);
   }
 });
 

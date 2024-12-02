@@ -1,5 +1,7 @@
 <template>
   <div class="calendar-drawer-background">
+    <Toast />
+
     <div class="calendar-drawer-container">
       <SplitButton label="Create" icon="pi pi-sparkles" :model="items" @click="toggle" />
 
@@ -12,6 +14,10 @@
           </div>
         </div>
       </Popover>
+
+      <div class="project-listbox">
+        <Listbox v-if="projects.length > 0" v-model="selectedProject" :options="projects" multiple optionLabel="name" />
+      </div>
 
       <Dialog v-model:visible="taskVisible" modal header="Create Task" :style="{ width: '50vw' }">
         <TaskForm :initialValues="taskInitialValues" @close="taskVisible = false;" />
@@ -38,19 +44,26 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Popover from 'primevue/popover';
 import InputText from 'primevue/inputtext';
+import Listbox from 'primevue/listbox';
+import Toast from 'primevue/toast';
+import { useToast } from "primevue/usetoast";
 
 import TaskForm from '../forms/TaskForm.vue';
 import EventForm from '../forms/EventForm.vue';
 import MeetingForm from '../forms/MeetingForm.vue';
 import ProjectForm from '../forms/ProjectForm.vue';
 
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { client } from "../../api/index";
 import { Peer } from "peerjs";
 
 import { useAuthStore } from "../../stores/auth.store.ts";
 
 import moment from 'moment-timezone';
+
+const authStore = useAuthStore();
+
+const toast = useToast();
 
 const taskVisible = ref(false);
 const eventVisible = ref(false);
@@ -156,6 +169,29 @@ function nlp() {
       console.error(err);
     });
 }
+
+const selectedProject = ref();
+const projects = ref([]);
+
+onBeforeMount(() => {
+  client.projects.getProjectbyLead.query({ uid: authStore.user })
+    .then((res) => {
+      const projectsLead = res.projects;
+      client.projects.getProjectbyParticipant.query({ uid: authStore.user })
+        .then((res) => {
+          const projectsParticipate = res.projects;
+          projects.value = projectsLead.concat(projectsParticipate);
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.add({ severity: 'error', summary: 'Failed to retrieve projects.', life: 3000 });
+        });
+    })
+    .catch((err) => {
+      console.error(err);
+      toast.add({ severity: 'error', summary: 'Failed to retrieve projects.', life: 3000 });
+    })
+});
 </script>
 
 <style lang="css" scoped>

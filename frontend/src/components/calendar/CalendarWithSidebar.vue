@@ -22,11 +22,11 @@ import Calendar from './Calendar.vue';
 }
 
 .calendar-drawer-background {
-  flex: 1 0 15vw;
+  flex: 1 0 35vw;
   padding: var(--sx-spacing-padding6);
 }
 
 .calendar-main {
-  flex: 6 0 85vw;
+  flex: 6 0 65vw;
 }
 </style>

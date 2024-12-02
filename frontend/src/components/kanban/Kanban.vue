@@ -49,10 +49,14 @@ onBeforeMount(() => {
     .then((res) => {
       const projectsLead = res.projects;
       client.projects.getProjectbyParticipant.query({ uid: authStore.user })
-      .then((res) => {
-        const projectsParticipate = res.projects;
-        projects.value = projectsLead.concat(projectsParticipate);
-      })
+        .then((res) => {
+          const projectsParticipate = res.projects;
+          projects.value = projectsLead.concat(projectsParticipate);
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.add({ severity: 'error', summary: 'Failed to retrieve projects.', life: 3000 });
+        });
     })
     .catch((err) => {
       console.error(err);

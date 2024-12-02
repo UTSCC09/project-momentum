@@ -5,7 +5,7 @@
       <div class="input-group">
         <FormField v-slot="$field" name="name">
           <IftaLabel>
-            <InputText id="name" type="text" auto fluid />
+            <InputText v-model="name" id="name" type="text" auto fluid />
             <label for="name">Name</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
@@ -13,7 +13,7 @@
         </FormField>
         <FormField v-slot="$field" name="project_id">
           <IftaLabel>
-            <Select inputId="project" :options="projects" optionLabel="name" optionValue="value" fluid />
+            <Select v-model="project_id" inputId="project" :options="projects" optionLabel="name" optionValue="value" fluid />
             <label for="project">Project</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
@@ -23,7 +23,7 @@
       <div class="input-group">
         <FormField v-slot="$field" name="location">
           <IftaLabel>
-            <InputText type="text" id="location" fluid />
+            <InputText v-model="location" type="text" id="location" fluid />
             <label for="location">Location</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
@@ -31,7 +31,7 @@
         </FormField>
         <FormField v-slot="$field" name="deadline">
           <IftaLabel>
-            <DatePicker inputId="deadline" showTime hourFormat="24" fluid />
+            <DatePicker v-model="deadline" inputId="deadline" showTime hourFormat="24" fluid />
             <label for="deadline">Deadline</label>
           </IftaLabel>
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
@@ -40,7 +40,7 @@
       </div>
       <FormField v-slot="$field" name="description">
         <IftaLabel>
-          <Textarea id="description" rows="5" cols="30" style="resize: none" fluid />
+          <Textarea v-model="description" id="description" rows="5" cols="30" style="resize: none" fluid />
           <label for="description">Description</label>
         </IftaLabel>
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
@@ -86,6 +86,32 @@ const emit = defineEmits(['close']);
 
 const authStore = useAuthStore();
 const calendarStore = useCalendarStore();
+
+const props = defineProps({
+  initialValues: {
+    type: Object as PropType<{
+      name?: string,
+      description?: string,
+      location?: string,
+      deadline?: Date,
+      project_id?: string,
+    }>,
+    required: false,
+    default: () => ({
+      name: '',
+      description: '',
+      location: '',
+      deadline: null,
+      project_id: '',
+    })
+  }
+});
+
+const name = ref<string>(props.initialValues.name);
+const description = ref<string>(props.initialValues.description);
+const location = ref<string>(props.initialValues.location);
+const deadline = ref<Date>(props.initialValues.deadline);
+const project_id = ref<string>(props.initialValues.project_id);
 
 const toast = useToast();
 

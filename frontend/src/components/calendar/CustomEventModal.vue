@@ -202,7 +202,6 @@ function deleteEvent(calendarEvent) {
 }
 
 function onEventClose(newEvent) {
-  console.log("newEvent", newEvent)
   eventVisible.value = false;
   title.value = newEvent.name;
   location.value = newEvent.location;
@@ -215,7 +214,6 @@ function onEventClose(newEvent) {
     .utc(newEvent.end)
     .local()
     .format("YYYY-MM-DD HH:mm");
-  console.log("updated title", title.value)
 }
 </script>
 

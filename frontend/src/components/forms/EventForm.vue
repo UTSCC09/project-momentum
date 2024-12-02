@@ -248,6 +248,23 @@ const onFormSubmit = ({ values, valid, reset }) => {
 
           // clear all input
           initialValues.values = {};
+
+          calendarStore.updateEvent({
+            id: res.event.id,
+            title: res.event.name,
+            description: res.event.description,
+            location: res.event.location,
+            start: moment
+              .utc(res.event.start_time)
+              .local()
+              .format("YYYY-MM-DD HH:mm"),
+            end: moment
+              .utc(res.event.end_time)
+              .local()
+              .format("YYYY-MM-DD HH:mm"),
+            rrule: res.event.rrule,
+            type: "event",
+          });
         })
         .catch((err) => {
           console.error(err);

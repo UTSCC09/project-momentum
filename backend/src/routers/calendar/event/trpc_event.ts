@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { userProcedure } from '../../oauth/_login';
 import { Event } from '../../../model/calendar/baseEvent/event';
 import { clearUserCalendarCache } from '../../../service/redis';
-import { eventNPL } from '../../../service/openAI';
+
 import { updateUserEvents } from '../../../service/redis';
 export const eventRouter = trpc.router({
 

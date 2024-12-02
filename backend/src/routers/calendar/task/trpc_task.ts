@@ -104,10 +104,25 @@ export const taskRouter = trpc.router({
         deadline: z.string().optional(),
         progress: z.boolean().optional(),
     }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
         const { projectId, deadline, progress } = input;
+
+        if (projectId === "NONE") {
+            const tasks = await Task.findAll({ 
+                where: { 
+                    pid: null,
+                    ...(deadline ? { deadline: deadline } : {}),
+                    ...(progress ? { progress: progress } : {}),
+                } 
+            });
+            return {
+                task: tasks,
+                temp: "temp"
+            };
+        }
+
         const tasks = await Task.findAll({ 
-            where: { 
+            where: {
                 pid: projectId, 
                 ...(deadline ? { deadline: deadline } : {}),
                 ...(progress ? { progress: progress } : {}),

@@ -113,6 +113,7 @@ export const taskRouter = trpc.router({
             const tasks = await Task.findAll({ 
                 where: { 
                     pid: null,
+                    uid: ctx.userId,
                     ...(deadline ? { deadline: deadline } : {}),
                     ...(progress ? { progress: progress } : {}),
                 } 

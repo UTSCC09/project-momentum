@@ -7,7 +7,9 @@ This web application features an AI-powered scheduler that automatically organiz
 ## Team
 
 Kevin Zhang [@kevin-z](https://github.com/KevinZJN)
-Minh Chau Nguyen [@minhchau](https://github.com/chaunguyenm)
+
+Minh Chau Nguyen [@chaunguyenm](https://github.com/chaunguyenm)
+
 ~~Megan Liu [@megan-l](https://github.com/MeganMujiaLiu)~~
 
 ## Project Link
@@ -23,22 +25,20 @@ Minh Chau Nguyen [@minhchau](https://github.com/chaunguyenm)
 ### Frontend
 
 The frontend is developed using Vue.js in Typescript. Below is a list of libraries and how they are used to power the frontend:
-Zod: form validation
-PrimeVue: components and styling, icons (PrimeVue Icons)
-Anime.js: animated elements
-Schedule-X: calendar component
-Moment: handling datetime data
-Pinia: state management
-Vue-router: routing
-Vuedraggable: drag and drop components
+- Zod: form validation
+- PrimeVue: components and styling, icons (PrimeVue Icons)
+- Anime.js: animated elements
+- Schedule-X: calendar component
+- Moment: handling datetime data
+- Pinia: state management
+- Vue-router: routing
+- Vuedraggable: drag and drop components
 
 Frontend is organized into groups of components including `calendar`, `kanban` and `forms`. Forms are reused throughout the application; hence, we decide to separate all the code related to forms to reduce code repetition. Components in `calendar` and `kanban` make up the two main views of the application, `Schedule` and `Tasks`, respectively.
 
 Using the Single File Component structure of Vue, all code logic, stylings and template of each component is encapsulated into one single file.
 
 Frontend utilizes some state management to avoid cumbersome props exchanging between parents and children, especially if the state information needs to traverse several layers. To do this, we use Pinia to manage global state, including user information, calendar information, and WebSocket functionalities.
-
-The landing page is built with Anime.js to render the animated sphere. 
 
 ### Backend
 
@@ -50,11 +50,11 @@ Our application is deployed using Docker, with Nginx and Let’s Encrypt Certbot
 
 ## Challenges
 
-### WebRTC real time video chat
+### WebRTC real-time video chat
 
 The application implements multiuser video meeting using WebRTC and WebSocket. We implement a mesh architecture with WebRTC, in which each user in a meeting will maintain `N - 1` connections with `N - 1` other participants of the meeting. We use WebSocket as the broker of information between any two users that make up two ends of a connection. The WebSocket servers maintain a number of sockets with users and relays messages between users to notify changes in media streams, devices and ICE candidates to each other.
 
-### OAuth with google and Integration with Google calendar
+### OAuth with Google and Integration with Google Calendar
 
 We have implemented OAuth integration with Google, enabling users to link their Google accounts and sync their Google Calendar events with our calendar application. This feature allows users to effortlessly view and manage their Google Calendar events within our platform. While we considered extending functionality to allow writing back to Google Calendar, we decided not to do that as this would require access to sensitive personal data.
 
@@ -65,7 +65,6 @@ Whenever a user creates or updates an event, the information is stored in Redis 
 ## Contributions
 
 Kevin Zhang:
-
 - Backend implementation with TRPC
 - OAuth and integration with google
 - Setup Database schema and Redis
@@ -73,7 +72,9 @@ Kevin Zhang:
 - Deployment
 
 Minh Chau Nguyen:
-
 - Frontend development
 - WebRTC
 - Frontend, database and Redis deployment
+
+Megan Liu:
+- Database schema design

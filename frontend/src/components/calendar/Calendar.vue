@@ -9,6 +9,8 @@ import {
 } from "@schedule-x/calendar";
 
 // plugins
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
 import { useCalendarStore } from "../../stores/calendar.store.ts";
 
 import { createCalendarControlsPlugin } from "@schedule-x/calendar-controls";
@@ -230,6 +232,7 @@ getEvents(calendarControls.getRange());
 
 <template>
   <div>
+    <Toast />
     <ScheduleXCalendar :calendar-app="calendarApp" :custom-components="customComponents" />
   </div>
 </template>

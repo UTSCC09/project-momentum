@@ -2,7 +2,7 @@
   <div class="custom-event-modal">
     <div class="event-title-container">
       <p class="event-title">{{ title }}</p>
-      <div class="event-controls">
+      <div v-if="owner" class="event-controls">
         <Button id="delete-button" icon="pi pi-trash" @click="deleteEvent(calendarEvent)" variant="text" />
         <Button id="edit-button" icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
       </div>
@@ -37,6 +37,7 @@ import { useEventsStore } from "../../stores/events.store.ts";
 import { client } from "../../api/index.ts";
 import { useRouter } from "vue-router";
 import { useCalendarStore } from "../../stores/calendar.store.ts";
+import { useAuthStore } from "../../stores/auth.store.ts";
 
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
@@ -49,6 +50,7 @@ const router = useRouter();
 
 const eventsStore = useEventsStore();
 const calendarStore = useCalendarStore();
+const authStore = useAuthStore();
 
 const props = defineProps({
   calendarEvent: {
@@ -71,6 +73,10 @@ const location = ref(props.calendarEvent.location);
 const description = ref(props.calendarEvent.description);
 const start = ref(props.calendarEvent.start);
 const end = ref(props.calendarEvent.end);
+const owner = ref(false);
+if (props.calendarEvent.uid == authStore.user) {
+  owner.value = true;
+}
 
 const eventVisible = ref(false);
 const meetingVisible = ref(false);

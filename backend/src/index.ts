@@ -37,7 +37,7 @@ app.use("/trpc", createExpressMiddleware({
   router: trpcRouter,
   createContext: createContext
 }));
-const server = app.listen(3000 , '0.0.0.0', () => console.log("Server running on http://localhost:3000"));
+const server = app.listen(3000 , '0.0.0.0', () => console.log("Server running"));
 createWebSocketServer(server);
 
 export type AppRouter = typeof trpcRouter;

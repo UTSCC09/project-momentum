@@ -35,7 +35,6 @@ export const projectRouter = trpc.router({
                 participants: participantId,
                 lead: uid
             });
-            console.log("Creating Task");
             return {
                 project: project,
                 success: true

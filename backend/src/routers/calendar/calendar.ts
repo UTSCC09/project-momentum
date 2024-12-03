@@ -128,7 +128,6 @@ export const calendarRouter = trpc.router({
     .mutation(async ({ input, ctx }) => {
         const { userInput } = input;
         const result = await eventNPL(userInput);
-        console.log(result);
         return result;
     }),
 });

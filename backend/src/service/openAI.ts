@@ -34,8 +34,6 @@ export async function getTaskSchedual(name: string, description: string, locatio
     const calendar = await getCalendarEvents(start_time, end_time);
     const previousEvents = await getCalendarEventsFromCache(uid);
     const task = `name: ${name}, description: ${description}, location: ${location}, deadline: ${deadline}`;
-    console.log("Task:", task);
-    console.log("Previous Events:", previousEvents);
 
     const completion = await openai.chat.completions.create({
         model: "gpt-4",
@@ -51,7 +49,7 @@ export async function getTaskSchedual(name: string, description: string, locatio
             end_time: z.string(),
         }), "eventSchema")
     });
-    console.log(completion.choices[0].message.content);
+
     return completion.choices[0].message.content;
 }
 
@@ -95,7 +93,6 @@ export async function eventNPL(userInput: string) {
 
     let result = completion.choices[0].message.content || "";
     result = JSON.parse(result).eventType;
-    console.log("Event Type:", result);
 
     if (result === "task") {
         const completionTask = await openai.chat.completions.create({

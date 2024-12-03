@@ -134,10 +134,9 @@ export const userRouter = trpc.router({
             `userId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`
         ]);
 
-        console.log("Logging out user", ctx.userId);
-        await Redisclient.set(`${ctx.userId}`, "loggedOut");
+        await Redisclient.set(`${ctx.authorization}`, "loggedOut");
         // set expire time to be 30 days
-        await Redisclient.expire(`${ctx.userId}`, 30 * 24 * 60 * 60);
+        await Redisclient.expire(`${ctx.authorization}`, 30 * 24 * 60 * 60);
         
         return { success: true };
     })

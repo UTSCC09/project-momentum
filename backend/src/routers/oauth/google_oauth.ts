@@ -36,7 +36,6 @@ oauthGoogleRouter.post("/signin", (req, res) => {
     prompt: "consent",
   });
 
-  console.log("Sign-in initiated");
   res.json({ url });
 });
 
@@ -80,15 +79,11 @@ oauthGoogleRouter.get("/googlecallback", async (req, res) => {
       return;
     }
 
-    console.log("Token payload:", payload);
-
     // Check if the user already exists in the database
     const googleOauth:any = await Oauth.findOne({
       where: { oauthId: kid },
       include: [{ model: User, as: "User" }],
     });
-
-    console.log("Google OAuth:", googleOauth);
 
     if (googleOauth) {
       const token = await new SignJWT({ userId: googleOauth.User.id })

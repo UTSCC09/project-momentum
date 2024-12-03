@@ -1,7 +1,9 @@
 import { createClient } from 'redis';
 
 
-const Redisclient = createClient();
+const Redisclient = createClient({
+    url: `redis://redis:6379`, // Use the Docker service name as the host
+});
 
 async function initializeRedis() {
     try {

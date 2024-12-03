@@ -119,7 +119,7 @@ const onFormSubmit = ({ values, valid, reset }) => {
 };
 
 function googleLogin() {
-  fetch("http://localhost:3000/api/oauth/google/signin", {
+  fetch("https://momentum-app.ca/api/api/oauth/google/signin", {
     method: "POST",
   })
     .then((response) => response.json())

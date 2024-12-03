@@ -108,8 +108,8 @@ export const userRouter = trpc.router({
           .sign(JWT_SECRET);
 
           ctx.res.setHeader('Set-Cookie', [
-            `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax;`,
-            `userId=${(user as any).id}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax;`
+            `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax; Secure;`,
+            `userId=${(user as any).id}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax; Secure;`
           ]);
 
         user.password="";
@@ -130,8 +130,8 @@ export const userRouter = trpc.router({
     logoutUser: trpc.procedure
     .mutation(async ({ ctx }) => {
         ctx.res.setHeader('Set-Cookie', [
-            `token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`,
-            `userId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`
+            `token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax; Secure;`,
+            `userId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax; Secure;`
         ]);
 
         await Redisclient.set(`${ctx.authorization}`, "loggedOut");

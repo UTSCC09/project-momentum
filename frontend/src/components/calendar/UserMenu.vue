@@ -100,7 +100,7 @@ const toggle = (event) => {
 };
 
 function integrateGoogle() {
-  fetch("http://localhost:3000/api/oauth/google/calendar", {
+  fetch("https://momentum-app.ca/api/api/oauth/google/calendar", {
     method: "GET",
     credentials: "include",
     headers: {

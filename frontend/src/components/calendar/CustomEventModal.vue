@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+  
   <div class="custom-event-modal">
     <div class="event-title-container">
       <p class="event-title">{{ title }}</p>

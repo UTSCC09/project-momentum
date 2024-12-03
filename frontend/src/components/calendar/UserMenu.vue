@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+  
   <div class="header-right">
     <SelectButton v-model="view" @change="switchView(view)" :options="views" aria-labelledby="basic" />
 
@@ -21,6 +23,8 @@ import Avatar from "primevue/avatar";
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
 import SelectButton from "primevue/selectbutton";
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
 
 import LoginForm from "../forms/LoginForm.vue";
 import SignupForm from "../forms/SignupForm.vue";
@@ -31,6 +35,7 @@ import { useAuthStore } from "../../stores/auth.store.ts";
 
 import { client } from "../../api/index";
 
+const toast = useToast();
 const authStore = useAuthStore();
 
 const props = defineProps({

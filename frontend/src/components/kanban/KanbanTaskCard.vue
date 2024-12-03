@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+
   <Card style="margin: 0.5rem 0">
     <template #title>{{ name }}</template>
     <template #subtitle>{{ deadline }}</template>
@@ -27,6 +29,8 @@ import TaskForm from "../forms/TaskForm.vue";
 import { ref, onBeforeMount } from "vue";
 import moment from "moment-timezone";
 import { useAuthStore } from "../../stores/auth.store.ts";
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
 
 const props = defineProps({
   task: {

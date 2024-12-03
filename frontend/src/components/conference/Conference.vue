@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+  
   <div class="conference-container">
     <div class="conference-container-videos">
       <div class="video">
@@ -25,6 +27,9 @@
 import Video from "./Video.vue";
 import AudioVideoControls from "./AudioVideoControls.vue";
 
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
+
 import { ref, watch, onBeforeUnmount, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebSocketStore } from "../../stores/websocket.store.ts";
@@ -32,6 +37,8 @@ import { useAuthStore } from "../../stores/auth.store.ts";
 import { servers } from "../../utils/ice-servers.ts";
 
 import { client } from "../../api/index";
+
+const toast = useToast();
 
 type Peer = {
   pc: RTCPeerConnection;

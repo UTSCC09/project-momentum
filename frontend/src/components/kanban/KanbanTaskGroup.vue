@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+
   <div class="progress">
     <ProgressBar :value="progress" />
   </div>
@@ -47,6 +49,8 @@ import moment from "moment-timezone";
 import draggable from "vuedraggable";
 import ProgressBar from "primevue/progressbar";
 import KanbanTaskCard from "./KanbanTaskCard.vue";
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
 
 const authStore = useAuthStore();
 const user = authStore.user;

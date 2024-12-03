@@ -80,23 +80,19 @@ export const useCalendarStore = defineStore("calendar", () => {
   }
 
   function addEvent(event) {
-    if (eventsService)
-      eventsService.value.add(event);
+    if (eventsService) eventsService.value.add(event);
   }
 
   function setEvents(events) {
-    if (eventsService)
-      eventsService.value.set(events);
+    if (eventsService) eventsService.value.set(events);
   }
 
   function updateEvent(event) {
-    if (eventsService)
-      eventsService.value.update(event);
+    if (eventsService) eventsService.value.update(event);
   }
 
   function removeEvent(event) {
-    if (eventsService)
-      eventsService.value.remove(event);
+    if (eventsService) eventsService.value.remove(event);
   }
 
   return {

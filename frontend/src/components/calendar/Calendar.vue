@@ -52,10 +52,7 @@ function getEvents(range) {
             .utc(event.start_time)
             .local()
             .format("YYYY-MM-DD HH:mm"),
-          end: moment
-            .utc(event.end_time)
-            .local()
-            .format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(event.end_time).local().format("YYYY-MM-DD HH:mm"),
           type: "event",
           uid: event.uid,
         };
@@ -75,10 +72,7 @@ function getEvents(range) {
             .utc(meeting.start_time)
             .local()
             .format("YYYY-MM-DD HH:mm"),
-          end: moment
-            .utc(meeting.end_time)
-            .local()
-            .format("YYYY-MM-DD HH:mm"),
+          end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
           type: "meeting",
           uid: meeting.uid,
         };
@@ -88,9 +82,7 @@ function getEvents(range) {
         return calendarMeeting;
       });
 
-      calendarStore.setEvents(
-        events.concat(meetings),
-      );
+      calendarStore.setEvents(events.concat(meetings));
     })
     .catch((err) => {
       toast.add({
@@ -235,6 +227,9 @@ getEvents(calendarControls.getRange());
 <template>
   <div>
     <Toast />
-    <ScheduleXCalendar :calendar-app="calendarApp" :custom-components="customComponents" />
+    <ScheduleXCalendar
+      :calendar-app="calendarApp"
+      :custom-components="customComponents"
+    />
   </div>
 </template>

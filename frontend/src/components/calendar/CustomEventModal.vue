@@ -1,12 +1,22 @@
 <template>
   <Toast />
-  
+
   <div class="custom-event-modal">
     <div class="event-title-container">
       <p class="event-title">{{ title }}</p>
       <div v-if="owner" class="event-controls">
-        <Button id="delete-button" icon="pi pi-trash" @click="deleteEvent(calendarEvent)" variant="text" />
-        <Button id="edit-button" icon="pi pi-pencil" @click="showForm(calendarEvent)" variant="text" />
+        <Button
+          id="delete-button"
+          icon="pi pi-trash"
+          @click="deleteEvent(calendarEvent)"
+          variant="text"
+        />
+        <Button
+          id="edit-button"
+          icon="pi pi-pencil"
+          @click="showForm(calendarEvent)"
+          variant="text"
+        />
       </div>
     </div>
     <div class="event-subtitle-container">
@@ -20,15 +30,39 @@
       </p>
     </div>
     <p class="event-description">{{ description }}</p>
-    <Button id="join-button" v-if="calendarEvent.type == 'meeting'" label="Join meeting" fluid variant="raised"
-      @click="joinMeeting" />
+    <Button
+      id="join-button"
+      v-if="calendarEvent.type == 'meeting'"
+      label="Join meeting"
+      fluid
+      variant="raised"
+      @click="joinMeeting"
+    />
 
-    <Dialog v-model:visible="eventVisible" modal header="Create Event" :style="{ width: '50vw' }">
-      <EventForm :id="calendarEvent.id" :initialValues="initialValues" @close="onEventClose" />
+    <Dialog
+      v-model:visible="eventVisible"
+      modal
+      header="Create Event"
+      :style="{ width: '50vw' }"
+    >
+      <EventForm
+        :id="calendarEvent.id"
+        :initialValues="initialValues"
+        @close="onEventClose"
+      />
     </Dialog>
 
-    <Dialog v-model:visible="meetingVisible" modal header="Create Meeting" :style="{ width: '50vw' }">
-      <MeetingForm :id="calendarEvent.id" :initialValues="initialValues" @close="onMeetingClose" />
+    <Dialog
+      v-model:visible="meetingVisible"
+      modal
+      header="Create Meeting"
+      :style="{ width: '50vw' }"
+    >
+      <MeetingForm
+        :id="calendarEvent.id"
+        :initialValues="initialValues"
+        @close="onMeetingClose"
+      />
     </Dialog>
   </div>
 </template>
@@ -92,7 +126,7 @@ async function getEmails(participantIds: string[]): Promise<string> {
 
   try {
     const promises = participantIds.map((p) =>
-      client.users.getUser.query({ userId: p })
+      client.users.getUser.query({ userId: p }),
     );
     const responses = await Promise.all(promises);
     responses.forEach((response) => {
@@ -100,9 +134,9 @@ async function getEmails(participantIds: string[]): Promise<string> {
         emails.push(response.email);
       }
     });
-    return emails.join(',');
+    return emails.join(",");
   } catch (err) {
-    console.error('Error fetching emails:', err);
+    console.error("Error fetching emails:", err);
   }
 }
 
@@ -111,38 +145,43 @@ if (props.calendarEvent.type == "event") {
   client.events.getEvent
     .query({ eventId: props.calendarEvent.id })
     .then((res) => {
-      initialValues.value = Object.assign({},
+      initialValues.value = Object.assign(
+        {},
         res.event.name && { name: res.event.name },
         res.event.location && { location: res.event.location },
         res.event.description && { description: res.event.description },
         res.event.project_id && { project_id: res.event.project_id },
-        res.event.start_time && { start_time: moment.utc(res.event.start_time).local().toDate() },
-        res.event.end_time && { end_time: moment.utc(res.event.end_time).local().toDate() },
+        res.event.start_time && {
+          start_time: moment.utc(res.event.start_time).local().toDate(),
+        },
+        res.event.end_time && {
+          end_time: moment.utc(res.event.end_time).local().toDate(),
+        },
         res.event.rrule && { repeat: true },
         res.event.project_id && { project_id: res.event.project_id },
         res.event.rrule &&
-        res.event.rrule.match(/FREQ=([^;]+)/)?.[1] && {
-          frequency: res.event.rrule.match(/FREQ=([^;]+)/)?.[1],
-        },
+          res.event.rrule.match(/FREQ=([^;]+)/)?.[1] && {
+            frequency: res.event.rrule.match(/FREQ=([^;]+)/)?.[1],
+          },
         res.event.rrule &&
-        res.event.rrule.match(/INTERVAL=([^;]+)/)?.[1] && {
-          interval: parseInt(res.event.rrule.match(/INTERVAL=([^;]+)/)?.[1]),
-        },
+          res.event.rrule.match(/INTERVAL=([^;]+)/)?.[1] && {
+            interval: parseInt(res.event.rrule.match(/INTERVAL=([^;]+)/)?.[1]),
+          },
         res.event.rrule &&
-        res.event.rrule.match(/BYDAY=([^;]+)/)?.[1] && {
-          byday: res.event.rrule.match(/BYDAY=([^;]+)/)?.[1].split(","),
-        },
+          res.event.rrule.match(/BYDAY=([^;]+)/)?.[1] && {
+            byday: res.event.rrule.match(/BYDAY=([^;]+)/)?.[1].split(","),
+          },
         res.event.rrule &&
-        res.event.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
-          bymonthday: res.event.rrule
-            .match(/BYMONTHDAY=([^;]+)/)?.[1]
-            .split(",")
-            .map((monthday) => parseInt(monthday)),
-        },
+          res.event.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
+            bymonthday: res.event.rrule
+              .match(/BYMONTHDAY=([^;]+)/)?.[1]
+              .split(",")
+              .map((monthday) => parseInt(monthday)),
+          },
         res.event.rrule &&
-        res.event.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
-          until: moment(res.event.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
-        },
+          res.event.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
+            until: moment(res.event.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
+          },
       );
     })
     .catch((err) => {
@@ -157,39 +196,50 @@ if (props.calendarEvent.type == "event") {
   client.meetings.getMeeting
     .query({ meetingId: props.calendarEvent.id })
     .then(async (res) => {
-      initialValues.value = Object.assign({},
+      initialValues.value = Object.assign(
+        {},
         res.meeting.name && { name: res.meeting.name },
         res.meeting.location && { location: res.meeting.location },
-        res.meeting.participants && { participants: await getEmails(res.meeting.participants) },
+        res.meeting.participants && {
+          participants: await getEmails(res.meeting.participants),
+        },
         res.meeting.project_id && { project_id: res.meeting.project_id },
         res.meeting.description && { description: res.meeting.description },
-        res.meeting.start_time && { start_time: moment.utc(res.meeting.start_time).local().toDate() },
-        res.meeting.end_time && { end_time: moment.utc(res.meeting.end_time).local().toDate() },
+        res.meeting.start_time && {
+          start_time: moment.utc(res.meeting.start_time).local().toDate(),
+        },
+        res.meeting.end_time && {
+          end_time: moment.utc(res.meeting.end_time).local().toDate(),
+        },
         res.meeting.rrule && { repeat: true },
         res.meeting.project_id && { project_id: res.meeting.project_id },
         res.meeting.rrule &&
-        res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] && {
-          frequency: res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1],
-        },
+          res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1] && {
+            frequency: res.meeting.rrule.match(/FREQ=([^;]+)/)?.[1],
+          },
         res.meeting.rrule &&
-        res.meeting.rrule.match(/INTERVAL=([^;]+)/)?.[1] && {
-          interval: parseInt(res.meeting.rrule.match(/INTERVAL=([^;]+)/)?.[1]),
-        },
+          res.meeting.rrule.match(/INTERVAL=([^;]+)/)?.[1] && {
+            interval: parseInt(
+              res.meeting.rrule.match(/INTERVAL=([^;]+)/)?.[1],
+            ),
+          },
         res.meeting.rrule &&
-        res.meeting.rrule.match(/BYDAY=([^;]+)/)?.[1] && {
-          byday: res.meeting.rrule.match(/BYDAY=([^;]+)/)?.[1].split(","),
-        },
+          res.meeting.rrule.match(/BYDAY=([^;]+)/)?.[1] && {
+            byday: res.meeting.rrule.match(/BYDAY=([^;]+)/)?.[1].split(","),
+          },
         res.meeting.rrule &&
-        res.meeting.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
-          bymonthday: res.meeting.rrule
-            .match(/BYMONTHDAY=([^;]+)/)?.[1]
-            .split(",")
-            .map((monthday) => parseInt(monthday)),
-        },
+          res.meeting.rrule.match(/BYMONTHDAY=([^;]+)/)?.[1] && {
+            bymonthday: res.meeting.rrule
+              .match(/BYMONTHDAY=([^;]+)/)?.[1]
+              .split(",")
+              .map((monthday) => parseInt(monthday)),
+          },
         res.meeting.rrule &&
-        res.meeting.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
-          until: moment(res.meeting.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
-        },
+          res.meeting.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
+            until: moment(
+              res.meeting.rrule.match(/UNTIL=([^;]+)/)?.[1],
+            ).toDate(),
+          },
       );
     })
     .catch((err) => {
@@ -273,14 +323,8 @@ function onEventClose(newEvent) {
   title.value = newEvent.name;
   location.value = newEvent.location;
   description.value = newEvent.description;
-  start.value = moment
-    .utc(newEvent.start)
-    .local()
-    .format("YYYY-MM-DD HH:mm");
-  end.value = moment
-    .utc(newEvent.end)
-    .local()
-    .format("YYYY-MM-DD HH:mm");
+  start.value = moment.utc(newEvent.start).local().format("YYYY-MM-DD HH:mm");
+  end.value = moment.utc(newEvent.end).local().format("YYYY-MM-DD HH:mm");
 }
 
 function onMeetingClose(newMeeting) {
@@ -288,14 +332,8 @@ function onMeetingClose(newMeeting) {
   title.value = newMeeting.name;
   location.value = newMeeting.location;
   description.value = newMeeting.description;
-  start.value = moment
-    .utc(newMeeting.start)
-    .local()
-    .format("YYYY-MM-DD HH:mm");
-  end.value = moment
-    .utc(newMeeting.end)
-    .local()
-    .format("YYYY-MM-DD HH:mm");
+  start.value = moment.utc(newMeeting.start).local().format("YYYY-MM-DD HH:mm");
+  end.value = moment.utc(newMeeting.end).local().format("YYYY-MM-DD HH:mm");
 }
 </script>
 

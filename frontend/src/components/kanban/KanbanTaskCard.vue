@@ -9,11 +9,32 @@
     </template>
     <template #footer>
       <div class="task-controls">
-        <Button v-if="editable" label="Edit" severity="secondary" outlined class="button" @click="editTask(task)" />
-        <Button v-if="deletable" label="Delete" class="button" @click="deleteTask(task.id)" />
+        <Button
+          v-if="editable"
+          label="Edit"
+          severity="secondary"
+          outlined
+          class="button"
+          @click="editTask(task)"
+        />
+        <Button
+          v-if="deletable"
+          label="Delete"
+          class="button"
+          @click="deleteTask(task.id)"
+        />
 
-        <Dialog v-model:visible="taskVisible" modal header="Edit Task" :style="{ width: '50vw' }">
-          <TaskForm :id="task.id" :initialValues="taskInitialValues" @close="onClose" />
+        <Dialog
+          v-model:visible="taskVisible"
+          modal
+          header="Edit Task"
+          :style="{ width: '50vw' }"
+        >
+          <TaskForm
+            :id="task.id"
+            :initialValues="taskInitialValues"
+            @close="onClose"
+          />
         </Dialog>
       </div>
     </template>
@@ -35,7 +56,7 @@ import { useToast } from "primevue/usetoast";
 const props = defineProps({
   task: {
     type: Object,
-    default: () => { },
+    default: () => {},
   },
 });
 
@@ -54,7 +75,8 @@ const taskVisible = ref(false);
 const taskInitialValues = ref({});
 
 function editTask(task) {
-  taskInitialValues.value = Object.assign({},
+  taskInitialValues.value = Object.assign(
+    {},
     task.name && { name: task.name },
     task.description && { description: task.description },
     task.location && { location: task.location },
@@ -83,11 +105,9 @@ function onClose(task) {
   taskVisible.value = false;
   name.value = task.name;
   description.value = task.description;
-  deadline.value = moment
-    .utc(task.deadline)
-    .local()
-    .format("YYYY-MM-DD HH:mm");
-  taskInitialValues.value = Object.assign({},
+  deadline.value = moment.utc(task.deadline).local().format("YYYY-MM-DD HH:mm");
+  taskInitialValues.value = Object.assign(
+    {},
     task.name && { name: task.name },
     task.description && { description: task.description },
     task.location && { location: task.location },

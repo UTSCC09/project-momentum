@@ -1,23 +1,40 @@
 <template>
   <Toast />
-  
+
   <div class="conference-container">
     <div class="conference-container-videos">
       <div class="video">
-        <Video videoId="localVideo" :displayControls="true" :videoStream="localStream" :pauseVideo="pauseVideo"
-          :pauseAudio="pauseAudio" :muted="true">
+        <Video
+          videoId="localVideo"
+          :displayControls="true"
+          :videoStream="localStream"
+          :pauseVideo="pauseVideo"
+          :pauseAudio="pauseAudio"
+          :muted="true"
+        >
         </Video>
       </div>
       <div v-for="[key, item] in peers" :key="key" class="video">
-        <Video :videoId="key" :displayControls="false" :videoStream="item.peerStream" :pauseVideo="pauseVideo"
-          :pauseAudio="pauseAudio" :muted="false">
+        <Video
+          :videoId="key"
+          :displayControls="false"
+          :videoStream="item.peerStream"
+          :pauseVideo="pauseVideo"
+          :pauseAudio="pauseAudio"
+          :muted="false"
+        >
         </Video>
       </div>
     </div>
 
     <div class="conference-footer">
-      <AudioVideoControls :pauseVideo="pauseVideo" :pauseAudio="pauseAudio" :disconnect="disconnect"
-        :numParticipants="numParticipants" :meetingName="meetingName">
+      <AudioVideoControls
+        :pauseVideo="pauseVideo"
+        :pauseAudio="pauseAudio"
+        :disconnect="disconnect"
+        :numParticipants="numParticipants"
+        :meetingName="meetingName"
+      >
       </AudioVideoControls>
     </div>
   </div>
@@ -198,7 +215,7 @@ function handleMessage(message: any) {
     if (peer)
       peer.pc
         .setRemoteDescription(payload.answer)
-        .then(() => { })
+        .then(() => {})
         .catch((err) => {
           toast.add({
             severity: "error",
@@ -370,12 +387,12 @@ onBeforeUnmount(() => {
 
 /* the case with 2 elements */
 .video:first-child:nth-last-child(2),
-.video:first-child:nth-last-child(2)~* {
+.video:first-child:nth-last-child(2) ~ * {
   flex: 0 0 calc((100% - 1rem) / 2);
 }
 
 .video:first-child:nth-last-child(1),
-.video:first-child:nth-last-child(1)~* {
+.video:first-child:nth-last-child(1) ~ * {
   flex: 0 0 100%;
 }
 

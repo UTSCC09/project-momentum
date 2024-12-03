@@ -6,18 +6,43 @@
     <div>
       <p>build your</p>
       <p><span style="color: white; font-size: 6rem">momentum</span></p>
-      <Button label="Get started" severity="secondary" @click="visibleSignup = true" />
-      <Button label="I already have an account" severity="primary" variant="text" class="custom"
-        @click="visibleLogin = true" />
-      <Button icon="pi pi-info-circle" severity="primary" variant="text" class="custom" @click="goToCredits" />
+      <Button
+        label="Get started"
+        severity="secondary"
+        @click="visibleSignup = true"
+      />
+      <Button
+        label="I already have an account"
+        severity="primary"
+        variant="text"
+        class="custom"
+        @click="visibleLogin = true"
+      />
+      <Button
+        icon="pi pi-info-circle"
+        severity="primary"
+        variant="text"
+        class="custom"
+        @click="goToCredits"
+      />
     </div>
   </div>
 
-  <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
+  <Dialog
+    v-model:visible="visibleLogin"
+    modal
+    header="Log in"
+    :style="{ width: '25rem' }"
+  >
     <LoginForm @close="redirect" />
   </Dialog>
 
-  <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
+  <Dialog
+    v-model:visible="visibleSignup"
+    modal
+    header="Sign up"
+    :style="{ width: '25rem' }"
+  >
     <SignupForm @close="visibleSignup = false" />
   </Dialog>
 </template>

@@ -1,18 +1,39 @@
 <template>
   <Toast />
-  
-  <div class="header-right">
-    <SelectButton v-model="view" @change="switchView(view)" :options="views" aria-labelledby="basic" />
 
-    <Avatar icon="pi pi-user" size="large" shape="circle" @click="toggle" aria-haspopup="true"
-      aria-controls="overlay_menu" />
+  <div class="header-right">
+    <SelectButton
+      v-model="view"
+      @change="switchView(view)"
+      :options="views"
+      aria-labelledby="basic"
+    />
+
+    <Avatar
+      icon="pi pi-user"
+      size="large"
+      shape="circle"
+      @click="toggle"
+      aria-haspopup="true"
+      aria-controls="overlay_menu"
+    />
     <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
 
-    <Dialog v-model:visible="visibleLogin" modal header="Log in" :style="{ width: '25rem' }">
+    <Dialog
+      v-model:visible="visibleLogin"
+      modal
+      header="Log in"
+      :style="{ width: '25rem' }"
+    >
       <LoginForm @close="visibleLogin = false" />
     </Dialog>
 
-    <Dialog v-model:visible="visibleSignup" modal header="Sign up" :style="{ width: '25rem' }">
+    <Dialog
+      v-model:visible="visibleSignup"
+      modal
+      header="Sign up"
+      :style="{ width: '25rem' }"
+    >
       <SignupForm @close="visibleSignup = false" />
     </Dialog>
   </div>
@@ -61,32 +82,32 @@ const items = ref([
     label: "Profile",
     items: authStore.user
       ? [
-        {
-          label: "Log out",
-          icon: "pi pi-sign-out",
-          command: () => {
-            logout();
-            authStore.logout();
-            router.push("/");
+          {
+            label: "Log out",
+            icon: "pi pi-sign-out",
+            command: () => {
+              logout();
+              authStore.logout();
+              router.push("/");
+            },
           },
-        },
-      ]
+        ]
       : [
-        {
-          label: "Log in",
-          icon: "pi pi-sign-in",
-          command: () => {
-            visibleLogin.value = true;
+          {
+            label: "Log in",
+            icon: "pi pi-sign-in",
+            command: () => {
+              visibleLogin.value = true;
+            },
           },
-        },
-        {
-          label: "Sign up",
-          icon: "pi pi-user-plus",
-          command: () => {
-            visibleSignup.value = true;
+          {
+            label: "Sign up",
+            icon: "pi pi-user-plus",
+            command: () => {
+              visibleSignup.value = true;
+            },
           },
-        },
-      ],
+        ],
   },
   {
     label: "Integrate",

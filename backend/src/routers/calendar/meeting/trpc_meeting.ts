@@ -160,6 +160,9 @@ export const meetingRouter = trpc.router({
             };
         } catch (error){
             console.log(error);
+            return {
+                error: error
+            };
         }
 
     }),

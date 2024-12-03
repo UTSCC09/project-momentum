@@ -118,8 +118,6 @@ function nlp() {
   client.calendar.calendarNPL
     .mutate({ userInput: nlpInput.value })
     .then((res) => {
-      console.log(res);
-
       // update view
       loading.value = false;
       op.value.toggle();
@@ -208,11 +206,21 @@ function nlp() {
         );
         taskVisible.value = true;
       } else {
-        console.error("Unrecognized type");
+        toast.add({
+          severity: "error",
+          summary: `Failed to process command.`,
+          detail: err.message,
+          life: 3000,
+        });
       }
     })
     .catch((err) => {
-      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: `Failed to process command.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 }
 
@@ -232,7 +240,6 @@ function getProject() {
     client.calendar.getCalendar
       .query(queryRange)
       .then((res) => {
-        console.log(res.calendar);
         const events = res.calendar.events.map((event) => {
           const calendarEvent = {
             id: event.id,
@@ -282,7 +289,12 @@ function getProject() {
         );
       })
       .catch((err) => {
-        console.log(err);
+        toast.add({
+          severity: "error",
+          summary: `Failed to retrieve events.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   }
   else {
@@ -344,7 +356,6 @@ function getProject() {
         calendarStore.setEvents(events.concat(meetings));
       })
       .catch((err) => {
-        console.error(err);
         toast.add({
           severity: "error",
           summary: "Failed to retrieve events.",
@@ -366,7 +377,6 @@ onBeforeMount(() => {
           projects.value = projectsLead.concat(projectsParticipate);
         })
         .catch((err) => {
-          console.error(err);
           toast.add({
             severity: "error",
             summary: "Failed to retrieve projects.",
@@ -375,7 +385,6 @@ onBeforeMount(() => {
         });
     })
     .catch((err) => {
-      console.error(err);
       toast.add({
         severity: "error",
         summary: "Failed to retrieve projects.",

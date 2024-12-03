@@ -37,87 +37,65 @@ function getEvents(range) {
     end_date: moment(range.end).local().utc().toISOString(),
   };
 
-  // client.meetings.getMeetingbyParticipant
-  //   .query({ userId: authStore.user })
-  //   .then((res) => {
-  //     const meetingsAsParticipants = res.meetings.map((meeting) => {
-  //       const calendarMeeting = {
-  //         id: meeting.id,
-  //         title: meeting.name,
-  //         description: meeting.description,
-  //         location: meeting.location,
-  //         start: moment
-  //           .utc(meeting.start_time)
-  //           .local()
-  //           .format("YYYY-MM-DD HH:mm"),
-  //         end: moment.utc(meeting.end_time).local().format("YYYY-MM-DD HH:mm"),
-  //         type: "meeting",
-  //       };
-  //       if (meeting.rrule) {
-  //         calendarMeeting.rrule = meeting.rrule;
-  //       }
-  //       return calendarMeeting;
-  //     });
+  client.calendar.getCalendar
+    .query(queryRange)
+    .then((res) => {
+      const events = res.calendar.events.map((event) => {
+        const calendarEvent = {
+          id: event.id,
+          title: event.name,
+          description: event.description,
+          location: event.location,
+          start: moment
+            .utc(event.start_time)
+            .local()
+            .format("YYYY-MM-DD HH:mm"),
+          end: moment
+            .utc(event.end_time)
+            .local()
+            .format("YYYY-MM-DD HH:mm"),
+          type: "event",
+        };
+        if (event.rrule) {
+          calendarEvent.rrule = event.rrule;
+        }
+        return calendarEvent;
+      });
 
-      client.calendar.getCalendar
-        .query(queryRange)
-        .then((res) => {
-          console.log(res.calendar);
-          const events = res.calendar.events.map((event) => {
-            const calendarEvent = {
-              id: event.id,
-              title: event.name,
-              description: event.description,
-              location: event.location,
-              start: moment
-                .utc(event.start_time)
-                .local()
-                .format("YYYY-MM-DD HH:mm"),
-              end: moment
-                .utc(event.end_time)
-                .local()
-                .format("YYYY-MM-DD HH:mm"),
-              type: "event",
-            };
-            if (event.rrule) {
-              calendarEvent.rrule = event.rrule;
-            }
-            return calendarEvent;
-          });
+      const meetings = res.calendar.meetings.map((meeting) => {
+        const calendarMeeting = {
+          id: meeting.id,
+          title: meeting.name,
+          description: meeting.description,
+          location: meeting.location,
+          start: moment
+            .utc(meeting.start_time)
+            .local()
+            .format("YYYY-MM-DD HH:mm"),
+          end: moment
+            .utc(meeting.end_time)
+            .local()
+            .format("YYYY-MM-DD HH:mm"),
+          type: "meeting",
+        };
+        if (meeting.rrule) {
+          calendarMeeting.rrule = meeting.rrule;
+        }
+        return calendarMeeting;
+      });
 
-          const meetings = res.calendar.meetings.map((meeting) => {
-            const calendarMeeting = {
-              id: meeting.id,
-              title: meeting.name,
-              description: meeting.description,
-              location: meeting.location,
-              start: moment
-                .utc(meeting.start_time)
-                .local()
-                .format("YYYY-MM-DD HH:mm"),
-              end: moment
-                .utc(meeting.end_time)
-                .local()
-                .format("YYYY-MM-DD HH:mm"),
-              type: "meeting",
-            };
-            if (meeting.rrule) {
-              calendarMeeting.rrule = meeting.rrule;
-            }
-            return calendarMeeting;
-          });
-
-          calendarStore.setEvents(
-            events.concat(meetings),
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    // })
-    // .catch((err) => {
-    //   console.log(err);
-    // });
+      calendarStore.setEvents(
+        events.concat(meetings),
+      );
+    })
+    .catch((err) => {
+      toast.add({
+        severity: "error",
+        summary: `Failed to get events.`,
+        detail: err.message,
+        life: 3000,
+      });
+    });
 }
 
 const config = {
@@ -181,7 +159,6 @@ const config = {
       getEvents(range);
     },
     onEventUpdate(updatedEvent) {
-      console.log(updatedEvent);
       if (updatedEvent.type == "event") {
         client.events.updateEvent
           .mutate({
@@ -190,10 +167,16 @@ const config = {
             end_time: moment(updatedEvent.end).local().utc().toISOString(),
           })
           .then((res) => {
-            console.log(res);
             calendarStore.updateEvent(updatedEvent);
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            toast.add({
+              severity: "error",
+              summary: `Failed to update event.`,
+              detail: err.message,
+              life: 3000,
+            });
+          });
       }
       if (updatedEvent.type == "meeting") {
         client.meetings.updateMeeting
@@ -203,10 +186,16 @@ const config = {
             end_time: moment(updatedEvent.end).local().utc().toISOString(),
           })
           .then((res) => {
-            console.log(res);
             calendarStore.updateEvent(updatedEvent);
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            toast.add({
+              severity: "error",
+              summary: `Failed to update event.`,
+              detail: err.message,
+              life: 3000,
+            });
+          });
       }
     },
   },
@@ -241,9 +230,6 @@ getEvents(calendarControls.getRange());
 
 <template>
   <div>
-    <ScheduleXCalendar
-      :calendar-app="calendarApp"
-      :custom-components="customComponents"
-    />
+    <ScheduleXCalendar :calendar-app="calendarApp" :custom-components="customComponents" />
   </div>
 </template>

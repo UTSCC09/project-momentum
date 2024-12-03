@@ -91,7 +91,6 @@ async function getEmails(participantIds: string[]): Promise<string> {
     return emails.join(',');
   } catch (err) {
     console.error('Error fetching emails:', err);
-    throw new Error('Failed to fetch emails'); // Optionally throw an error to handle further
   }
 }
 
@@ -134,7 +133,14 @@ if (props.calendarEvent.type == "event") {
         },
       );
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      toast.add({
+        severity: "error",
+        summary: `Failed to get event.`,
+        detail: err.message,
+        life: 3000,
+      });
+    });
 } else if (props.calendarEvent.type == "meeting") {
   client.meetings.getMeeting
     .query({ meetingId: props.calendarEvent.id })
@@ -174,13 +180,23 @@ if (props.calendarEvent.type == "event") {
         },
       );
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      toast.add({
+        severity: "error",
+        summary: `Failed to get event.`,
+        detail: err.message,
+        life: 3000,
+      });
+    });
 } else {
-  console.log("Unrecognized event type.");
+  toast.add({
+    severity: "error",
+    summary: `Unrecognized event type.`,
+    life: 3000,
+  });
 }
 
 function showForm(calendarEvent) {
-  console.log(calendarEvent);
   if (calendarEvent.type == "meeting") {
     meetingVisible.value = true;
     eventVisible.value = false;
@@ -188,7 +204,11 @@ function showForm(calendarEvent) {
     meetingVisible.value = false;
     eventVisible.value = true;
   } else {
-    console.log("Unrecognized event type.");
+    toast.add({
+      severity: "error",
+      summary: `Unrecognized event type.`,
+      life: 3000,
+    });
     meetingVisible.value = false;
     eventVisible.value = false;
   }
@@ -199,30 +219,40 @@ function joinMeeting() {
 }
 
 function deleteEvent(calendarEvent) {
-  console.log(calendarEvent);
-
   if (calendarEvent.type == "meeting") {
     client.meetings.deleteMeeting
       .mutate({ meetingId: calendarEvent.id })
       .then((res) => {
-        console.log(res);
         calendarStore.removeEvent(calendarEvent.id);
       })
       .catch((err) => {
-        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: `Failed to delete event.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   } else if (calendarEvent.type == "event") {
     client.events.deleteEvent
       .mutate({ eventId: calendarEvent.id })
       .then((res) => {
-        console.log(res);
         calendarStore.removeEvent(calendarEvent.id);
       })
       .catch((err) => {
-        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: `Failed to delete event.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   } else {
-    console.warn("Unrecognized type");
+    toast.add({
+      severity: "error",
+      summary: `Unrecognized event type.`,
+      life: 3000,
+    });
   }
 }
 

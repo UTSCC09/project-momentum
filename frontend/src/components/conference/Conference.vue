@@ -2,37 +2,20 @@
   <div class="conference-container">
     <div class="conference-container-videos">
       <div class="video">
-        <Video
-          videoId="localVideo"
-          :displayControls="true"
-          :videoStream="localStream"
-          :pauseVideo="pauseVideo"
-          :pauseAudio="pauseAudio"
-          :muted="true"
-        >
+        <Video videoId="localVideo" :displayControls="true" :videoStream="localStream" :pauseVideo="pauseVideo"
+          :pauseAudio="pauseAudio" :muted="true">
         </Video>
       </div>
       <div v-for="[key, item] in peers" :key="key" class="video">
-        <Video
-          :videoId="key"
-          :displayControls="false"
-          :videoStream="item.peerStream"
-          :pauseVideo="pauseVideo"
-          :pauseAudio="pauseAudio"
-          :muted="false"
-        >
+        <Video :videoId="key" :displayControls="false" :videoStream="item.peerStream" :pauseVideo="pauseVideo"
+          :pauseAudio="pauseAudio" :muted="false">
         </Video>
       </div>
     </div>
 
     <div class="conference-footer">
-      <AudioVideoControls
-        :pauseVideo="pauseVideo"
-        :pauseAudio="pauseAudio"
-        :disconnect="disconnect"
-        :numParticipants="numParticipants"
-        :meetingName="meetingName"
-      >
+      <AudioVideoControls :pauseVideo="pauseVideo" :pauseAudio="pauseAudio" :disconnect="disconnect"
+        :numParticipants="numParticipants" :meetingName="meetingName">
       </AudioVideoControls>
     </div>
   </div>
@@ -74,7 +57,6 @@ function createPeerConnection(
   peerId: string,
   description?: RTCSessionDescription,
 ) {
-  console.log("creating peerconnection with", peerId);
   const pc = new RTCPeerConnection({ iceServers: servers });
   peers.value.set(peerId, {
     pc: pc,
@@ -100,8 +82,6 @@ function createPeerConnection(
 
   // receive media stream and add to peer connection
   pc.ontrack = (event) => {
-    console.log("receiving media stream");
-    console.log(event);
     const peer = peers.value.get(peerId);
     if (peer) {
       peer.peerVideo = peer.peerVideo || document.getElementById(peerId);
@@ -123,11 +103,15 @@ function createPeerConnection(
     // set remote description
     pc.setRemoteDescription(description)
       .then(() => {
-        console.log(`setRemoteDescription: finished`);
         createAnswer(pc, peerId);
       })
       .catch((err) => {
-        console.error(`Error setting the RemoteDescription: ${err}`);
+        toast.add({
+          severity: "error",
+          summary: `Error setting RemoteDescription.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   } else {
     createOffer(pc, peerId);
@@ -135,59 +119,65 @@ function createPeerConnection(
 }
 
 function createAnswer(pc: RTCPeerConnection, peerId: string) {
-  console.log(`${authStore.user} create an answer: start`);
   pc.createAnswer()
     .then((answer) => {
-      console.log(`${authStore.user} setLocalDescription: start`);
       pc.setLocalDescription(answer)
         .then(() => {
-          console.log(`${authStore.user} setLocalDescription: finished`);
           websocketStore.send({
             type: "answer",
             senderId: myClientId,
             payload: { receiverId: peerId, answer: answer },
           });
-
-          console.log("ICE gathering state:", pc.iceGatheringState);
-          console.log("LocalDescription:", pc.localDescription);
-          console.log("RemoteDescription:", pc.remoteDescription);
         })
         .catch((err) => {
-          console.error(`Error setting LocalDescription: ${err}`);
+          toast.add({
+            severity: "error",
+            summary: `Error setting LocalDescription.`,
+            detail: err.message,
+            life: 3000,
+          });
         });
     })
     .catch((err) => {
-      console.error(`Error creating answer: ${err}`);
+      toast.add({
+        severity: "error",
+        summary: `Error creating answer.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 }
 
 function createOffer(pc: RTCPeerConnection, peerId: string) {
-  console.log(`${authStore.user} wants to start a call with ${peerId}`);
   pc.createOffer({
     offerToReceiveAudio: true,
     offerToReceiveVideo: true,
   })
     .then((offer) => {
-      console.log(`${authStore.user} setLocalDescription: start`);
       pc.setLocalDescription(offer)
         .then(() => {
-          console.log(`${authStore.user} setLocalDescription: finished`);
           websocketStore.send({
             type: "offer",
             senderId: myClientId,
             payload: { receiverId: peerId, offer: offer },
           });
-
-          console.log("ICE gathering state:", pc.iceGatheringState);
-          console.log("LocalDescription:", pc.localDescription);
-          console.log("RemoteDescription:", pc.remoteDescription);
         })
         .catch((err) => {
-          console.error(`Error setting the LocalDescription: ${err}`);
+          toast.add({
+            severity: "error",
+            summary: `Error setting LocalDescription.`,
+            detail: err.message,
+            life: 3000,
+          });
         });
     })
     .catch((err) => {
-      console.error(`Error creating offer: ${err}`);
+      toast.add({
+        severity: "error",
+        summary: `Error creating offer.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 }
 
@@ -195,28 +185,33 @@ function handleMessage(message: any) {
   const { senderId, type, payload } = message;
 
   if (type === "offer") {
-    console.log("Received offer from:", senderId);
     createPeerConnection(senderId, payload.offer);
   } else if (type === "answer") {
-    console.log("Received answer from:", senderId);
     const peer = peers.value.get(senderId);
     if (peer)
       peer.pc
         .setRemoteDescription(payload.answer)
-        .then(() => {
-          console.log(`setRemoteDescription: finished`);
-        })
+        .then(() => { })
         .catch((err) => {
-          console.error(`Error setting the RemoteDescription: ${err}`);
+          toast.add({
+            severity: "error",
+            summary: `Error setting RemoteDescription.`,
+            detail: err.message,
+            life: 3000,
+          });
         });
   } else if (type === "ice-candidate") {
-    console.log("Received ICE candidate from:", senderId);
     const peer = peers.value.get(senderId);
     if (peer && payload["ice-candidate"]) {
       peer.pc
         .addIceCandidate(new RTCIceCandidate(payload["ice-candidate"]))
         .catch((error) => {
-          console.error("Error adding ICE candidate:", error);
+          toast.add({
+            severity: "error",
+            summary: `Error adding ICE candidate.`,
+            detail: error.message,
+            life: 3000,
+          });
         });
     }
   } else if (type === "connect") {
@@ -240,10 +235,18 @@ function handleMessage(message: any) {
       peers.value.delete(senderId);
       numParticipants.value = peers.value.size + 1;
     } else {
-      console.warn("Cannot find user:", senderId);
+      toast.add({
+        severity: "error",
+        summary: `Cannot find user ${senderId}.`,
+        life: 3000,
+      });
     }
   } else {
-    console.warn("Unrecognized message type from:", senderId);
+    toast.add({
+      severity: "error",
+      summary: `Unrecognized message type from ${senderId}.`,
+      life: 3000,
+    });
   }
 }
 
@@ -285,7 +288,14 @@ onMounted(() => {
     .then((res) => {
       meetingName.value = res.meeting.name;
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      toast.add({
+        severity: "error",
+        summary: `Failed to get meeting.`,
+        detail: err.message,
+        life: 3000,
+      });
+    });
 
   // initialize local video
   const constraints = {
@@ -295,7 +305,6 @@ onMounted(() => {
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
-      console.log("Got local stream:", stream);
       localStream.value = stream;
 
       // set local video
@@ -313,7 +322,12 @@ onMounted(() => {
       });
     })
     .catch((err) => {
-      console.error("Error accessing media devices:", err);
+      toast.add({
+        severity: "error",
+        summary: `Error accessing media devices.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 });
 
@@ -349,12 +363,12 @@ onBeforeUnmount(() => {
 
 /* the case with 2 elements */
 .video:first-child:nth-last-child(2),
-.video:first-child:nth-last-child(2) ~ * {
+.video:first-child:nth-last-child(2)~* {
   flex: 0 0 calc((100% - 1rem) / 2);
 }
 
 .video:first-child:nth-last-child(1),
-.video:first-child:nth-last-child(1) ~ * {
+.video:first-child:nth-last-child(1)~* {
   flex: 0 0 100%;
 }
 

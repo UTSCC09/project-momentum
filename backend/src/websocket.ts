@@ -56,10 +56,10 @@ export function createWebSocketServer(server: any) {
         if (socket)
           socket.send(JSON.stringify(message));
         else
-          console.warn(`No client found: ${payload.receiverId}`);
+          console.error(`No client found: ${payload.receiverId}`);
       }
       else {
-        console.warn('Unrecognized message format');
+        console.error('Unrecognized message format');
       }
     });
   
@@ -75,7 +75,7 @@ export function createWebSocketServer(server: any) {
                 type: 'disconnect', senderId: clientId, payload: {}
               }));
             else
-              console.warn(`No client found: ${clientId}`);
+              console.error(`No client found: ${clientId}`);
           })
         }
       })

@@ -121,7 +121,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
         reset();
       })
       .catch((err) => {
-        console.error(err);
         toast.add({
           severity: "error",
           summary: `Failed to create project: ${err.message}.`,

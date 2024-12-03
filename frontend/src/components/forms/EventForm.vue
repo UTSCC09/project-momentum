@@ -242,7 +242,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
     if (props.id) {
       client.events.updateEvent.mutate({ eventId: props.id, ...req })
         .then((res) => {
-          console.log(res);
           // send event to parent to close the dialog
           emit("close", res.event);
 
@@ -267,7 +266,12 @@ const onFormSubmit = ({ values, valid, reset }) => {
           });
         })
         .catch((err) => {
-          console.error(err);
+          toast.add({
+            severity: "error",
+            summary: `Failed to update event.`,
+            detail: err.message,
+            life: 3000,
+          });
         })
     }
     else {
@@ -298,7 +302,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
           });
         })
         .catch((err) => {
-          console.error(err);
           toast.add({
             severity: "error",
             summary: `Failed to create event: ${err.message}.`,
@@ -376,7 +379,12 @@ onBeforeMount(() => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: `Failed to get projects.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 });
 </script>

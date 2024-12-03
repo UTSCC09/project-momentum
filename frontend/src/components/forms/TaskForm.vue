@@ -180,7 +180,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
           }
         })
         .catch((err) => {
-          console.error(err);
           toast.add({
             severity: "error",
             summary: `Failed to create task: ${err.message}.`,
@@ -203,13 +202,17 @@ onBeforeMount(() => {
   client.projects.getProjectbyLead
     .query({ uid: authStore.user })
     .then((res) => {
-      console.log(res);
       for (const project of res.projects) {
         projects.value.push({ name: project.name, value: project.id });
       }
     })
     .catch((err) => {
-      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: `Failed to get projects.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 });
 </script>

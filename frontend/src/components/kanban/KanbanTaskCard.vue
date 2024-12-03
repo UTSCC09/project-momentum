@@ -66,7 +66,12 @@ function deleteTask(taskId) {
       emit("delete", taskId);
     })
     .catch((err) => {
-      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: `Failed to delete task.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 }
 

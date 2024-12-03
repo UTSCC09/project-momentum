@@ -56,7 +56,6 @@ onBeforeMount(() => {
           projects.value = projectsLead.concat(projectsParticipate);
         })
         .catch((err) => {
-          console.error(err);
           toast.add({
             severity: "error",
             summary: "Failed to retrieve projects.",
@@ -65,7 +64,6 @@ onBeforeMount(() => {
         });
     })
     .catch((err) => {
-      console.error(err);
       toast.add({
         severity: "error",
         summary: "Failed to retrieve projects.",

@@ -109,7 +109,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
         });
       })
       .catch((err) => {
-        console.error(err);
         toast.add({
           severity: "error",
           summary: `Login failed: ${err.message}.`,

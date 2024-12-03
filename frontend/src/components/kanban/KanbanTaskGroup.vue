@@ -6,21 +6,10 @@
   <div class="kanban-board">
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">To do</div>
-      <draggable
-        class="kanban-task-group"
-        :list="todoTasks"
-        group="tasks"
-        @change="updateTodo"
-        itemKey="id"
-        draggable=".item"
-      >
+      <draggable class="kanban-task-group" :list="todoTasks" group="tasks" @change="updateTodo" itemKey="id"
+        draggable=".item">
         <template #item="{ element, index }">
-          <KanbanTaskCard
-            v-if="element.uid == user"
-            class="item"
-            :task="element"
-            @delete="deleteTodoTask"
-          />
+          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteTodoTask" />
           <KanbanTaskCard v-else :task="element" @delete="deleteTodoTask" />
         </template>
       </draggable>
@@ -28,47 +17,21 @@
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">In progress</div>
-      <draggable
-        class="kanban-task-group"
-        :list="inProgressTasks"
-        group="tasks"
-        @change="udpateInProgress"
-        itemKey="id"
-        draggable=".item"
-      >
+      <draggable class="kanban-task-group" :list="inProgressTasks" group="tasks" @change="udpateInProgress" itemKey="id"
+        draggable=".item">
         <template #item="{ element, index }">
-          <KanbanTaskCard
-            v-if="element.uid == user"
-            class="item"
-            :task="element"
-            @delete="deleteInProgressTask"
-          />
-          <KanbanTaskCard
-            v-else
-            :task="element"
-            @delete="deleteInProgressTask"
-          />
+          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteInProgressTask" />
+          <KanbanTaskCard v-else :task="element" @delete="deleteInProgressTask" />
         </template>
       </draggable>
     </div>
 
     <div class="kanban-task-group-container">
       <div class="kanban-task-group-header">Done</div>
-      <draggable
-        class="kanban-task-group"
-        :list="doneTasks"
-        group="tasks"
-        @change="updateDone"
-        itemKey="id"
-        draggable=".item"
-      >
+      <draggable class="kanban-task-group" :list="doneTasks" group="tasks" @change="updateDone" itemKey="id"
+        draggable=".item">
         <template #item="{ element, index }">
-          <KanbanTaskCard
-            v-if="element.uid == user"
-            class="item"
-            :task="element"
-            @delete="deleteDoneTask"
-          />
+          <KanbanTaskCard v-if="element.uid == user" class="item" :task="element" @delete="deleteDoneTask" />
           <KanbanTaskCard v-else :task="element" @delete="deleteDoneTask" />
         </template>
       </draggable>
@@ -151,7 +114,12 @@ onBeforeMount(() => {
       progress.value = total > 0 ? Math.round((done / total) * 100) : 0;
     })
     .catch((err) => {
-      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: `Failed to get tasks.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 });
 
@@ -166,7 +134,12 @@ function updateTodo(event) {
         updateProgress();
       })
       .catch((err) => {
-        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: `Failed to update task.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   }
 }
@@ -182,7 +155,12 @@ function udpateInProgress(event) {
         updateProgress();
       })
       .catch((err) => {
-        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: `Failed to update task.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   }
 }
@@ -198,7 +176,12 @@ function updateDone(event) {
         updateProgress();
       })
       .catch((err) => {
-        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: `Failed to update task.`,
+          detail: err.message,
+          life: 3000,
+        });
       });
   }
 }

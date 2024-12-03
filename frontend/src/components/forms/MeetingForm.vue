@@ -277,7 +277,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
           });
         })
         .catch((err) => {
-          console.error(err);
           toast.add({
             severity: "error",
             summary: `Failed to update meeting: ${err.message}.`,
@@ -313,7 +312,6 @@ const onFormSubmit = ({ values, valid, reset }) => {
           });
         })
         .catch((err) => {
-          console.error(err);
           toast.add({
             severity: "error",
             summary: `Failed to create meeting: ${err.message}.`,
@@ -391,7 +389,12 @@ onBeforeMount(() => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: `Failed to get projects.`,
+        detail: err.message,
+        life: 3000,
+      });
     });
 });
 </script>

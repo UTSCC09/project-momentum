@@ -94,6 +94,9 @@ app.use(ToastService);
 app.use(PrimeVue, {
   theme: {
     preset: Noir,
+    options: {
+      darkModeSelector: '.my-app-dark',
+    },
   },
   ripple: true,
 });

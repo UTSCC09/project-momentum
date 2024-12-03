@@ -57,6 +57,7 @@ function getEvents(range) {
             .local()
             .format("YYYY-MM-DD HH:mm"),
           type: "event",
+          uid: event.uid,
         };
         if (event.rrule) {
           calendarEvent.rrule = event.rrule;
@@ -79,6 +80,7 @@ function getEvents(range) {
             .local()
             .format("YYYY-MM-DD HH:mm"),
           type: "meeting",
+          uid: meeting.uid,
         };
         if (meeting.rrule) {
           calendarMeeting.rrule = meeting.rrule;

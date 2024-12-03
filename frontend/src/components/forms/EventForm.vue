@@ -79,6 +79,8 @@
               suffix=" weeks" showButtons fluid />
             <InputNumber name="interval" v-if="$form.frequency?.value == 'MONTHLY'" inputId="interval" :min="1"
               suffix=" months" showButtons fluid />
+            <InputNumber name="interval" v-if="!$form.frequency?.value" inputId="interval" :min="1"
+              suffix=" months" showButtons fluid />
             <label for="interval">Every</label>
           </IftaLabel>
           <Message v-if="$form.interval?.invalid" severity="error" size="small" variant="simple">{{

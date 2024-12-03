@@ -32,6 +32,9 @@
 </template>
 
 <script lang="ts" setup>
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
+
 import { PropType, ref, watch } from "vue";
 import { useEventsStore } from "../../stores/events.store.ts";
 import { client } from "../../api/index.ts";
@@ -47,6 +50,7 @@ import MeetingForm from "../forms/MeetingForm.vue";
 import moment from "moment-timezone";
 
 const router = useRouter();
+const toast = useToast();
 
 const eventsStore = useEventsStore();
 const calendarStore = useCalendarStore();

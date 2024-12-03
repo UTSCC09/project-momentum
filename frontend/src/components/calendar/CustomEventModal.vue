@@ -75,6 +75,26 @@ const end = ref(props.calendarEvent.end);
 const eventVisible = ref(false);
 const meetingVisible = ref(false);
 
+async function getEmails(participantIds: string[]): Promise<string> {
+  const emails: string[] = [];
+
+  try {
+    const promises = participantIds.map((p) =>
+      client.users.getUser.query({ userId: p })
+    );
+    const responses = await Promise.all(promises);
+    responses.forEach((response) => {
+      if (response.email) {
+        emails.push(response.email);
+      }
+    });
+    return emails.join(',');
+  } catch (err) {
+    console.error('Error fetching emails:', err);
+    throw new Error('Failed to fetch emails'); // Optionally throw an error to handle further
+  }
+}
+
 const initialValues = ref();
 if (props.calendarEvent.type == "event") {
   client.events.getEvent
@@ -118,11 +138,11 @@ if (props.calendarEvent.type == "event") {
 } else if (props.calendarEvent.type == "meeting") {
   client.meetings.getMeeting
     .query({ meetingId: props.calendarEvent.id })
-    .then((res) => {
+    .then(async (res) => {
       initialValues.value = Object.assign({},
         res.meeting.name && { name: res.meeting.name },
         res.meeting.location && { location: res.meeting.location },
-        res.meeting.participants && { participants: res.meeting.participants.join(',') },
+        res.meeting.participants && { participants: await getEmails(res.meeting.participants) },
         res.meeting.project_id && { project_id: res.meeting.project_id },
         res.meeting.description && { description: res.meeting.description },
         res.meeting.start_time && { start_time: moment.utc(res.meeting.start_time).local().toDate() },

@@ -65,7 +65,7 @@ export const userRouter = trpc.router({
         try {
             const hashedPassword = await argon2.hash(password);
             const user = { username, password: hashedPassword, email };
-            const createdUser = await User.create(user);
+            const createdUser: any = await User.create(user);
             createStatus = true;
 
             const token = await new SignJWT({ userId: (createdUser as any).id })
@@ -73,6 +73,8 @@ export const userRouter = trpc.router({
                 .setIssuedAt()
                 .setExpirationTime("30d")
                 .sign(JWT_SECRET);
+
+            createdUser.password="";
             return { success: createStatus, user: createdUser, token: token };
         } catch (error) {
           console.error("Create User Error:", error);
@@ -87,7 +89,7 @@ export const userRouter = trpc.router({
   
       try {
         // Find the user by username
-        const user = await User.findOne({ where: { username } });
+        const user : any= await User.findOne({ where: { username } });
         if (!user) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found' });
         }
@@ -109,9 +111,9 @@ export const userRouter = trpc.router({
             `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax;`,
             `userId=${(user as any).id}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax;`
           ]);
-          
-  
-        return { success: true, user, token };
+
+        user.password="";
+        return { success: true, user: user, token: token };
       } catch (error) {
         console.error("Login Error:", error);
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid login credentials' });
@@ -132,6 +134,7 @@ export const userRouter = trpc.router({
             `userId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax;`
         ]);
 
+        console.log("Logging out user", ctx.userId);
         await Redisclient.set(`${ctx.userId}`, "loggedOut");
         // set expire time to be 30 days
         await Redisclient.expire(`${ctx.userId}`, 30 * 24 * 60 * 60);

@@ -81,6 +81,7 @@ const items = ref([
             label: "Log out",
             icon: "pi pi-sign-out",
             command: () => {
+              logout();
               authStore.logout();
               router.push("/");
             },
@@ -135,6 +136,10 @@ function integrateGoogle() {
     })
     .then((data) => console.log(data))
     .catch((error) => console.error(error));
+}
+
+function logout() {
+  client.users.logoutUser.mutate();
 }
 </script>
 

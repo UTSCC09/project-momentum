@@ -139,7 +139,7 @@ if (props.calendarEvent.type == "event") {
         },
         res.event.rrule &&
         res.event.rrule.match(/UNTIL=([^;]+)/)?.[1] && {
-          until: moment(res.eventrrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
+          until: moment(res.event.rrule.match(/UNTIL=([^;]+)/)?.[1]).toDate(),
         },
       );
     })

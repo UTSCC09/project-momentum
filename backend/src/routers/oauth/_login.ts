@@ -121,8 +121,8 @@ export const userRouter = trpc.router({
     getUser: trpc.procedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input, ctx }) => {
-        const user = await User.findByPk(input.userId);
-        return user;
+        const user : any = await User.findByPk(input.userId);
+        return {username: user.username, email: user.email};
     }),
 
     logoutUser: trpc.procedure

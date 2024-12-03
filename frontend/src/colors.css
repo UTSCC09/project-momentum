@@ -1,0 +1,85 @@
+:root {
+  --sx-color-primary: #000000; /* Black */
+  --sx-color-on-primary: #ffffff; /* White text on primary */
+  --sx-color-primary-container: #333333; /* Dark gray for primary container */
+  --sx-color-on-primary-container: #ffffff; /* White text on container */
+
+  --sx-color-secondary: #1c1c1c; /* Darker secondary */
+  --sx-color-on-secondary: #ffffff; /* White text on secondary */
+  --sx-color-secondary-container: #444444; /* Medium gray for secondary container */
+  --sx-color-on-secondary-container: #ffffff; /* White text on secondary container */
+
+  --sx-color-tertiary: #f0f5f9; /* Light tertiary */
+  --sx-color-on-tertiary: #1e2022; /* Dark text on tertiary */
+  --sx-color-tertiary-container: #c9d6df; /* Light tertiary container */
+  --sx-color-on-tertiary-container: #1e2022; /* Dark text on tertiary container */
+
+  --sx-color-surface: #f0f5f9; /* Light surface */
+  --sx-color-surface-dim: #cccccc; /* Dim surface */
+  --sx-color-surface-bright: #f0f5f9; /* Bright surface */
+  --sx-color-on-surface: #1e2022; /* Dark text on surface */
+
+  --sx-color-surface-container: #c9d6df; /* Surface container */
+  --sx-color-surface-container-low: #f0f5f9; /* Low container */
+  --sx-color-surface-container-high: #ffffff; /* High container */
+
+  --sx-color-background: #ffffff; /* Background */
+  --sx-color-on-background: #1e2022; /* Dark text on background */
+
+  --sx-color-outline: #666666; /* Gray outline */
+  --sx-color-outline-variant: #b0b0b0; /* Outline variant */
+  --sx-color-shadow: rgba(0, 0, 0, 0.2); /* Soft shadow */
+
+  --sx-color-surface-tint: #333333; /* Surface tint */
+  --sx-color-neutral: var(--sx-color-outline); /* Neutral */
+  --sx-color-neutral-variant: var(
+    --sx-color-outline-variant
+  ); /* Neutral variant */
+
+  --sx-internal-color-gray-ripple-background: #cccccc; /* Gray ripple background */
+  --sx-internal-color-light-gray: #f0f5f9; /* Light gray */
+  --sx-internal-color-text: #1e2022; /* Text color */
+}
+
+.is-dark {
+  --sx-color-primary: #ffffff; /* White for dark mode */
+  --sx-color-on-primary: #000000; /* Black text on primary */
+  --sx-color-primary-container: #333333; /* Darker primary container */
+  --sx-color-on-primary-container: #ffffff; /* White text on container */
+
+  --sx-color-secondary: #f0f5f9; /* Light secondary */
+  --sx-color-on-secondary: #1e2022; /* Dark text on secondary */
+  --sx-color-secondary-container: #444444; /* Light secondary container */
+  --sx-color-on-secondary-container: #1e2022; /* Dark text on secondary container */
+
+  --sx-color-tertiary: #f0f5f9; /* Light tertiary */
+  --sx-color-on-tertiary: #1e2022; /* Dark text on tertiary */
+  --sx-color-tertiary-container: #333333; /* Darker tertiary container */
+  --sx-color-on-tertiary-container: #f0f5f9; /* Light text on tertiary container */
+
+  --sx-color-surface: #1e2022; /* Dark surface */
+  --sx-color-surface-dim: #3b3f41; /* Dim surface */
+  --sx-color-surface-bright: #2a2d2f; /* Slightly brighter surface */
+  --sx-color-on-surface: #f0f5f9; /* Light text on surface */
+
+  --sx-color-surface-container: #2a2d2f; /* Surface container */
+  --sx-color-surface-container-low: #1e2022; /* Low container */
+  --sx-color-surface-container-high: #3b3f41; /* High container */
+
+  --sx-color-background: #1e2022; /* Dark background */
+  --sx-color-on-background: #f0f5f9; /* Light text on background */
+
+  --sx-color-outline: #cccccc; /* Light outline */
+  --sx-color-outline-variant: #4a4e50; /* Outline variant */
+  --sx-color-shadow: rgba(0, 0, 0, 0.5); /* Deeper shadow for dark mode */
+
+  --sx-color-surface-tint: #666666; /* Surface tint */
+  --sx-color-neutral: var(--sx-color-outline); /* Neutral */
+  --sx-color-neutral-variant: var(
+    --sx-color-outline-variant
+  ); /* Neutral variant */
+
+  --sx-internal-color-gray-ripple-background: #3b3f41; /* Gray ripple background */
+  --sx-internal-color-light-gray: #2a2d2f; /* Darker gray */
+  --sx-internal-color-text: #f0f5f9; /* Text color */
+}

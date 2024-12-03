@@ -36,7 +36,7 @@ export async function getTaskSchedual(name: string, description: string, locatio
     const task = `name: ${name}, description: ${description}, location: ${location}, deadline: ${deadline}`;
 
     const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: [
             { role: "system", content: systemTemplate },
             {

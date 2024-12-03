@@ -15,6 +15,7 @@ Minh Chau Nguyen [@minhchau](https://github.com/chaunguyenm)
 [Project Momentum](https://momentum-app.ca)
 
 ## Youtube Demo
+
 [Youtube Demo](https://youtu.be/opvSXeoxpVg)
 
 ## Development
@@ -50,6 +51,7 @@ Our application is deployed using Docker, with Nginx and Let’s Encrypt Certbot
 ## Challenges
 
 ### WebRTC real time video chat
+
 The application implements multiuser video meeting using WebRTC and WebSocket. We implement a mesh architecture with WebRTC, in which each user in a meeting will maintain `N - 1` connections with `N - 1` other participants of the meeting. We use WebSocket as the broker of information between any two users that make up two ends of a connection. The WebSocket servers maintain a number of sockets with users and relays messages between users to notify changes in media streams, devices and ICE candidates to each other.
 
 ### OAuth with google and Integration with Google calendar
@@ -57,4 +59,21 @@ The application implements multiuser video meeting using WebRTC and WebSocket. W
 We have implemented OAuth integration with Google, enabling users to link their Google accounts and sync their Google Calendar events with our calendar application. This feature allows users to effortlessly view and manage their Google Calendar events within our platform. While we considered extending functionality to allow writing back to Google Calendar, we decided not to do that as this would require access to sensitive personal data.
 
 ### Personalize AI integration using Redis
+
 Whenever a user creates or updates an event, the information is stored in Redis for efficient data retrieval. When users leverage the AI feature to generate events based on their tasks, the stored data is utilized to pre-train the model, ensuring it has a clear understanding of the user's preferences and scheduling habits. This approach allows the AI to create a highly personalized schedule tailored to the user's needs, combining their existing events with optimized task management.
+
+## Contributions
+
+Kevin Zhang:
+
+- Backend implementation with TRPC
+- OAuth and integration with google
+- Setup Database schema and Redis
+- AI Integration with OpenAI
+- Deployment
+
+Minh Chau Nguyen:
+
+- Frontend development
+- WebRTC
+- Frontend, database and Redis deployment
